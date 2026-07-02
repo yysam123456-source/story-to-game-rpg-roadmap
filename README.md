@@ -13,6 +13,7 @@
 - 场景交互系统：支持调查、搜索、修炼、交谈、使用道具。
 - 背包与资源系统：支持道具、资源消耗和条件判断。
 - 类型模板：优先支持修仙、无限恐怖，再扩展悬疑、末世、宫斗/权谋。
+- 微信小程序并行集成：HTML 继续负责开源和独立部署，小程序负责移动端传播和未来商业化。
 - Skill 升级：让 AI 根据小说类型自动生成对应玩法循环和 JSON 结构。
 - 校验器与调试器增强：检查 RPG 字段、交互逻辑和类型模板完整性。
 
@@ -22,6 +23,7 @@
 - `docs/IMPLEMENTATION_PLAN.md`：可执行开发任务拆解。
 - `docs/RPG_JSON_SCHEMA_PROPOSAL.md`：RPG 化 JSON 扩展草案。
 - `docs/GENRE_TEMPLATES.md`：类型小说玩法模板。
+- `docs/WECHAT_MINIPROGRAM_INTEGRATION.md`：微信小程序并行集成方案。
 - `docs/GITHUB_ISSUE_BACKLOG.md`：后续 GitHub Issues 草案。
 
 ## 仓库结构补充
@@ -32,6 +34,7 @@ docs/
 ├── IMPLEMENTATION_PLAN.md
 ├── RPG_JSON_SCHEMA_PROPOSAL.md
 ├── GENRE_TEMPLATES.md
+├── WECHAT_MINIPROGRAM_INTEGRATION.md
 └── GITHUB_ISSUE_BACKLOG.md
 
 story-to-game-source/
@@ -45,6 +48,7 @@ story-to-game-source/
 - 旧 JSON 必须保持兼容。
 - 新 RPG 字段默认可选。
 - 数值服务叙事，不让数值压过文学表达。
+- HTML 播放器和微信小程序共享同一套 JSON 剧本协议。
 - 每个阶段都需要示例 JSON 和 `validate.py` 校验。
 
 一套从「小说/剧本转互动文游」到「运行互动文游」的全流程工具，包含两大核心组件：

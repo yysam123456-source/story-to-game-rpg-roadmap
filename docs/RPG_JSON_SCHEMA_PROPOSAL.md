@@ -9,6 +9,7 @@
 - 默认轻量，不做复杂战斗公式。
 - AI 易生成，人工易编辑，校验器易检查。
 - 强类型小说通过 `genre` 选择专属玩法模板。
+- HTML 播放器和微信小程序播放器消费同一份 JSON 剧本协议。
 
 ## meta.genre
 
@@ -269,6 +270,33 @@
 }
 ```
 
+## 跨端条件表达式
+
+微信小程序端不应使用 `eval` 执行字符串条件。后续 Skill 应优先生成对象条件，字符串条件仅作为兼容格式保留。
+
+兼容格式：
+
+```json
+{
+  "condition": "qi >= 20"
+}
+```
+
+推荐格式：
+
+```json
+{
+  "condition": {
+    "all": [
+      { "var": "qi", "op": ">=", "value": 20 },
+      { "flag": "learned_basic_spell" }
+    ]
+  }
+}
+```
+
+条件解析器必须在 HTML 和微信小程序两端复用，保证同一份 JSON 在双端得到一致结果。
+
 ## mission
 
 用于无限恐怖、副本生存、末世任务等结构。
@@ -284,6 +312,26 @@
 }
 ```
 
+## saveModel
+
+HTML 和微信小程序应共享同一份存档模型，便于未来接入云存档。
+
+```json
+{
+  "storyId": "qinglu-yehuo",
+  "currentNodeId": "node_023",
+  "val": 45,
+  "variables": {},
+  "flags": [],
+  "inventory": {},
+  "achievements": [],
+  "visitedNodes": [],
+  "playedAt": 1783000000
+}
+```
+
+HTML 端可用 `localStorage` 保存，小程序端使用 `wx.setStorageSync` / `wx.getStorageSync` 保存。字段语义不能因端而异。
+
 ## 兼容策略
 
 - 旧 JSON 没有 `meta.rpg` 时，启动器不显示 RPG 面板。
@@ -291,6 +339,7 @@
 - 旧 `condition` 字符串继续支持。
 - 新增字段只在存在时启用。
 - `theme` 继续兼容，但新稿建议使用 `ambient`。
+- 小程序端必须走安全条件解析器，不执行任意 JavaScript。
 
 ## MVP 必须支持
 
