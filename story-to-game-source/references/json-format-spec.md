@@ -9,10 +9,28 @@
   "meta": {},
   "startNodeId": "start",
   "variables": {},
+  "flags": [],
   "achievements": {},
+  "inventory": {},
+  "milestones": [],
+  "endings": [],
+  "mission": {},
   "nodes": {}
 }
 ```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `meta` | object | ✅ | 作品元信息 |
+| `startNodeId` | string | ✅ | 起始节点 ID |
+| `variables` | object | ❌ | 自定义变量初始值 |
+| `flags` | array\<string\> | ❌ | 已触发的 flag 列表（运行时） |
+| `achievements` | object | ❌ | 成就定义 |
+| `inventory` | object | ❌ | 背包/资源初始值 |
+| `milestones` | array | ❌ | 里程碑定义 |
+| `endings` | array | ❌ | 结局定义 |
+| `mission` | object | ❌ | 任务信息（无限恐怖/末世类型） |
+| `nodes` | object | ✅ | 节点字典 |
 
 ## meta 字段
 
@@ -81,11 +99,31 @@
       "choices": [],
       "next": "next_node_id",
       "routes": [],
-      "isEnding": false
+      "isEnding": false,
+      "candidateEndings": [],
+      "interactions": [],
+      "delayedChanges": []
     }
   }
 }
 ```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `chapterTitle` | string | ❌ | 章节标题，只在章节第一个节点设置 |
+| `title` | string | ❌ | 场景标题 |
+| `scene` | object/string | ❌ | 场景信息 |
+| `progress` | number | ❌ | 进度百分比 0-100 |
+| `theme` | string | ❌ | 节点级主题覆盖 |
+| `ambient` | string | ❌ | 节点级环境效果覆盖 |
+| `segments` | array | ✅ | 叙事段落 |
+| `choices` | array | ❌ | 选项列表 |
+| `next` | string | ❌ | 自动跳转目标节点 ID |
+| `routes` | array | ❌ | 自动路由 |
+| `isEnding` | boolean | ❌ | 是否为结局节点 |
+| `candidateEndings` | array\<string\> | ❌ | 声明该节点为结局候选节点 |
+| `interactions` | array | ❌ | 场景交互 |
+| `delayedChanges` | array | ❌ | 延迟变化 |
 
 节点 ID 使用英文、数字、下划线。
 

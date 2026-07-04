@@ -338,6 +338,179 @@ closing 可以是：
 成就 ID 使用英文：`first_choice`、`low_trust`、`found_secret`、`true_ending`
 成就标题和描述使用中文，风格应贴合作品气质。
 
+## 六、RPG 扩展状态系统设计
+
+当作品类型需要 RPG 数值面板时（修仙、无限恐怖、末世、宫斗等），需要在基础状态系统之上扩展 RPG 状态系统。
+
+### 6.1 primaryStats 设计（可见数值）
+
+`primaryStats` 定义在 `meta.rpg.primaryStats` 中，控制播放器顶部状态栏展示的数值。
+
+**设计原则**：
+1. **可见数值最多 5 个**：避免面板过于拥挤。
+2. **每个类型有推荐变量**：参考 `GENRE_TEMPLATES.md` 中对应类型的"推荐变量"部分。
+3. **区分可见与隐藏**：核心数值可见，辅助数值放入 `hiddenStats`。
+
+**字段说明**：
+```json
+{
+  "meta": {
+    "rpg": {
+      "primaryStats": [
+        { "key": "qi", "label": "灵力", "type": "bar", "max": 80, "min": 0, "tone": "positive" },
+        { "key": "realm", "label": "境界", "type": "text", "default": "炼气三层" }
+      ]
+    }
+  }
+}
+```
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `key` | ✅ | 对应 `variables` 中的键名 |
+| `label` | ✅ | UI 展示名 |
+| `type` | ✅ | `"text"` / `"number"` / `"bar"` |
+| `max` | ❌ | `bar` 类型最大值，默认 100 |
+| `min` | ❌ | `bar` 类型最小值，默认 0 |
+| `default` | ❌ | `type="text"` 时的默认值 |
+| `tone` | ❌ | `"positive"` / `"danger"` / `"neutral"` |
+
+**类型说明**：
+- `text`：直接显示 `variables[key]` 的字符串值（如"炼气三层"）
+- `number`：显示数值，支持加减
+- `bar`：显示进度条，有最大/最小值
+
+### 6.2 hiddenStats 设计（隐藏数值）
+
+`hiddenStats` 定义在 `meta.rpg.hiddenStats` 中，指定可用于条件但不展示的隐藏数值键名列表。
+
+**用途**：
+- 隐藏数值可以用于条件、routes、结局判定
+- 但不在普通 UI 中暴露，保持悬念和探索感
+
+**示例**：
+```json
+{
+  "meta": {
+    "rpg": {
+      "hiddenStats": ["karma", "tribulationRisk", "sectReputation"]
+    }
+  }
+}
+```
+
+### 6.3 milestones 设计（成长里程碑）
+
+`milestones` 是顶层里程碑定义，标记剧情中的关键成就节点。
+
+**设计原则**：
+1. **每个类型必须至少包含 1 个 `large` 里程碑**：标志玩家在剧情中的关键性进展。
+2. **里程碑分为 small / medium / large 三级**：均可配置 VFX 特效。
+3. **触发条件应基于变量或 flag**：而非单纯依赖 val。
+
+**字段说明**：
+```json
+{
+  "milestones": [
+    {
+      "id": "first_breakthrough",
+      "name": "踏入修行",
+      "condition": { "var": "realm", "op": "!=", "value": "凡人" },
+      "celebration": "small",
+      "vfx": "breakthrough",
+      "segments": [
+        { "text": "体内的灵气开始流转，你感受到了天地之间的第一缕灵韵。" }
+      ]
+    }
+  ]
+}
+```
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `id` | ✅ | 全局唯一标识 |
+| `name` | ✅ | 里程碑名称 |
+| `condition` | ✅ | 触发条件 |
+| `celebration` | ❌ | `"small"` / `"medium"` / `"large"` |
+| `vfx` | ❌ | 题材专属特效标识 |
+| `segments` | ❌ | 达成时的叙事文本 |
+| `changes` | ❌ | 达成时附带的状态变化 |
+
+**celebration 级别**：
+- `small`：简短通知 Toast（顶部滑入，2 秒后消失）
+- `medium`：全屏半透明 overlay + 叙事文本（需点击继续）
+- `large`：全屏庆祝动画 + 题材专属 VFX + 叙事文本
+
+**检测策略**：
+- 运行时在每次 `changes.apply()` 之后，遍历所有未触发的 milestones 并检查 `condition`
+- `once: true` 的 milestone 触发后从检测列表中移除
+- 已触发过的 milestone 通过 `saveModel.triggeredMilestones` 去重
+
+### 6.4 delayedChanges 设计（延迟后果）
+
+`delayedChanges` 实现"因果延迟"机制，让选择的真正影响不会立即显现。
+
+**设计原则**：
+1. **`weight=critical` 的选择必须配置至少 1 个 `delayedChanges`**：即选择的真正影响不会立即显现，而是在后续章节中以出人意料的方式爆发。
+2. **延迟后果应有叙事解释**：通过 `reason` 字段增强叙事感。
+3. **触发节点应合理**：不能太近（失去悬念）也不能太远（玩家忘记原因）。
+
+**字段说明**：
+```json
+{
+  "delayedChanges": [
+    {
+      "triggerNode": "node_025",
+      "changes": {
+        "set": { "masterTrust": -10 },
+        "show": true,
+        "feedback": [
+          { "label": "师父信任", "delta": "-10", "tone": "negative" }
+        ]
+      },
+      "reason": "师父发现了你隐瞒真相的事"
+    }
+  ]
+}
+```
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `triggerNode` | ✅ | 延迟到哪个节点触发 |
+| `changes` | ✅ | 触发时执行的状态变化 |
+| `reason` | ❌ | 解释延迟后果的原因 |
+
+**运行时机制**：
+1. 玩家做出选择后，引擎将 `delayedChanges` 记入 `saveModel.pendingDelayedChanges` 队列
+2. 当玩家到达 `triggerNode` 时，引擎检查是否有匹配的 pending 变更并依次执行
+3. `reason` 文本以旁白风格插入到 `triggerNode` 的 `segments` 之前
+
+### 6.5 RPG 类型模板选择
+
+根据原作类型选择对应的 RPG 模板，在 `meta.genre` 中声明：
+
+| genre 值 | 类型 | 说明 |
+|----------|------|------|
+| `xianxia` | 修仙 | 境界 + 修为 + 灵力 |
+| `horror` | 无限恐怖 | HP + SAN + 点数 |
+| `apocalypse` | 末世生存 | 食物 + 药品 + 安全度 |
+| `palace` | 宫斗 | 好感度 + 声望 + 危机值 |
+| `mystery` | 悬疑推理 | 线索 + 怀疑度 |
+| `literary` | 普通文学 | 无 RPG 面板 |
+| `custom` | 自定义 | 由 `meta.rpg.primaryStats` 定义 |
+
+选择类型后，参考 `GENRE_TEMPLATES.md` 中对应类型的：
+- 核心体验
+- 核心循环
+- 节奏设计
+- 推荐变量
+- 推荐交互
+- 推荐里程碑
+- 推荐结局
+- 渐进探索示例
+- 模板要求
+- 安全屋章节
+
 ## 输出：状态与结局设计文档
 
 ```markdown
@@ -355,6 +528,19 @@ closing 可以是：
 
 ## Flags 清单
 （flag 名 | 何时触发 | 何处使用）
+
+## RPG 扩展（如适用）
+### primaryStats
+（key | label | type | 说明）
+
+### hiddenStats
+（隐藏数值键名列表）
+
+### milestones
+（id | name | condition | celebration | 说明）
+
+### delayedChanges 设计
+（选择 | triggerNode | changes | reason）
 
 ## 结局矩阵
 （结局 ID | 类型 | 标题 | 到达条件 | 内容方向）
