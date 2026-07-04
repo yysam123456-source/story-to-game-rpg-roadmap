@@ -392,3 +392,196 @@ default
 ```json
 { "changes": { "set": { "letterOpened": true, "trust": 2 } } }
 ```
+
+---
+
+## RPG 扩展
+
+当 `meta.genre` 为 `xianxia` / `horror` / `mystery` / `apocalypse` / `palace` 时，可启用 RPG 化字段。所有 RPG 字段均为可选，旧 JSON 完全兼容。
+
+详细定义见 `docs/SCHEMA_v1.md`。本文档仅作速查。
+
+### meta.rpg
+
+控制 RPG 面板是否显示。
+
+```json
+{
+  "meta": {
+    "genre": "xianxia",
+    "rpg": {
+      "enabled": true,
+      "conditionDisplay": "disabled",
+      "primaryStats": [
+        { "key": "realm", "label": "境界", "type": "text" },
+        { "key": "cultivation", "label": "修为", "type": "bar", "max": 100 },
+        { "key": "qi", "label": "灵力", "type": "bar", "max": 80 }
+      ],
+      "hiddenStats": ["karma", "tribulationRisk"]
+    }
+  }
+}
+```
+
+`conditionDisplay`：`"hide"` 不满足条件选项直接隐藏；`"disabled"` 置灰不可点。默认 `"disabled"`。
+
+### primaryStats（状态栏数值）
+
+```json
+{ "key": "qi", "label": "灵力", "type": "bar", "max": 80, "min": 0, "tone": "positive" }
+```
+
+`type` 枚举：`text`（字符串，如境界名）/ `number`（数字）/ `bar`（进度条）。
+
+### changes.show / changes.feedback
+
+```json
+{ "changes": { "show": true } }
+```
+```json
+{
+  "changes": {
+    "feedback": [
+      { "label": "灵力", "delta": "+10", "tone": "positive" }
+    ]
+  }
+}
+```
+
+`feedback` 存在时优先于 `show` 的自动反馈。
+
+### choice.weight（选择权重）
+
+```json
+{
+  "choices": [
+    { "text": "告诉师父真相", "weight": "critical", "weightHint": "此选择将影响后续剧情走向" }
+  ]
+}
+```
+
+| 值 | 视觉 |
+|------|------|
+| `critical` | 品牌色高亮边框 + 辉光 |
+| `branch` | 品牌色竖线 |
+| `minor` | 默认样式（缺失时默认） |
+| `cosmetic` | 淡色 |
+
+### interactions（场景交互）
+
+节点内可探索的交互，在主线选择前执行。
+
+```json
+{
+  "interactions": [
+    {
+      "id": "inspect_buddha",
+      "label": "查看佛像背后",
+      "depth": "surface",
+      "once": true,
+      "condition": null,
+      "result": {
+        "segments": [{ "text": "佛像背后刻着一行细字..." }],
+        "changes": { "addFlag": "found_warning", "set": { "clue": 1 }, "show": true }
+      }
+    }
+  ]
+}
+```
+
+`depth` 枚举：`surface`（始终可见）/ `deep`（条件满足才可执行）/ `ultimate`（条件满足才显现）。
+
+### delayedChanges（延迟变化）
+
+当前节点的选择不立即生效，延迟到 `triggerNode` 才兑现。
+
+```json
+{
+  "delayedChanges": [
+    {
+      "triggerNode": "node_025",
+      "changes": { "set": { "masterTrust": -10 }, "show": true },
+      "reason": "师父发现了你隐瞒真相的事"
+    }
+  ]
+}
+```
+
+### milestones（里程碑）
+
+顶层定义，标记关键成就节点。
+
+```json
+{
+  "milestones": [
+    {
+      "id": "first_breakthrough",
+      "name": "踏入修行",
+      "condition": { "var": "realm", "op": "!=", "value": "凡人" },
+      "celebration": "small"
+    }
+  ]
+}
+```
+
+`celebration` 枚举：`small`（Toast）/ `medium`（overlay）/ `large`（全屏动画）。
+
+### endings（结局定义）
+
+顶层定义所有可能的结局及其触发条件。与 `nodes` 中的结局节点不同——此处定义"什么条件触发哪个结局"，节点中写"到达结局时的叙事"。
+
+```json
+{
+  "endings": [
+    {
+      "id": "ascension",
+      "name": "飞升成仙",
+      "desc": "你突破重重劫难，终于飞升仙界。",
+      "type": "true",
+      "condition": { "all": [
+        { "var": "realm", "op": "==", "value": "渡劫期" },
+        { "flag": "passed_tribulation" }
+      ]},
+      "hidden": false
+    }
+  ]
+}
+```
+
+节点中声明候选结局：
+```json
+{ "candidateEndings": ["ascension", "demon_path"] }
+```
+
+`type` 枚举：`true` / `dark` / `romance` / `neutral` / `noble` / `hidden` / `failure`。
+
+### inventory（背包）
+
+```json
+{ "inventory": { "spirit_stone": 3, "healing_pill": 1 } }
+```
+
+完整写法：
+```json
+{
+  "inventory": {
+    "spirit_stone": { "label": "下品灵石", "count": 3, "type": "resource" }
+  }
+}
+```
+
+`changes.inventory`（选项或交互中变更）：
+```json
+{ "changes": { "inventory": { "spirit_stone": -1, "healing_pill": 1 } } }
+```
+
+### condition 对象格式（推荐）
+
+字符串格式继续兼容，新稿建议用对象格式（小程序端安全）：
+
+```json
+{ "all": [ { "var": "qi", "op": ">=", "value": 20 }, { "flag": "learned_spell" } ] }
+```
+
+条件单元类型：`var` / `flag` / `item` / `interaction`。
+
