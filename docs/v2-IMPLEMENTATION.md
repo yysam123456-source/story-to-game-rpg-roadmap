@@ -68,6 +68,32 @@ P1-4 Skill 类型识别
 
 ---
 
+## 2.5 MVP 分层定义
+
+基于 PRD 和 Schema 的 MVP 必须支持列表，按优先级分为两层：
+
+### Q3 MVP 必须（6 项）
+- `meta.genre` 和 `meta.rpg.enabled`
+- `meta.rpg.primaryStats`（text/number/bar）
+- `changes.show` 变化反馈
+- 条件选项置灰/隐藏（conditionDisplay）
+- `choice.weight`（critical/branch 识别和视觉差异化）
+- validate.py RPG-001 到 RPG-008
+
+### Q3 MVP 应该 / Stretch Goal（2 项）
+- `milestones` 基础支持（small/medium 庆祝，不含 large VFX）
+- `endings` 基础定义（结局列表展示 + hidden 机制，不含 dot tracker）
+
+### Q4 必须（6 项）
+- `interactions` + `interaction.depth`
+- `inventory` + `changes.inventory`
+- `delayedChanges`（triggerNode: "next"）
+- `milestones.large` 庆祝 + 题材 VFX
+- `endings` 完整 UI（dot tracker + 回顾）
+- `condition.interaction` 前置依赖
+
+---
+
 ## 3. Q3 2026 详细周计划
 
 ### 7 月：RPG 基础功能
@@ -433,9 +459,29 @@ P1-4 Skill 类型识别
 
 | 阶段 | 开发工作量 | 内容工作量 | 总周期 |
 |------|------------|------------|--------|
-| Q3 MVP | 19 天 + 小程序 5 天 | 14 天 | 12 周（含测试+迭代） |
+| Q3 MVP | 33 天 + 小程序 5 天 | 21 天 | 12 周（含测试+迭代） |
 | Q4 核心互动 | 24 天 + 小程序 10 天 | 12 天 | 12 周 |
 | Q1 类型扩展 | 10 天 + 小程序 10 天 | 15 天 | 12 周 |
+
+**Q3 开发工作量明细（33 天）**：
+- P0-1 meta.rpg schema：3 天
+- P0-1.5 choice.weight/milestones/endings/delayedChanges schema：4 天
+- P0-2 状态栏 UI（Glassmorphism + 4 种 primaryStats）：5 天
+- P0-3 状态详情抽屉：3 天
+- P0-4 变化反馈 Toast（含 changes 计算引擎）：5 天
+- P0-5 条件选项置灰（字符串 + 对象 condition）：3 天
+- P0-6 修仙 Demo 联调（播放器 + Demo JSON 联合调试）：5 天
+- P0-7 validate.py 增强（RPG-001 到 RPG-013）：3 天
+- Core 抽离（story-engine + condition-engine + change-engine + save-model）：2 天
+
+**Q3 内容工作量明细（21 天）**：
+- 修仙 Demo 故事大纲 + 数值设计：3 天
+- 修仙 Demo 节点撰写（40-50 节点，Q3 聚焦核心验证而非内容规模）：10 天
+- 配置 milestones（3 个）+ endings（4 个）+ delayedChanges + choice.weight：3 天
+- 文本润色 + 文学保真度审核：3 天
+- 联调期间数值平衡调整：2 天
+
+注意：Demo 规模从 60-80 节点调整为 40-50 节点。Q3 的目标是验证核心玩法假设，不需要大规模内容。Q4 的无限恐怖 Demo 可以做到 60-100 节点。
 
 **Q4 开发工作量明细（24 天）**：
 - 原有任务：17 天
@@ -466,6 +512,7 @@ P1-4 Skill 类型识别
 
 | 时间点 | 决策 | 选项 | 建议 |
 |--------|------|------|------|
+| 7 月第 2 周 | 仍未确认第 2 名开发人员？ | 缩减 Demo 规模至 30 节点，将 milestones/endings 推迟到 Q4 | 先确保核心 P0-1 到 P0-5 在 8 月底前完成 |
 | 7 月底 | Schema 是否锁定？ | 锁定 / 继续调整 | 锁定，进入开发 |
 | 8 月中旬 | milestone 基础框架是否纳入 Q3 MVP？ | 纳入 / 延后 | 纳入至少 small+medium |
 | 8 月底 | Demo 是否可玩？ | 可玩 / 延期 | 延期不超过 1 周 |

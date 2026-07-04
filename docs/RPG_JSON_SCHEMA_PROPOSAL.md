@@ -29,7 +29,7 @@
 | --- | --- |
 | `literary` | 普通文学/现实向 |
 | `xianxia` | 修仙 |
-| `infinite_horror` | 无限恐怖/副本生存 |
+| `horror` | 无限恐怖/副本生存 |
 | `mystery` | 悬疑推理 |
 | `apocalypse` | 末世生存 |
 | `palace` | 宫斗/权谋 |
@@ -343,6 +343,15 @@ celebration 枚举：
 
 可选字段，整个 `milestones` 数组缺失时视为无里程碑。
 
+#### milestone 检测策略
+
+运行时在每次 `changes.apply()` 之后，遍历所有未触发的 milestones 并检查 condition。
+
+优化规则：
+- `once=true` 的 milestone 触发后从检测列表中移除
+- 已触发过的 milestone 不再参与检测（通过 `saveModel.triggeredMilestones` 去重）
+- 检测顺序：按数组定义顺序，首个满足条件的 milestone 触发后不阻断后续 milestone 的检测（允许多个 milestone 同时触发）
+
 ## endings
 
 顶层结局定义，描述所有可能的结局及其触发条件。
@@ -415,6 +424,22 @@ type 枚举：
 | `hidden` | 隐藏 |
 
 可选字段，整个 `endings` 数组缺失时视为无结局定义（退回到基础的节点到达判定）。
+
+#### endings 检测时机
+
+**节点候选模式（MVP 推荐）**：在节点上通过 `candidateEndings` 字段声明该节点为结局候选节点，到达时检测声明的 endings.condition。
+
+```json
+{
+  "id": "node_final",
+  "segments": [{ "text": "一切尘埃落定..." }],
+  "candidateEndings": ["ascension", "demon_path", "ending_ordinary"]
+}
+```
+
+**全量检测模式（后续）**：每次状态变化后遍历所有 endings.condition，增加防重复冷却机制。
+
+MVP 阶段只实现节点候选模式。
 
 ## delayedChanges
 
@@ -522,6 +547,30 @@ type 枚举：
   }
 }
 ```
+
+### condition.interaction
+
+用于检查前置交互是否已完成，常用于 `interaction.depth = "ultimate"` 的条件中。
+
+```json
+{
+  "condition": {
+    "all": [
+      { "interaction": "find_secret_compartment", "completed": true },
+      { "var": "comprehension", "op": ">=", "value": 8 }
+    ]
+  }
+}
+```
+
+字段说明：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `interaction` | string | 交互 ID，引用当前节点或之前节点中的 `interactions[].id` |
+| `completed` | boolean | 是否已完成（默认 true） |
+
+可选字段，与 `var`/`flag`/`item` 条件类型并列使用。替代了通过 flag 间接推断交互完成状态的做法，使前置依赖关系更显式。
 
 ## 跨端条件表达式
 

@@ -59,6 +59,9 @@
 - [ ] 定义 endings 顶层结构和 6 种 type。
 - [ ] 定义 delayedChanges 节点字段。
 - [ ] 定义 interaction.depth 枚举。
+- [ ] 定义 `condition.interaction` 前置交互条件类型。
+- [ ] 定义 `candidateEndings` 节点字段（结局候选声明）。
+- [ ] 统一 genre 枚举值（消除 infinite_horror vs horror 等不一致）。
 - [ ] 评审并确认所有新字段。
 
 ## Milestone：P1 RPG 状态展示 MVP
@@ -176,6 +179,8 @@
 - [ ] deep 交互在 condition 不满足时显示锁定状态。
 - [ ] ultimate 交互在满足条件时以特殊动画显现。
 - [ ] 三级探索的差异化文本反馈。
+- [ ] 支持 `condition.interaction` 检查前置交互完成状态。
+- [ ] deep 交互的 condition 支持 interaction 条件与 var/flag 组合。
 - [ ] 存档保存 depth 相关状态。
 
 ## Milestone：P3.5 三层后果与成长里程碑
@@ -219,6 +224,8 @@
 - [ ] 实现 mini dot tracker。
 - [ ] hidden 结局的模糊显示和发现机制。
 - [ ] 6 种结局类型的视觉差异化。
+- [ ] 支持节点候选模式（candidateEndings 字段）。
+- [ ] 到达结局候选节点时检测声明的 endings.condition。
 
 ## Milestone：P4 背包与资源系统
 
