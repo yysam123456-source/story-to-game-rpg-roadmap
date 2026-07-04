@@ -511,6 +511,36 @@ closing 可以是：
 - 模板要求
 - 安全屋章节
 
+### 6.6 关键选择标记（importantFlag）和权重标签（weightTag）
+
+**importantFlag**：标记影响结局走向的关键决定，播放器会短暂浮出提示"重要决定已记录"。
+
+```json
+{ "changes": { "importantFlag": { "flag": "saved_master", "label": "救下师父" } } }
+```
+
+**使用建议**：
+- `weight=critical` 的选择应使用 `importantFlag` 标记
+- 整个游戏中只有 2-5 个 importantFlag，不要滥用
+- 带标签的 importantFlag 可以提示决定的内容
+
+**weightTag**：选项旁边的标签文字，增强视觉提示。
+
+```json
+{
+  "text": "强行突破",
+  "next": "node_breakthrough",
+  "weight": "critical",
+  "weightTag": "关键抉择",
+  "weightHint": "此选择可能导致突破成功或失败"
+}
+```
+
+**使用建议**：
+- 在 `choice.weightTag` 字段中显示标签（如"关键抉择"、"支线影响"）
+- `weightHint` 字段在鼠标悬停/长按时显示
+- 两者配合使用，增强玩家对选择重要性的感知
+
 ## 输出：状态与结局设计文档
 
 ```markdown

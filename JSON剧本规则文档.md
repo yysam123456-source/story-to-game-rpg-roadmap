@@ -312,6 +312,9 @@
 | `text` | 是 | 选项显示文本 |
 | `next` | 是 | 选择后跳转的节点 ID |
 | `condition` | 否 | 显示条件 |
+| `weight` | 否 | 叙事权重（critical/branch/minor/cosmetic） |
+| `weightTag` | 否 | 选项旁边的标签文字（如"关键抉择"、"支线影响"） |
+| `weightHint` | 否 | 权重提示，鼠标悬停/长按显示 |
 | `changes` | 否 | 选择后修改变量 |
 | `effect` | 否 | 选择后触发单个特效 |
 | `effects` | 否 | 选择后触发多个特效 |
