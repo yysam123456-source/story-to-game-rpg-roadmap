@@ -19,23 +19,25 @@
 
 详细文档：
 
-- `docs/ROADMAP.md`：完整阶段路线图。
-- `docs/IMPLEMENTATION_PLAN.md`：可执行开发任务拆解。
+- `docs/v2-ROADMAP.md`：季度迭代路线图（Q3 MVP → Q4 核心互动 → Q1 类型扩展 → Q2 平台化）。
+- `docs/v2-IMPLEMENTATION.md`：阶段划分与交付标准。
+- `docs/v2-PRD.md`：产品需求文档 v3.0（RPG 状态、变化反馈、选择重量、渐进探索、里程碑、结局系统）。
 - `docs/RPG_JSON_SCHEMA_PROPOSAL.md`：RPG 化 JSON 扩展草案。
-- `docs/GENRE_TEMPLATES.md`：类型小说玩法模板。
+- `docs/GENRE_TEMPLATES.md`：类型小说玩法模板（修仙/无限恐怖/悬疑/末世/宫斗）。
 - `docs/WECHAT_MINIPROGRAM_INTEGRATION.md`：微信小程序并行集成方案。
-- `docs/GITHUB_ISSUE_BACKLOG.md`：后续 GitHub Issues 草案。
+- `docs/GITHUB_ISSUE_BACKLOG.md`：开发清单。
 
 ## 仓库结构补充
 
 ```text
 docs/
-├── ROADMAP.md
-├── IMPLEMENTATION_PLAN.md
+├── v2-ROADMAP.md              # 季度迭代路线图
+├── v2-IMPLEMENTATION.md       # 阶段划分与交付标准
+├── v2-PRD.md                  # 产品需求文档 v3.0
 ├── RPG_JSON_SCHEMA_PROPOSAL.md
 ├── GENRE_TEMPLATES.md
 ├── WECHAT_MINIPROGRAM_INTEGRATION.md
-└── GITHUB_ISSUE_BACKLOG.md
+└── GITHUB_ISSUE_BACKLOG.md    # 开发清单
 
 story-to-game-source/
 ├── SKILL.md
