@@ -120,6 +120,25 @@
 | hidden | 逆天改命 | 满足特殊条件 + 古道法 + 特殊机缘（隐藏数值达阈值） |
 | romance | 仙侣双修 | 道心 + 感情双满 + 双方存活 |
 
+### 结局检测方式
+
+使用 `candidateEndings` 字段声明结局候选节点。当玩家到达候选节点时，引擎检测声明的结局条件，第一个满足的结局触发。
+
+```json
+{
+  "id": "node_final",
+  "segments": [{ "text": "一切尘埃落定..." }],
+  "candidateEndings": ["ascension", "demon_path", "ending_ordinary"]
+}
+```
+
+**使用建议**：
+- 在接近结局的节点上声明 `candidateEndings`
+- 在 `endings` 数组中定义所有结局（含触发条件）
+- 引擎按数组顺序检测 `endings[].condition`，第一个满足的结局触发
+
+**检测顺序**：milestones 先，endings 后。同时触发时，先展示 milestone 庆祝（简化为简短通知），再进入 ending 动画。
+
 ### 渐进探索示例
 
 以"修炼室"节点为例：
