@@ -254,75 +254,87 @@ def validate(path):
                     f'无任何互动——建议插入伪互动'
                 )
 
-    # === 16. RPG meta.rpg 校验 ===
+    # === 16. RPG meta.rpg 校验（RPG-001, RPG-002） ===
     rpg = data.get('meta', {}).get('rpg', {})
     if rpg.get('enabled'):
         for stat in rpg.get('primaryStats', []):
             key = stat.get('key', '')
+            # RPG-001: primaryStats[].key 必须在 variables 中有对应初始值
             if key and key not in variables:
                 errors.append(f'RPG-001: primaryStats key "{key}" 未在 variables 中定义')
-            if stat.get('type') not in ('text', 'number', 'bar', None):
-                errors.append(f'RPG-002: primaryStats type "{stat.get("type")}" 无效，应为 text/number/bar')
+            # RPG-002: primaryStats[].type 必须是 text/number/bar 之一
+            if stat.get('type') and stat.get('type') not in ('text', 'number', 'bar'):
+                errors.append(f'RPG-002: primaryStats "{key}" type "{stat.get("type")}" 无效，应为 text/number/bar')
+            # 补充：type=bar 时 max 必填
             if stat.get('type') == 'bar' and 'max' not in stat:
-                errors.append(f'RPG-003: primaryStats "{key}" type="bar" 缺少 max 字段')
+                errors.append(f'RPG-002: primaryStats "{key}" type="bar" 缺少 max 字段')
 
-    # === 17. choice.weight 校验 ===
+    # === 17. choice.weight 校验（RPG-003） ===
     for nid, node in nodes.items():
         for c in node.get('choices', []):
             w = c.get('weight', 'minor')
             if w not in ('critical', 'branch', 'minor', 'cosmetic'):
-                errors.append(f'RPG-003: 节点 "{nid}" choice.weight "{w}" 无效')
+                errors.append(f'RPG-003: 节点 "{nid}" choice.weight "{w}" 无效，应为 critical/branch/minor/cosmetic')
 
-    # === 18. milestones 校验 ===
+    # === 18. milestones 校验（RPG-004） ===
     for m in data.get('milestones', []):
         cond = m.get('condition')
-        if cond and isinstance(cond, dict):
-            if not any(k in cond for k in ('all', 'any', 'not', 'var', 'flag', 'item', 'interaction')):
-                warnings.append(f'RPG-004: milestone "{m.get("id")}" condition 格式异常')
+        if cond:
+            if isinstance(cond, dict):
+                if not any(k in cond for k in ('all', 'any', 'not', 'var', 'flag', 'item', 'interaction')):
+                    errors.append(f'RPG-004: milestone "{m.get("id")}" condition 格式异常，无法解析')
+            elif isinstance(cond, str):
+                # 字符串格式条件，检查基本格式
+                if not any(cond.startswith(prefix) for prefix in ('val', 'trust', 'route', 'hasFlag', '!hasFlag', 'default')):
+                    warnings.append(f'RPG-004: milestone "{m.get("id")}" condition 字符串格式可能异常')
 
-    # === 19. endings 校验 ===
+    # === 19. endings 校验（RPG-005） ===
     ending_ids = [e.get('id', '') for e in data.get('endings', [])]
     for e in data.get('endings', []):
         cond = e.get('condition')
-        if cond and isinstance(cond, dict):
-            if not any(k in cond for k in ('all', 'any', 'not', 'var', 'flag', 'item', 'interaction')):
-                warnings.append(f'RPG-005: ending "{e.get("id")}" condition 格式异常')
+        if cond:
+            if isinstance(cond, dict):
+                if not any(k in cond for k in ('all', 'any', 'not', 'var', 'flag', 'item', 'interaction')):
+                    errors.append(f'RPG-005: ending "{e.get("id")}" condition 格式异常，无法解析')
+            elif isinstance(cond, str):
+                if not any(cond.startswith(prefix) for prefix in ('val', 'trust', 'route', 'hasFlag', '!hasFlag', 'default')):
+                    warnings.append(f'RPG-005: ending "{e.get("id")}" condition 字符串格式可能异常')
 
-    # === 20. candidateEndings 校验 ===
+    # === 20. candidateEndings 校验（RPG-006） ===
     for nid, node in nodes.items():
         for cid in node.get('candidateEndings', []):
             if cid not in ending_ids:
                 errors.append(f'RPG-006: 节点 "{nid}" candidateEndings "{cid}" 未在 endings 中定义')
 
-    # === 21. delayedChanges 校验 ===
+    # === 21. delayedChanges 校验（RPG-007） ===
     for nid, node in nodes.items():
         for dc in node.get('delayedChanges', []):
             tn = dc.get('triggerNode', '')
             if tn and tn not in nodes:
-                errors.append(f'RPG-007: 节点 "{nid}" delayedChanges.triggerNode "{tn}" 不存在')
+                errors.append(f'RPG-007: 节点 "{nid}" delayedChanges.triggerNode "{tn}" 不存在于 nodes 中')
 
-    # === 22. interactions id 唯一性校验 ===
+    # === 22. interactions id 唯一性校验（RPG-008） ===
     for nid, node in nodes.items():
         ids = [i.get('id') for i in node.get('interactions', [])]
-        if len([x for x in ids if x]) != len(set(x for x in ids if x)):
+        if len(ids) != len(set(ids)):
             errors.append(f'RPG-008: 节点 "{nid}" interactions 存在重复 id')
 
-    # === 23. genre 枚举校验 ===
+    # === 23. genre 枚举校验（RPG-009） ===
     genre = data.get('meta', {}).get('genre', 'literary')
     if genre not in ('literary', 'xianxia', 'horror', 'mystery', 'apocalypse', 'palace', 'custom'):
-        warnings.append(f'RPG-009: meta.genre "{genre}" 不在枚举值内')
+        warnings.append(f'RPG-009: meta.genre "{genre}" 不在枚举值内（应为 literary/xianxia/horror/mystery/apocalypse/palace/custom）')
 
-    # === 24. milestones/endings 共存建议 ===
+    # === 24. milestones/endings 共存建议（RPG-010, RPG-011） ===
     if data.get('milestones') and not data.get('endings'):
         warnings.append('RPG-010: 存在 milestones 但无 endings，缺乏重玩动力')
     if data.get('endings') and not data.get('milestones'):
         warnings.append('RPG-011: 存在 endings 但无 milestones，缺乏成长仪式感')
 
-    # === 25. 质量建议 ===
+    # === 25. 质量建议（RPG-012, RPG-013） ===
     if data.get('meta', {}).get('genre') == 'xianxia' and len(data.get('milestones', [])) < 3:
-        warnings.append('RPG-012: 修仙类型建议至少包含 3 个 milestones（QUAL-005）')
+        warnings.append('RPG-012: 修仙类型建议至少包含 3 个 milestones')
     if len(data.get('endings', [])) < 2:
-        warnings.append('RPG-013: 建议至少定义 2 个 endings（含隐藏结局）（QUAL-006）')
+        warnings.append('RPG-013: 建议至少定义 2 个 endings（含隐藏结局）')
 
     # === 报告 ===
     print(f'\n{"="*50}')
