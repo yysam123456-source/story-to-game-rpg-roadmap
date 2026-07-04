@@ -118,6 +118,8 @@
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `enabled` | boolean | ❌ | 是否启用 RPG 展示，默认 `false` |
+| `mode` | string | ❌ | `"light"`（轻 RPG，Q3 MVP）或 `"standard"`（标准 RPG，Q4+），默认 `"light"` |
+| `mode` | string | ❌ | `"light"`（轻 RPG，Q3 MVP）或 `"standard"`（标准 RPG，Q4+），默认 `"light"` |
 | `conditionDisplay` | string | ❌ | 条件选项展示策略：`"hide"` 或 `"disabled"`，默认 `"disabled"` |
 | `primaryStats` | array | ❌ | 玩家可见核心数值，见 §2.5 |
 | `hiddenStats` | array\<string\> | ❌ | 可用于条件但不展示的隐藏数值键名列表 |
@@ -144,8 +146,9 @@
 | `key` | string | ✅ | 对应 `variables` 中的键名 |
 | `label` | string | ✅ | UI 展示名 |
 | `type` | string | ✅ | `"text"` / `"number"` / `"bar"` |
-| `max` | number | ❌ | `bar` 类型最大值，默认 100 |
+| `max` | number | ❌ | `bar` 类型最大值，默认 100；`type="bar"` 时必填 |
 | `min` | number | ❌ | `bar` 类型最小值，默认 0 |
+| `default` | string | ❌ | `type="text"` 时的默认值/初始显示文本，如 `"炼气三层"` |
 | `tone` | string | ❌ | `"positive"` / `"danger"` / `"neutral"`，影响 bar 颜色 |
 
 **类型说明**：
@@ -357,6 +360,7 @@
 | `next` | string | ❌ | 选择后跳转的节点 ID |
 | `condition` | string/object | ❌ | 显示条件，见 §10 |
 | `weight` | string | ❌ | 叙事权重，见 §6.5 |
+| `weightTag` | string | ❌ | 选项旁边的标签文字（如"关键抉择"、"支线影响"），与 `weightHint` 独立 |
 | `weightHint` | string | ❌ | 权重提示，鼠标悬停/长按显示 |
 | `effect` | string | ❌ | 选项特效 |
 | `changes` | object | ❌ | 选择后的状态变化，见 §6.7 |
@@ -444,9 +448,9 @@
 | `val` | number | 在主状态值上加减（可为正负） |
 | `valSet` | number | 直接设置主状态值 |
 | `set` | object | 设置 `variables` 中的键值 |
-| `addFlag` | string | 添加单个 flag |
-| `addFlags` | array | 添加多个 flag |
-| `importantFlag` | string/object | 添加重要 flag（显示提示） |
+| `addFlag` | string/object | 添加单个 flag；对象格式：`{ "flag": "flag_name", "label": "友好名称" }` |
+| `addFlags` | array | 添加多个 flag；元素可为字符串或对象 |
+| `importantFlag` | string/object | 添加重要 flag（显示提示）；对象格式：`{ "flag": "flag_name", "label": "友好名称" }` |
 | `importantFlags` | array | 添加多个重要 flag |
 | `removeFlag` | string | 移除单个 flag |
 | `unlockAchievement` | string | 解锁单个成就 |

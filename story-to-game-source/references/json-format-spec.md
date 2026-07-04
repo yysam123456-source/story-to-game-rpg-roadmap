@@ -455,10 +455,13 @@ default
 ```json
 {
   "choices": [
-    { "text": "告诉师父真相", "weight": "critical", "weightHint": "此选择将影响后续剧情走向" }
+    { "text": "告诉师父真相", "weight": "critical", "weightTag": "关键抉择", "weightHint": "此选择将影响后续剧情走向" }
   ]
 }
 ```
+
+`weightTag`：显示在选择旁边的标签文字（如"关键抉择"、"支线影响"），与 `weightHint` 独立配置。
+`weightHint`：鼠标悬停或长按时显示的详细提示。
 
 | 值 | 视觉 |
 |------|------|

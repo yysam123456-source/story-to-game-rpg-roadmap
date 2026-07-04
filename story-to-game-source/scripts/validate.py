@@ -263,6 +263,8 @@ def validate(path):
                 errors.append(f'RPG-001: primaryStats key "{key}" 未在 variables 中定义')
             if stat.get('type') not in ('text', 'number', 'bar', None):
                 errors.append(f'RPG-002: primaryStats type "{stat.get("type")}" 无效，应为 text/number/bar')
+            if stat.get('type') == 'bar' and 'max' not in stat:
+                errors.append(f'RPG-003: primaryStats "{key}" type="bar" 缺少 max 字段')
 
     # === 17. choice.weight 校验 ===
     for nid, node in nodes.items():
