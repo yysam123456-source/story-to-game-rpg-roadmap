@@ -255,6 +255,41 @@ depth 枚举：
 
 可选字段，缺失时默认为 `surface`。
 
+### interaction.hint
+
+用于在条件接近但未完全满足时给玩家暗示，避免 ultimate 交互完全隐藏导致玩家不知道有隐藏内容。
+
+```json
+{
+  "interactions": [
+    {
+      "id": "find_secret_compartment",
+      "label": "仔细检查书架",
+      "depth": "ultimate",
+      "condition": { "all": [
+        { "interaction": "inspect_bookshelf", "completed": true },
+        { "var": "comprehension", "op": ">=", "value": 8 }
+      ]},
+      "hint": {
+        "text": "你感觉书架后面似乎有什么东西...",
+        "showIf": { "var": "comprehension", "op": ">=", "value": 5 },
+        "insertPosition": "after_interaction"
+      }
+    }
+  ]
+}
+```
+
+字段说明：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `hint.text` | string | 暗示文本 |
+| `hint.showIf` | object | 显示条件（与 condition 不同，条件更宽松） |
+| `hint.insertPosition` | string | 插入位置：`after_interaction`（在关联交互的叙事文本后）、`before_choice`（在选择前）、`in_narrative`（在叙事流中） |
+
+hint 的展示方式：在 `insertPosition` 指定的位置插入一段淡化显示的文本（如斜体、透明度 60%），提示玩家"这里似乎还有什么"。hint 不替代 condition 判断，只提供方向性暗示。
+
 ## choice.weight
 
 标记选项的叙事权重，用于前端差异化渲染和对玩家进行重要选择的视觉提示。
@@ -352,6 +387,15 @@ celebration 枚举：
 - 已触发过的 milestone 不再参与检测（通过 `saveModel.triggeredMilestones` 去重）
 - 检测顺序：按数组定义顺序，首个满足条件的 milestone 触发后不阻断后续 milestone 的检测（允许多个 milestone 同时触发）
 
+#### milestones 与 endings 检测优先级
+
+检测顺序：milestones 先，endings 后（如果当前节点是 candidateEndings 节点）。
+
+同时触发规则：
+- milestone 和 ending 同时满足时，先展示 milestone 庆祝
+- 如果 ending 实际触发（到达结局节点），milestone 的 celebration 简化为简短通知，不阻断 ending 动画
+- milestone 触发不影响 ending 判定逻辑
+
 ## endings
 
 顶层结局定义，描述所有可能的结局及其触发条件。
@@ -410,18 +454,20 @@ celebration 枚举：
 | `type` | string | 结局类型 |
 | `condition` | string/object | 触发条件 |
 | `hidden` | boolean | 是否为隐藏结局，默认 `false` |
+| `failureNode` | string | 否。失败后跳转到的节点 ID（用于"重新开始"或"读档"引导） |
 | `hint` | string | 可选，给玩家方向性暗示，仅在 `hidden: true` 时有意义 |
 
 type 枚举：
 
-| 值 | 说明 |
-| --- | --- |
-| `true` | 真结局 |
-| `dark` | 暗结局 |
-| `romance` | 感情线 |
-| `neutral` | 中立 |
-| `noble` | 牺牲 |
-| `hidden` | 隐藏 |
+| 值 | 说明 | 视觉 |
+| --- | --- | --- |
+| `true` | 真结局 | |
+| `dark` | 暗结局 | |
+| `romance` | 感情线 | |
+| `neutral` | 中立 | |
+| `noble` | 牺牲 | |
+| `hidden` | 隐藏 | |
+| `failure` | 失败结局（中途死亡、精神崩溃、任务失败等） | 灰黑 |
 
 可选字段，整个 `endings` 数组缺失时视为无结局定义（退回到基础的节点到达判定）。
 
@@ -472,6 +518,23 @@ MVP 阶段只实现节点候选模式。
 | `reason` | string | 可选，解释延迟后果的原因，增强叙事感 |
 
 运行时机制：当玩家做出选择后，引擎将 `delayedChanges` 记入 pending 队列。当玩家到达 `triggerNode` 时，引擎检查是否有匹配的 pending 变更并依次执行。`reason` 字段用于在触发时向玩家展示一段叙事解释。
+
+#### 触发叙事流程
+
+```
+到达 triggerNode
+  ↓
+检查 pending delayedChanges
+  ↓
+按添加顺序依次处理：
+  1. 插入 reason 文本到叙事流（作为新段落）
+  2. 应用 changes 数值变化
+  3. 如果 changes.show === true，显示变化反馈
+  ↓
+继续渲染 triggerNode 的 segments
+```
+
+reason 文本在 JSON 中预写好，以旁白风格插入到 triggerNode 的 segments 之前。多个 delayedChanges 同时触发时按添加顺序处理。
 
 可选字段，节点内缺失时视为无延迟变化。
 
@@ -644,6 +707,53 @@ HTML 和微信小程序应共享同一份存档模型，便于未来接入云存
 | `pendingDelayedChanges` | array | 尚未触发的延迟变更队列 |
 
 HTML 端可用 `localStorage` 保存，小程序端使用 `wx.setStorageSync` / `wx.getStorageSync` 保存。字段语义不能因端而异。
+
+## i18n 多语言支持
+
+可选的多语言方案，通过字段后缀实现：
+
+```json
+{
+  "meta": {
+    "locale": "zh-CN",
+    "title_i18n": {
+      "zh-CN": "青炉夜火",
+      "en-US": "Blue Furnace Night Fire"
+    }
+  },
+  "nodes": [
+    {
+      "id": "node_001",
+      "segments_i18n": {
+        "zh-CN": [{ "text": "你站在青炉峰的石阶前..." }],
+        "en-US": [{ "text": "You stand before the stone steps of Qinglu Peak..." }]
+      }
+    }
+  ]
+}
+```
+
+规则：
+- 如果存在 `_i18n` 后缀字段，播放器优先读取当前 locale 对应的文本
+- 如果不存在 `_i18n` 字段，回退到默认文本字段
+- MVP 阶段可不做，后续阶段支持
+- 推荐在 Phase 9（示例库与发布）时实现
+
+## 玩法质量检测规则（validate.py 扩展）
+
+后续在 validate.py 中增加以下玩法质量检查：
+
+| 规则 | 级别 | 说明 |
+|------|------|------|
+| QUAL-001 | warning | 修仙 Demo 未包含突破节点 |
+| QUAL-002 | warning | 整部作品无 critical 选择 |
+| QUAL-003 | warning | critical 选择占比过高（>30%） |
+| QUAL-004 | warning | 无 delayedChanges，因果深度不足 |
+| QUAL-005 | warning | 无 milestones，缺乏成长仪式感 |
+| QUAL-006 | warning | 无 endings，缺乏重玩动力 |
+| QUAL-007 | suggestion | 每章应至少包含 1 个 surface 交互 |
+
+这些规则用于 AI 生成后的自动质量评估，不阻止发布，仅作为改进建议。
 
 ## 兼容策略
 

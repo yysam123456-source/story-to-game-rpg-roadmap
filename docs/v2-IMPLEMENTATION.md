@@ -3,7 +3,6 @@
 **日期**：2026-07-04
 **版本**：v3.0
 **基于**：v2-PRD.md + v2-ROADMAP.md
-**周期**：Q3 2026 详细周计划 + Q4/Q1 概要计划
 
 ---
 
@@ -14,8 +13,8 @@
 2. 先 schema 后 UI：JSON 字段定义必须先稳定，再开发渲染
 3. 开发内容并行：引擎开发和内容撰写可以并行，但联调需要串行
 4. 双端同源：HTML 和微信小程序共享 JSON 协议与剧情 core，UI 分端实现
-5. 每周有交付：每周末必须有可演示的进度
-6. 风险早发现：第 2 周结束必须完成 schema 评审，第 4 周结束必须完成核心 UI
+5. 每阶段有交付：每阶段结束必须有可演示的进度
+6. 风险早发现：Schema 评审必须完成，核心 UI 联调必须验证通过
 ```
 
 ---
@@ -94,435 +93,178 @@ P1-4 Skill 类型识别
 
 ---
 
-## 3. Q3 2026 详细周计划
+## 3. 阶段划分
 
-### 7 月：RPG 基础功能
+### 阶段一：Schema 定义与评审
 
-#### Week 1（7/1 - 7/6）：Schema 定义与评审
+**目标**：锁定 JSON Schema，确保所有字段定义清晰
 
-**开发任务**：
-- [ ] P0-1: 定义 `meta.rpg` 完整 schema（含所有字段、类型、约束）
-- [ ] P0-1: 编写 schema 文档（含示例）
-- [ ] P0-1: 评审会议（与内容顾问确认字段是否满足修仙需求）
-- [ ] P0-1.5: 定义 `choice.weight` 字段（critical/branch/minor/cosmetic枚举 + weightHint）
-- [ ] P0-1.5: 定义 `milestones` 顶层字段基础结构（condition/celebration/vfx/segments）
-- [ ] P0-1.5: 定义 `endings` 顶层字段基础结构（id/name/desc/type/condition/hidden）
-- [ ] P0-1.5: 定义 `delayedChanges` 节点字段（triggerNode/changes/reason）
+**任务**：
+- P0-1: 定义 `meta.rpg` 完整 schema
+- P0-1.5: 定义 `choice.weight`、`milestones`、`endings`、`delayedChanges`、`interaction.depth` 字段
+- P0-1.5: 定义 `condition.interaction` 前置交互条件
+- P0-1.5: 定义 `candidateEndings` 节点字段
+- 统一 `genre` 枚举值
+
+**交付物**：Schema 文档通过评审
+
+**风险检查点**：如果 schema 评审不通过，需在此阶段修正
+
+---
+
+### 阶段二：核心引擎开发
+
+**目标**：实现状态栏、变化反馈、条件选项、选择重量
+
+**任务**：
+- P0-2: 实现 `meta.rpg` 解析器
+- P0-2: 实现顶部状态栏组件（text/number/bar）
+- P0-2: 状态栏样式（暗色/亮色主题适配、Glassmorphism）
+- P0-2.5: 实现 `choice.weight` UI（critical/branch/minor/cosmetic 视觉差异化）
+- P0-2.5: 实现 `weightHint` 悬停/长按提示
+- P0-3: 实现状态详情抽屉
+- P0-4: 实现 `changes` 变化计算引擎和 Toast 组件
+- P0-5: 实现字符串 condition 解析（向后兼容）
+- P0-5: 实现对象 condition 解析（all/any/var/flag/item/interaction）
+- P0-5: 实现 `conditionDisplay`（hide/disabled）
+- P0-7: validate.py 增强（RPG-001 到 RPG-013）
+- Core 抽离：抽出 `story-engine`、`condition-engine`、`change-engine`、`save-model`
+
+**交付物**：播放器可显示状态栏、变化反馈、条件选项、选择重量
+
+**风险检查点**：bar 类型渲染性能、移动端适配
+
+---
+
+### 阶段三：修仙 Demo 与联调
+
+**目标**：制作可玩的修仙 Demo，验证核心玩法假设
 
 **内容任务**：
-- [ ] 确定修仙 Demo 故事大纲（主角、关键选择、结局方向）
-- [ ] 列出修仙 Demo 需要的所有数值（境界、修为、灵力、道心等）
-
-**文档任务**：
-- [ ] 更新 `docs/RPG_JSON_SCHEMA_PROPOSAL.md`
-
-**验收标准**：
-- schema 文档通过评审
-- 修仙 Demo 数值清单确定
-- choice.weight、milestones、endings、delayedChanges 字段定义完成
-
-**风险检查点**：
-- 如果 schema 评审不通过（字段不满足需求），本周内必须修正
-
----
-
-#### Week 2（7/7 - 7/13）：状态栏 UI 开发
+- 确定修仙 Demo 故事大纲（主角、关键选择、结局方向）
+- 列出修仙 Demo 需要的所有数值
+- 撰写修仙 Demo 节点（40-50 节点，聚焦核心验证）
+- 配置 `meta.rpg`（primaryStats、hiddenStats）
+- 为关键选择配置 `changes` 和 `show`
+- 配置 `choice.weight` 示例
+- 配置 milestones（至少 3 个：1 large + 1 medium + 1 small）
+- 配置 endings（至少 4 个：true/dark/neutral/hidden）
+- 配置 delayedChanges（每个 critical 选择配 1 个）
 
 **开发任务**：
-- [ ] P0-2: 实现 `meta.rpg` 解析器（读取 primaryStats、hiddenStats）
-- [ ] P0-2: 实现顶部状态栏组件（text/number/bar 三种类型）
-- [ ] P0-2: 状态栏样式（暗色/亮色主题适配）
-- [ ] P0-2.5: 实现 choice.weight UI（critical: 品牌色辉光边框, branch: 品牌色竖线, minor: 默认, cosmetic: 淡色）
-- [ ] P0-2.5: 实现 weightHint 悬停提示
-- [ ] Core: 标记现有启动器中可抽离的剧情推进、条件判断、changes 应用逻辑
+- 用 validate.py 校验 Demo JSON
+- 播放器加载修仙 Demo 联调
+- 测试状态栏、变化反馈、条件选项、选择重量
+- 测试 milestone 触发、delayedChanges 执行
 
-**内容任务**：
-- [ ] 撰写修仙 Demo 前 20 个节点（修炼、突破、因果选择）
+**交付物**：可完整游玩的修仙 Demo
 
-**文档任务**：
-- [ ] 编写「修仙互动文游设计规范」初稿
-
-**验收标准**：
-- 播放器能正确显示 4 种 primaryStats
-- 状态栏高度 ≤ 60px，不遮挡正文
-- 4 种 choice.weight 的视觉差异化正确呈现
-- weightHint 悬停提示正常显示
-
-**风险检查点**：
-- 如果 bar 类型渲染性能差，考虑用 CSS 简化
+**风险检查点**：数值平衡、文本质量
 
 ---
 
-#### Week 3（7/14 - 7/20）：状态详情 + 变化反馈
+### 阶段四：测试与迭代
 
-**开发任务**：
-- [ ] P0-3: 实现状态详情抽屉（右侧滑出，显示所有 variables）
-- [ ] P0-4: 实现 changes 变化计算引擎（对比前后差异）
-- [ ] P0-4: 实现 Toast 组件（位置、动画、颜色、持续时间）
-- [ ] Core: 抽出 `condition-engine` 和 `change-engine`，避免小程序端使用 `eval`
+**目标**：内部测试 + 用户测试 + 迭代修复
 
-**内容任务**：
-- [ ] 撰写修仙 Demo 中间 30 个节点（宗门大比、人情因果）
+**任务**：
+- 完整游玩修仙 Demo（多路线）
+- 记录 bug 和体验问题
+- 移动端测试（iOS Safari + Android Chrome）
+- 用户测试（5-10 名目标用户）
+- 收集反馈并迭代修复
 
-**文档任务**：
-- [ ] 更新「修仙互动文游设计规范」
-
-**验收标准**：
-- 抽屉展开/收起动画流畅
-- Toast 正确显示 val/set/flags 的变化
-- 动画不遮挡选项
-
-**风险检查点**：
-- Toast 动画如果在低端设备卡顿，提供关闭选项
+**交付物**：用户测试报告、修复后的 Demo
 
 ---
 
-#### Week 4（7/21 - 7/27）：条件选项 + 校验器
+### 阶段五：发布准备
 
-**开发任务**：
-- [ ] P0-5: 实现字符串 condition 解析（向后兼容）
-- [ ] P0-5: 实现对象 condition 解析（all/any/var/flag/item）
-- [ ] P0-5: 实现 conditionDisplay（hide/disabled）
-- [ ] P0-7: validate.py 增加 RPG-001 到 RPG-008 规则
-- [ ] 小程序: 建立最小项目结构，准备内置 Demo 加载路径
+**目标**：GitHub Release + 社区建设
 
-**内容任务**：
-- [ ] 撰写修仙 Demo 后 30 个节点（结局前 closure、多结局）
+**任务**：
+- 制作演示视频和图文
+- 更新 GitHub README
+- 发布 GitHub Release v0.2
+- 社区运营（B站、小红书、V2EX、知乎、NGA）
+- 撰写复盘报告
 
-**文档任务**：
-- [ ] 编写 validate.py 新增规则说明
-
-**验收标准**：
-- 字符串 condition 继续可用
-- 对象 condition 正确解析
-- hide/disabled 模式正确工作
-- validate.py 能检测 RPG 字段错误
-
-**风险检查点**：
-- 如果 condition 解析复杂度过高，简化对象 condition 语法
+**交付物**：Release 包、演示视频、社区反馈
 
 ---
 
-### 8 月：Demo + 联调
+### 阶段六：Q4 扩展（场景交互 + 无限恐怖）
 
-#### Week 5（8/4 - 8/10）：修仙 Demo JSON 初稿
+**目标**：增加互动深度，扩展类型覆盖
 
-**内容任务**（主力）：
-- [ ] P0-6: 完成修仙 Demo JSON 初稿（全部 60-80 节点）
-- [ ] P0-6: 配置 `meta.rpg`（primaryStats、hiddenStats）
-- [ ] P0-6: 为每个关键选择配置 `changes` 和 `show`
-- [ ] P0-6: 配置每个 critical 选择的 delayedChanges
-- [ ] P0-6: 配置至少 3 个 milestones（1 large 突破境界 + 1 medium 领悟功法 + 1 small 首次修炼）
-- [ ] P0-6: 配置至少 4 个 endings（1 true + 1 dark + 1 neutral + 1 hidden）
-
-**开发任务**：
-- [ ] P0-6: 用 validate.py 校验 Demo JSON
-- [ ] P0-6: 修复校验错误
-- [ ] 小程序: 加载内置修仙 Demo JSON，渲染正文和选项
-
-**验收标准**：
-- JSON 通过 validate.py 全部校验
-- 无错误，警告 < 5 个
-- delayedChanges 在每个 critical 选择上有配置
-- milestones 覆盖 3 种尺寸（large/medium/small）
-- endings 覆盖 4 种类型（true/dark/neutral/hidden）
-
-**风险检查点**：
-- 如果 validate.py 报错过多，优先修复 error，warning 可延后
+**任务**：
+- P1-1: `interactions` 字段 + UI
+- P1-1.5: `interaction.depth` 三级探索
+- P1-1.5: `interaction.hint` 字段
+- P1-2: `inventory` 字段 + 背包 UI
+- P1-2.5: `delayedChanges` 延迟后果引擎
+- P1-3: `milestones` 庆祝 UI（small/medium/large + VFX）
+- P1-3.5: `endings` 数据包 + dot tracker + hidden 结局
+- P1-4: 无限恐怖 Demo
+- P1-5: Skill 类型识别升级
+- P1-6: 调试器增强
 
 ---
 
-#### Week 6（8/11 - 8/17）：播放器联调
+### 阶段七：Q1 扩展（类型扩展 + 小程序）
 
-**开发任务**：
-- [ ] P0-6: 播放器加载修仙 Demo，测试状态栏显示
-- [ ] P0-6: 测试变化反馈（每个关键选择后检查 Toast）
-- [ ] P0-6: 测试条件选项（置灰/隐藏逻辑）
-- [ ] P0-6: 测试状态详情抽屉（所有 variables 正确显示）
-- [ ] P0-6: 测试 milestone 触发（到达 condition 时自动触发庆祝动画）
-- [ ] P0-6: 测试 delayedChanges（多节点后正确触发延迟后果）
-- [ ] P0-6: 测试 choice.weight 视觉差异化（4 种 weight 的 UI 表现）
-- [ ] 小程序: 实现状态栏、changes 反馈、本地存档
+**目标**：覆盖更多类型，建立小程序分发渠道
 
-**内容任务**：
-- [ ] P0-6: 根据联调结果调整数值平衡（修为增长速度、突破门槛）
-
-**验收标准**：
-- 状态栏数值随选择正确更新
-- Toast 在正确时机显示
-- 条件选项在不满足时正确置灰/隐藏
-- milestone 在满足 condition 时自动触发对应尺寸的庆祝动画
-- delayedChanges 在 triggerNode 到达后正确执行延迟变化
-- choice.weight 的 4 种 UI 样式（critical/branch/minor/cosmetic）正确呈现
-- 同一份修仙 Demo JSON 可在小程序端完成基础播放
-
-**风险检查点**：
-- 如果数值平衡有问题（太难/太简单），内容顾问本周内调整
+**任务**：
+- 悬疑 Demo
+- 末世 Demo
+- 宫斗 Demo
+- 示例库整理
+- 小程序内测版（作品列表、云端 JSON、分享）
 
 ---
 
-#### Week 7（8/18 - 8/24）：内部测试 + Bug 修复
+### 阶段八：平台化探索
 
-**测试任务**：
-- [ ] 团队成员完整游玩修仙 Demo（每人至少 2 次，走不同路线）
-- [ ] 记录所有 bug 和体验问题
-- [ ] 测试移动端（iOS Safari + Android Chrome）
-- [ ] 小程序真机测试（至少 1 台 iOS 微信 + 1 台 Android 微信）
+**目标**：探索商业化路径
 
-**开发任务**：
-- [ ] 修复 P0 级别 bug
-- [ ] 优化性能（加载时间、动画流畅度）
-
-**内容任务**：
-- [ ] 修复文本错误、逻辑漏洞
-
-**验收标准**：
-- 无 P0 级别 bug
-- 移动端可正常游玩
-- 加载时间 < 3 秒
-- 小程序端单次选择响应时间 ≤ 200ms
+**任务**：
+- 商业化方案设计
+- 创作者平台评估
+- 与橙光/易次元合作评估
+- OpenCore + 捐赠模式
 
 ---
 
-#### Week 8（8/25 - 8/31）：公开演示准备
+## 4. 每阶段检查清单
 
-**市场任务**：
-- [ ] 制作 B 站演示视频（5-10 分钟，展示核心功能）
-- [ ] 制作小红书图文（功能介绍 + 游玩截图）
-- [ ] 更新 GitHub README（新增 RPG 功能说明、修仙 Demo 截图）
-
-**开发任务**：
-- [ ] 准备 GitHub Release v0.2（打包单文件 HTML）
-- [ ] 小程序技术验证版录屏，作为路线图评审材料
-
-**文档任务**：
-- [ ] 撰写「快速开始」指南（如何生成修仙互动文游）
-- [ ] 更新 `docs/WECHAT_MINIPROGRAM_INTEGRATION.md` 中的技术验证结果
-
-**验收标准**：
-- 视频完成，可发布
-- README 更新完成
-- Release 包可下载运行
-
----
-
-### 9 月：用户验证 + 迭代
-
-#### Week 9（9/1 - 9/7）：用户测试
-
-**测试任务**：
-- [ ] 联系 5-10 名目标用户（修仙读者/作者）
-- [ ] 发放测试链接 + 问卷
-- [ ] 收集反馈（满意度、问题、建议）
-- [ ] 邀请 2-3 名用户试玩小程序技术验证版，确认微信内阅读体验
-
-**问卷设计**：
-- 满意度打分（1-10）
-- 「数值是否干扰阅读体验」（是/否/有时）
-- 「最喜欢/最不喜欢的地方」（开放题）
-- 「愿意推荐给朋友吗」（NPS）
-
-**验收标准**：
-- 回收 ≥ 5 份有效问卷
-- 满意度 ≥ 7/10
-
----
-
-#### Week 10（9/8 - 9/14）：迭代修复
-
-**开发任务**：
-- [ ] 根据用户反馈修复 bug
-- [ ] 优化 UI（如果用户反馈体验问题）
-- [ ] 调整数值平衡（如果用户反馈太难/太简单）
-
-**内容任务**：
-- [ ] 根据用户反馈调整文本
-
-**验收标准**：
-- 用户反馈的 P0 问题全部修复
-
----
-
-#### Week 11（9/15 - 9/21）：GitHub Release
-
-**开发任务**：
-- [ ] 最终测试（回归测试）
-- [ ] 打 tag：v0.2.0
-- [ ] 发布 GitHub Release（含 Release Notes）
-
-**市场任务**：
-- [ ] 发布 B 站视频
-- [ ] 发布小红书图文
-- [ ] 在相关社区发帖（V2EX、知乎、NGA）
-
-**验收标准**：
-- Release 包可正常运行
-- 视频播放量 > 1000（首周目标）
-
----
-
-#### Week 12（9/22 - 9/30）：社区建设
-
-**社区任务**：
-- [ ] 回复 GitHub Issues 和 Discussions
-- [ ] 收集首批用户反馈
-- [ ] 规划 Q4 工作（根据用户反馈调整优先级）
-
-**文档任务**：
-- [ ] 撰写 Q3 复盘报告
-- [ ] 更新路线图（根据实际进度调整 Q4 计划）
-
-**验收标准**：
-- GitHub Stars > 100
-- 至少 1 个外部 Issue 或 PR
-
----
-
-## 4. Q4 2026 概要计划
-
-### 10 月：场景交互系统
-
-| 周 | 任务 | 依赖 |
-|----|------|------|
-| W1 | `interactions` schema 定义 | P0 schema 经验 |
-| W1 | interaction.depth schema（surface/deep/ultimate） | P0 schema 经验 |
-| W2 | interactions UI 开发 | schema 稳定 |
-| W2 | interaction.depth UI + 渐进探索动画 | schema 稳定 |
-| W3 | 修仙 Demo 增加 interactions | UI 完成 |
-| W3 | 修仙 Demo 增加三级探索节点 + delayedChanges | UI 完成 |
-| W4 | 调试器增强；小程序支持 interactions 基础渲染 | 无 |
-| W4 | 调试器增加 delayedChanges 追踪面板 | 无 |
-
-### 11 月：背包 + 无限恐怖 + milestone
-
-| 周 | 任务 | 依赖 |
-|----|------|------|
-| W1 | `inventory` schema + UI | interactions 经验 |
-| W1 | milestone 庆祝 UI（small Toast / medium overlay / large 全屏+VFX） | 无 |
-| W2 | 背包面板 + 道具交互 | schema 稳定 |
-| W2 | 修仙 Demo 增加 large 里程碑触发 + VFX 联调 | UI 完成 |
-| W3 | 无限恐怖故事大纲；小程序作品列表 | 无 |
-| W3 | 无限恐怖 Demo；小程序支持 interactions 渲染 | 无 |
-| W4 | 无限恐怖 Demo JSON；小程序云端 JSON 加载 | inventory 完成 |
-| W4 | 小程序支持 milestone/ending 基础渲染 | 无 |
-
-### 12 月：Skill 升级 + endings + 社区
-
-| 周 | 任务 | 依赖 |
-|----|------|------|
-| W1 | Skill 类型识别规则 | 无 |
-| W1 | endings panel + dot tracker + hidden 结局机制 | 无 |
-| W2 | Skill 自动生成功能 | 类型规则稳定 |
-| W2 | 无限恐怖 Demo 配 endings 和 milestones | endings 系统 |
-| W3 | GitHub 社区建设；小程序分享卡片 | 无 |
-| W3 | GitHub 社区 + 小程序分享 + hidden 结局彩蛋推广 | 无 |
-| W4 | 年度总结 + Q1 规划；小程序内测版 | 无 |
-
----
-
-## 5. 2027 Q1 概要计划
-
-### 1 月：悬疑 + 末世模板
-
-- 悬疑 Demo（线索/推理/压力系统）
-- 末世 Demo（资源/生存/庇护所系统）
-
-### 2 月：宫斗模板 + 示例库
-
-- 宫斗 Demo（宠信/派系/把柄系统）
-- 示例库整理 + 教程文档
-
-### 3 月：小程序公开测试
-
-- 微信登录。
-- 云存档。
-- 作品收藏。
-- 游玩统计。
-- 公开测试版本。
-- APP 仍作为远期备选，不进入 Q1 主线。
-
----
-
-## 6. 资源需求
-
-### 6.1 人员配置
-
-| 角色 | Q3 | Q4 | Q1 | 说明 |
-|------|-----|-----|-----|------|
-| 全栈开发 | 1 人 | 1 人 | 1-2 人 | HTML/JS/JSON 处理 |
-| 小程序开发 | 0.3 人 | 0.5 人 | 0.5-1 人 | 可由全栈兼任，负责 WXML/WXSS/微信 API |
-| 内容顾问 | 0.5 人 | 0.5 人 | 0.5 人 | 修仙/无限流读者，撰写 Demo |
-| 产品经理 | 0.3 人 | 0.3 人 | 0.5 人 | 需求确认、用户测试、规划 |
-| 市场/社区 | 0.2 人 | 0.3 人 | 0.3 人 | 视频制作、社区运营 |
-
-### 6.2 时间估算汇总
-
-| 阶段 | 开发工作量 | 内容工作量 | 总周期 |
-|------|------------|------------|--------|
-| Q3 MVP | 33 天 + 小程序 5 天 | 21 天 | 12 周（含测试+迭代） |
-| Q4 核心互动 | 24 天 + 小程序 10 天 | 12 天 | 12 周 |
-| Q1 类型扩展 | 10 天 + 小程序 10 天 | 15 天 | 12 周 |
-
-**Q3 开发工作量明细（33 天）**：
-- P0-1 meta.rpg schema：3 天
-- P0-1.5 choice.weight/milestones/endings/delayedChanges schema：4 天
-- P0-2 状态栏 UI（Glassmorphism + 4 种 primaryStats）：5 天
-- P0-3 状态详情抽屉：3 天
-- P0-4 变化反馈 Toast（含 changes 计算引擎）：5 天
-- P0-5 条件选项置灰（字符串 + 对象 condition）：3 天
-- P0-6 修仙 Demo 联调（播放器 + Demo JSON 联合调试）：5 天
-- P0-7 validate.py 增强（RPG-001 到 RPG-013）：3 天
-- Core 抽离（story-engine + condition-engine + change-engine + save-model）：2 天
-
-**Q3 内容工作量明细（21 天）**：
-- 修仙 Demo 故事大纲 + 数值设计：3 天
-- 修仙 Demo 节点撰写（40-50 节点，Q3 聚焦核心验证而非内容规模）：10 天
-- 配置 milestones（3 个）+ endings（4 个）+ delayedChanges + choice.weight：3 天
-- 文本润色 + 文学保真度审核：3 天
-- 联调期间数值平衡调整：2 天
-
-注意：Demo 规模从 60-80 节点调整为 40-50 节点。Q3 的目标是验证核心玩法假设，不需要大规模内容。Q4 的无限恐怖 Demo 可以做到 60-100 节点。
-
-**Q4 开发工作量明细（24 天）**：
-- 原有任务：17 天
-- 新增 interaction.depth schema + UI + 渐进探索动画：3 天
-- 新增 delayedChanges 引擎 + 联调：2 天
-- 新增 milestone 庆祝 UI（small/medium/large + VFX）：3 天
-- 新增 endings panel + dot tracker + hidden 结局机制：2 天
-- 新增联调（milestone + delayedChanges + endings 综合测试）：2 天
-
----
-
-## 7. 每周检查清单
-
-每个周末，团队必须确认：
+每个阶段结束，确认：
 
 ```
-□ 本周任务是否完成？
-□ 是否有阻塞问题需要升级？
-□ 下周计划是否需要调整？
-□ 用户反馈是否已记录？
+□ 本阶段任务是否完成？
+□ 是否有阻塞问题需要处理？
+□ 下阶段计划是否需要调整？
 □ 代码是否已提交并推送？
 □ 文档是否已更新？
 ```
 
 ---
 
-## 8. 关键决策点
+## 5. 关键决策点
 
-| 时间点 | 决策 | 选项 | 建议 |
-|--------|------|------|------|
-| 7 月第 2 周 | 仍未确认第 2 名开发人员？ | 缩减 Demo 规模至 30 节点，将 milestones/endings 推迟到 Q4 | 先确保核心 P0-1 到 P0-5 在 8 月底前完成 |
-| 7 月底 | Schema 是否锁定？ | 锁定 / 继续调整 | 锁定，进入开发 |
-| 8 月中旬 | milestone 基础框架是否纳入 Q3 MVP？ | 纳入 / 延后 | 纳入至少 small+medium |
-| 8 月底 | Demo 是否可玩？ | 可玩 / 延期 | 延期不超过 1 周 |
-| 9 月中 | 用户反馈是否达标？ | 达标 / 不达标 | 不达标则执行 Plan B |
-| 9 月中 | 小程序技术路径是否成立？ | 成立 / 暂缓 | 同一份 JSON 能否稳定播放 |
-| 11 月 | large 里程碑的 VFX 复杂度？ | 全题材 VFX / 先做修仙 | 先做修仙，验证后扩展 |
-| 12 月 | hidden 结局的数量和复杂度？ | 每类型 1 个 / 每类型 2 个 | 每类型 1 个 hidden |
-| 12 月底 | 是否进入小程序公开测试？ | 是 / 否 | 取决于 Q3/Q4 用户数据 |
-| 2027 Q1 末 | 商业化方向？ | 平台 / 合作 / 捐赠 | 根据用户规模决定 |
+| 决策 | 选项 | 建议 |
+|------|------|------|
+| 开发资源不足？ | 缩减 Demo 规模至 30 节点，将 milestones/endings 推迟到 Q4 | 先确保核心 P0-1 到 P0-5 完成 |
+| Schema 是否锁定？ | 锁定 / 继续调整 | 锁定，进入开发 |
+| milestone 基础框架是否纳入 Q3 MVP？ | 纳入 / 延后 | 纳入至少 small+medium |
+| Demo 是否可玩？ | 可玩 / 延期 | 延期不超过 1 周 |
+| 用户反馈是否达标？ | 达标 / 不达标 | 不达标则执行 Plan B |
+| 小程序技术路径是否成立？ | 成立 / 暂缓 | 同一份 JSON 能否稳定播放 |
+| large 里程碑的 VFX 复杂度？ | 全题材 VFX / 先做修仙 | 先做修仙，验证后扩展 |
+| hidden 结局的数量和复杂度？ | 每类型 1 个 / 每类型 2 个 | 每类型 1 个 hidden |
+| 是否进入小程序公开测试？ | 是 / 否 | 取决于 Q3/Q4 用户数据 |
+| 商业化方向？ | 平台 / 合作 / 捐赠 | 根据用户规模决定 |
 
 ---
 
-> 本开发计划基于 v2-PRD 和 v2-ROADMAP，是可直接执行的周级别任务分解。v3.0 整合了 choice.weight 权重系统、milestone 里程碑框架、endings 多结局系统、delayedChanges 延迟后果机制、interaction.depth 渐进探索等新玩法机制。实际执行中可根据用户反馈和资源情况灵活调整。
+> 本开发计划基于 v2-PRD 和 v2-ROADMAP，是可直接执行的阶段级别任务分解。v3.0 整合了 choice.weight 权重系统、milestone 里程碑框架、endings 多结局系统、delayedChanges 延迟后果机制、interaction.depth 渐进探索等新玩法机制。实际执行中可根据用户反馈灵活调整。
