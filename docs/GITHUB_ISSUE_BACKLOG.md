@@ -46,6 +46,21 @@
 - [ ] 定义统一 `save-model`。
 - [ ] HTML 播放器改为调用共享 core。
 
+### Issue：定义 choice.weight、milestones、endings、delayedChanges、interaction.depth 字段
+
+目标：
+
+- 完成 v3.0 新增字段的 schema 定义。
+
+任务：
+
+- [ ] 定义 choice.weight 枚举和 weightHint。
+- [ ] 定义 milestones 顶层结构和 celebration 级别。
+- [ ] 定义 endings 顶层结构和 6 种 type。
+- [ ] 定义 delayedChanges 节点字段。
+- [ ] 定义 interaction.depth 枚举。
+- [ ] 评审并确认所有新字段。
+
 ## Milestone：P1 RPG 状态展示 MVP
 
 ### Issue：实现 `meta.rpg.primaryStats` 状态栏
@@ -74,6 +89,21 @@
 - [ ] 展示 `primaryStats`。
 - [ ] 不展示 `hiddenStats`。
 - [ ] 缺失变量时降级显示。
+
+### Issue：实现 choice.weight UI 渲染
+
+目标：
+
+- 让选项视觉上反映 weight 差异。
+
+任务：
+
+- [ ] critical 选择品牌色辉光边框。
+- [ ] branch 选择品牌色竖线。
+- [ ] minor 选择默认样式。
+- [ ] cosmetic 选择淡色。
+- [ ] weightHint 悬停提示。
+- [ ] 旧 JSON（无 weight）保持原样。
 
 ## Milestone：P2 变化反馈与条件提示
 
@@ -134,6 +164,62 @@
 - [ ] 读档恢复 interaction 状态。
 - [ ] once 执行后隐藏或标记已完成。
 
+### Issue：支持 interaction.depth 三级探索
+
+目标：
+
+- surface 始终可见、deep 锁定可见、ultimate 隐藏直到满足条件。
+
+任务：
+
+- [ ] surface 交互始终渲染。
+- [ ] deep 交互在 condition 不满足时显示锁定状态。
+- [ ] ultimate 交互在满足条件时以特殊动画显现。
+- [ ] 三级探索的差异化文本反馈。
+- [ ] 存档保存 depth 相关状态。
+
+## Milestone：P3.5 三层后果与成长里程碑
+
+### Issue：实现 delayedChanges 延迟后果引擎
+
+目标：
+
+- 玩家的关键选择在后续节点才真正生效，制造"因果回报"体验。
+
+任务：
+
+- [ ] 维护 pending delayedChanges 队列。
+- [ ] 到达 triggerNode 时检查并执行。
+- [ ] 执行时显示 reason 文本和变化反馈。
+- [ ] 存档保存 pending 状态。
+
+### Issue：实现里程碑庆祝 UI
+
+目标：
+
+- 在达到重要叙事节点时提供多层次的仪式感反馈。
+
+任务：
+
+- [ ] small：简短 Toast 通知。
+- [ ] medium：半透明 overlay + 叙事文本。
+- [ ] large：全屏庆祝动画 + 题材 VFX + 叙事文本。
+- [ ] 5 种题材专属 large milestone VFX。
+
+### Issue：实现结局数据包和追踪系统
+
+目标：
+
+- 让玩家感知到多条结局路径的存在，激励重玩和探索。
+
+任务：
+
+- [ ] 解析 endings 顶层定义。
+- [ ] 实现 endings panel。
+- [ ] 实现 mini dot tracker。
+- [ ] hidden 结局的模糊显示和发现机制。
+- [ ] 6 种结局类型的视觉差异化。
+
 ## Milestone：P4 背包与资源系统
 
 ### Issue：实现 `inventory` 数据结构和背包 UI
@@ -176,6 +262,10 @@
 - [ ] 写入 Skill 修仙模板规则。
 - [ ] 创建修仙 demo JSON。
 - [ ] demo 通过 validate.py。
+- [ ] 配置 milestones（至少 1 large + 1 medium + 1 small）。
+- [ ] 配置 endings（至少 4 个，含 1 个 hidden）。
+- [ ] critical 选择配置 delayedChanges。
+- [ ] 至少 1 个三级探索交互示例。
 
 ### Issue：实现无限恐怖类型模板和 demo
 

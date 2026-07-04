@@ -17,6 +17,9 @@
 - [ ] 将文档中的 `theme` / `ambient` 口径统一。
 - [ ] 为后续启动器拆分建立目录规划。
 - [ ] 为微信小程序并行集成预留共享 core 目录规划。
+- [ ] 定义 choice.weight / milestones / endings / delayedChanges / interaction.depth 字段。
+- [ ] 实现 choice.weight UI 渲染。
+- [ ] 修仙 Demo 配置 milestones 和 endings。
 
 ### 交付物
 
@@ -86,6 +89,10 @@
 - [ ] 支持 `interaction.result.changes`。
 - [ ] 执行后更新当前节点 UI。
 - [ ] once 交互写入本地运行状态，避免重复奖励。
+- [ ] 支持 interaction.depth 三级探索。
+- [ ] 实现 delayedChanges 延迟后果引擎。
+- [ ] 实现里程碑庆祝 UI（三级 celebration）。
+- [ ] 实现结局追踪系统（panel + dot tracker + hidden）。
 
 ### 验收
 
@@ -93,6 +100,10 @@
 - [ ] interaction 可改变变量和 flag。
 - [ ] interaction 执行后可解锁新选项。
 - [ ] 旧节点无 `interactions` 时行为不变。
+- [ ] surface 交互始终可见，deep 交互显示锁定状态，ultimate 交互满足条件时显现。
+- [ ] delayedChanges 在到达 triggerNode 时正确触发并显示 reason。
+- [ ] 里程碑 small / medium / large 三级庆祝按配置触发。
+- [ ] endings panel 和 mini dot tracker 正确显示已解锁结局，hidden 结局模糊显示。
 
 ## P4：背包与资源系统
 
@@ -120,7 +131,7 @@
 
 ### 目标
 
-优先支持修仙和无限恐怖，验证“类型玩法模板”的生成价值。
+优先支持修仙和无限恐怖，验证"类型玩法模板"的生成价值。
 
 ### 修仙任务
 
@@ -137,6 +148,15 @@
 - [ ] 定义倒计时/危险度/团队信任机制。
 - [ ] 定义支线奖励和回归结算模板。
 - [ ] 创建无限恐怖 demo。
+
+### 修仙 Demo 验收
+
+- [ ] Demo 通过 validate.py（包含 v3.0 新规则 RPG-009 到 RPG-013）。
+- [ ] milestones / endings / delayedChanges / choice.weight 全部配置正确。
+- [ ] milestones 至少包含 1 large + 1 medium + 1 small。
+- [ ] endings 至少包含 4 个（含 1 个 hidden）。
+- [ ] critical 选择配置了 delayedChanges。
+- [ ] 至少 1 个三级探索交互示例。
 
 ## P6：类型模板 v2
 

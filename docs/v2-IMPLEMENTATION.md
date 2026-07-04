@@ -1,7 +1,7 @@
-# Story-to-Game v2.0 开发实施计划
+# Story-to-Game v3.0 开发实施计划
 
-**日期**：2026-07-02
-**版本**：v2.0
+**日期**：2026-07-04
+**版本**：v3.0
 **基于**：v2-PRD.md + v2-ROADMAP.md
 **周期**：Q3 2026 详细周计划 + Q4/Q1 概要计划
 
@@ -24,9 +24,14 @@
 
 ```
 P0-1 meta.rpg schema
+  ├── P0-1.5 choice.weight schema
+  │     ├── P0-2.5 choice.weight UI（与P0-2并行）
+  │     └── P0-6 修仙Demo
   ├── P0-2 顶部状态栏 UI
   │     ├── P0-3 状态详情抽屉
   │     └── P0-6 修仙 Demo（内容依赖 schema，开发依赖 UI）
+  ├── P0-2.5 milestone基础框架
+  │     └── P0-6 修仙Demo
   ├── P0-4 变化反馈 Toast
   │     └── P0-6 修仙 Demo
   ├── P0-5 条件选项置灰
@@ -46,6 +51,10 @@ Core 抽离
   └── 微信小程序技术验证
 
 P1-1 interactions
+  ├── P1-1.5 interaction.depth（渐进探索）
+  │     ├── P1-2.5 delayedChanges（三层后果）
+  │     └── P1-3 milestone庆祝UI
+  │           └── P1-3.5 endings数据包
   ├── P1-2 inventory
   └── P1-3 无限恐怖 Demo
 
@@ -53,7 +62,7 @@ P1-4 Skill 类型识别
   └── P1-3 无限恐怖 Demo
 ```
 
-**关键路径**：P0-1 → P0-2 → P0-4 → P0-6 → 用户测试
+**关键路径**：P0-1 → P0-2 → P0-2.5 → P0-4 → P0-6 → 用户测试
 
 **小程序并行路径**：Core 抽离 → 小程序加载内置 Demo → 状态栏/变化反馈/存档 → Q3 技术验证
 
@@ -69,6 +78,10 @@ P1-4 Skill 类型识别
 - [ ] P0-1: 定义 `meta.rpg` 完整 schema（含所有字段、类型、约束）
 - [ ] P0-1: 编写 schema 文档（含示例）
 - [ ] P0-1: 评审会议（与内容顾问确认字段是否满足修仙需求）
+- [ ] P0-1.5: 定义 `choice.weight` 字段（critical/branch/minor/cosmetic枚举 + weightHint）
+- [ ] P0-1.5: 定义 `milestones` 顶层字段基础结构（condition/celebration/vfx/segments）
+- [ ] P0-1.5: 定义 `endings` 顶层字段基础结构（id/name/desc/type/condition/hidden）
+- [ ] P0-1.5: 定义 `delayedChanges` 节点字段（triggerNode/changes/reason）
 
 **内容任务**：
 - [ ] 确定修仙 Demo 故事大纲（主角、关键选择、结局方向）
@@ -80,6 +93,7 @@ P1-4 Skill 类型识别
 **验收标准**：
 - schema 文档通过评审
 - 修仙 Demo 数值清单确定
+- choice.weight、milestones、endings、delayedChanges 字段定义完成
 
 **风险检查点**：
 - 如果 schema 评审不通过（字段不满足需求），本周内必须修正
@@ -92,6 +106,8 @@ P1-4 Skill 类型识别
 - [ ] P0-2: 实现 `meta.rpg` 解析器（读取 primaryStats、hiddenStats）
 - [ ] P0-2: 实现顶部状态栏组件（text/number/bar 三种类型）
 - [ ] P0-2: 状态栏样式（暗色/亮色主题适配）
+- [ ] P0-2.5: 实现 choice.weight UI（critical: 品牌色辉光边框, branch: 品牌色竖线, minor: 默认, cosmetic: 淡色）
+- [ ] P0-2.5: 实现 weightHint 悬停提示
 - [ ] Core: 标记现有启动器中可抽离的剧情推进、条件判断、changes 应用逻辑
 
 **内容任务**：
@@ -103,6 +119,8 @@ P1-4 Skill 类型识别
 **验收标准**：
 - 播放器能正确显示 4 种 primaryStats
 - 状态栏高度 ≤ 60px，不遮挡正文
+- 4 种 choice.weight 的视觉差异化正确呈现
+- weightHint 悬停提示正常显示
 
 **风险检查点**：
 - 如果 bar 类型渲染性能差，考虑用 CSS 简化
@@ -167,6 +185,9 @@ P1-4 Skill 类型识别
 - [ ] P0-6: 完成修仙 Demo JSON 初稿（全部 60-80 节点）
 - [ ] P0-6: 配置 `meta.rpg`（primaryStats、hiddenStats）
 - [ ] P0-6: 为每个关键选择配置 `changes` 和 `show`
+- [ ] P0-6: 配置每个 critical 选择的 delayedChanges
+- [ ] P0-6: 配置至少 3 个 milestones（1 large 突破境界 + 1 medium 领悟功法 + 1 small 首次修炼）
+- [ ] P0-6: 配置至少 4 个 endings（1 true + 1 dark + 1 neutral + 1 hidden）
 
 **开发任务**：
 - [ ] P0-6: 用 validate.py 校验 Demo JSON
@@ -176,6 +197,9 @@ P1-4 Skill 类型识别
 **验收标准**：
 - JSON 通过 validate.py 全部校验
 - 无错误，警告 < 5 个
+- delayedChanges 在每个 critical 选择上有配置
+- milestones 覆盖 3 种尺寸（large/medium/small）
+- endings 覆盖 4 种类型（true/dark/neutral/hidden）
 
 **风险检查点**：
 - 如果 validate.py 报错过多，优先修复 error，warning 可延后
@@ -189,6 +213,9 @@ P1-4 Skill 类型识别
 - [ ] P0-6: 测试变化反馈（每个关键选择后检查 Toast）
 - [ ] P0-6: 测试条件选项（置灰/隐藏逻辑）
 - [ ] P0-6: 测试状态详情抽屉（所有 variables 正确显示）
+- [ ] P0-6: 测试 milestone 触发（到达 condition 时自动触发庆祝动画）
+- [ ] P0-6: 测试 delayedChanges（多节点后正确触发延迟后果）
+- [ ] P0-6: 测试 choice.weight 视觉差异化（4 种 weight 的 UI 表现）
 - [ ] 小程序: 实现状态栏、changes 反馈、本地存档
 
 **内容任务**：
@@ -198,6 +225,9 @@ P1-4 Skill 类型识别
 - 状态栏数值随选择正确更新
 - Toast 在正确时机显示
 - 条件选项在不满足时正确置灰/隐藏
+- milestone 在满足 condition 时自动触发对应尺寸的庆祝动画
+- delayedChanges 在 triggerNode 到达后正确执行延迟变化
+- choice.weight 的 4 种 UI 样式（critical/branch/minor/cosmetic）正确呈现
 - 同一份修仙 Demo JSON 可在小程序端完成基础播放
 
 **风险检查点**：
@@ -329,26 +359,37 @@ P1-4 Skill 类型识别
 | 周 | 任务 | 依赖 |
 |----|------|------|
 | W1 | `interactions` schema 定义 | P0 schema 经验 |
+| W1 | interaction.depth schema（surface/deep/ultimate） | P0 schema 经验 |
 | W2 | interactions UI 开发 | schema 稳定 |
+| W2 | interaction.depth UI + 渐进探索动画 | schema 稳定 |
 | W3 | 修仙 Demo 增加 interactions | UI 完成 |
+| W3 | 修仙 Demo 增加三级探索节点 + delayedChanges | UI 完成 |
 | W4 | 调试器增强；小程序支持 interactions 基础渲染 | 无 |
+| W4 | 调试器增加 delayedChanges 追踪面板 | 无 |
 
-### 11 月：背包 + 无限恐怖
+### 11 月：背包 + 无限恐怖 + milestone
 
 | 周 | 任务 | 依赖 |
 |----|------|------|
 | W1 | `inventory` schema + UI | interactions 经验 |
+| W1 | milestone 庆祝 UI（small Toast / medium overlay / large 全屏+VFX） | 无 |
 | W2 | 背包面板 + 道具交互 | schema 稳定 |
+| W2 | 修仙 Demo 增加 large 里程碑触发 + VFX 联调 | UI 完成 |
 | W3 | 无限恐怖故事大纲；小程序作品列表 | 无 |
+| W3 | 无限恐怖 Demo；小程序支持 interactions 渲染 | 无 |
 | W4 | 无限恐怖 Demo JSON；小程序云端 JSON 加载 | inventory 完成 |
+| W4 | 小程序支持 milestone/ending 基础渲染 | 无 |
 
-### 12 月：Skill 升级 + 社区
+### 12 月：Skill 升级 + endings + 社区
 
 | 周 | 任务 | 依赖 |
 |----|------|------|
 | W1 | Skill 类型识别规则 | 无 |
+| W1 | endings panel + dot tracker + hidden 结局机制 | 无 |
 | W2 | Skill 自动生成功能 | 类型规则稳定 |
+| W2 | 无限恐怖 Demo 配 endings 和 milestones | endings 系统 |
 | W3 | GitHub 社区建设；小程序分享卡片 | 无 |
+| W3 | GitHub 社区 + 小程序分享 + hidden 结局彩蛋推广 | 无 |
 | W4 | 年度总结 + Q1 规划；小程序内测版 | 无 |
 
 ---
@@ -393,8 +434,16 @@ P1-4 Skill 类型识别
 | 阶段 | 开发工作量 | 内容工作量 | 总周期 |
 |------|------------|------------|--------|
 | Q3 MVP | 19 天 + 小程序 5 天 | 14 天 | 12 周（含测试+迭代） |
-| Q4 核心互动 | 17 天 + 小程序 10 天 | 12 天 | 12 周 |
+| Q4 核心互动 | 24 天 + 小程序 10 天 | 12 天 | 12 周 |
 | Q1 类型扩展 | 10 天 + 小程序 10 天 | 15 天 | 12 周 |
+
+**Q4 开发工作量明细（24 天）**：
+- 原有任务：17 天
+- 新增 interaction.depth schema + UI + 渐进探索动画：3 天
+- 新增 delayedChanges 引擎 + 联调：2 天
+- 新增 milestone 庆祝 UI（small/medium/large + VFX）：3 天
+- 新增 endings panel + dot tracker + hidden 结局机制：2 天
+- 新增联调（milestone + delayedChanges + endings 综合测试）：2 天
 
 ---
 
@@ -418,12 +467,15 @@ P1-4 Skill 类型识别
 | 时间点 | 决策 | 选项 | 建议 |
 |--------|------|------|------|
 | 7 月底 | Schema 是否锁定？ | 锁定 / 继续调整 | 锁定，进入开发 |
+| 8 月中旬 | milestone 基础框架是否纳入 Q3 MVP？ | 纳入 / 延后 | 纳入至少 small+medium |
 | 8 月底 | Demo 是否可玩？ | 可玩 / 延期 | 延期不超过 1 周 |
 | 9 月中 | 用户反馈是否达标？ | 达标 / 不达标 | 不达标则执行 Plan B |
 | 9 月中 | 小程序技术路径是否成立？ | 成立 / 暂缓 | 同一份 JSON 能否稳定播放 |
+| 11 月 | large 里程碑的 VFX 复杂度？ | 全题材 VFX / 先做修仙 | 先做修仙，验证后扩展 |
+| 12 月 | hidden 结局的数量和复杂度？ | 每类型 1 个 / 每类型 2 个 | 每类型 1 个 hidden |
 | 12 月底 | 是否进入小程序公开测试？ | 是 / 否 | 取决于 Q3/Q4 用户数据 |
 | 2027 Q1 末 | 商业化方向？ | 平台 / 合作 / 捐赠 | 根据用户规模决定 |
 
 ---
 
-> 本开发计划基于 v2-PRD 和 v2-ROADMAP，是可直接执行的周级别任务分解。实际执行中可根据用户反馈和资源情况灵活调整。
+> 本开发计划基于 v2-PRD 和 v2-ROADMAP，是可直接执行的周级别任务分解。v3.0 整合了 choice.weight 权重系统、milestone 里程碑框架、endings 多结局系统、delayedChanges 延迟后果机制、interaction.depth 渐进探索等新玩法机制。实际执行中可根据用户反馈和资源情况灵活调整。
