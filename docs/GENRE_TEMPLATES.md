@@ -134,10 +134,77 @@
 - 每章至少 1 个资源/法宝/丹药选择。
 - 每章至少 1 个道心或因果选择。
 - 至少 1 个突破 routes 节点。
-- 每章至少 1 个 `weight=critical` 选择（可跨章共享，即连续章节可共享同一个 critical 选择的后果阶段）。
+- 每章至少 1 个 `weight=critical` 选择（可跨章共享，即连续章节可共享同一个 critical 选择的后果阶段），并使用 `importantFlag` 标记。
 - 每章至少 2 个 `surface` 交互 + 可选 `deep` / `ultimate`。
 - 每个 Demo 至少包含 1 个 `large` 里程碑 + 2 个 `medium` + 3 个 `small`。
 - 每个 Demo 结局总数 4-8 个。
+- 关键选择应使用 `weightTag` 字段增强视觉提示。
+
+### 完整示例 JSON（修仙类型）
+
+```json
+{
+  "meta": {
+    "title": "青炉夜火",
+    "genre": "xianxia",
+    "rpg": {
+      "enabled": true,
+      "primaryStats": [
+        { "key": "realm", "label": "境界", "type": "text", "default": "炼气三层" },
+        { "key": "cultivation", "label": "修为", "type": "bar", "max": 100 },
+        { "key": "qi", "label": "灵力", "type": "bar", "max": 80, "min": 0 }
+      ],
+      "hiddenStats": ["karma", "tribulationRisk"]
+    }
+  },
+  "startNodeId": "node_start",
+  "variables": {
+    "realm": "炼气三层",
+    "cultivation": 12,
+    "qi": 30
+  },
+  "nodes": {
+    "node_start": {
+      "segments": [{ "text": "你站在青炉峰上，感受着微弱的灵气。" }],
+      "choices": [
+        {
+          "text": "打坐修炼",
+          "next": "node_cultivate",
+          "weight": "minor"
+        },
+        {
+          "text": "冒险突破",
+          "next": "node_breakthrough",
+          "weight": "critical",
+          "weightTag": "关键抉择",
+          "weightHint": "此选择可能导致突破成功或失败",
+          "changes": {
+            "importantFlag": { "flag": "tried_breakthrough", "label": "尝试突破" }
+          }
+        }
+      ]
+    }
+  },
+  "milestones": [
+    {
+      "id": "first_breakthrough",
+      "name": "初次突破",
+      "condition": { "var": "realm", "op": "!=", "value": "炼气三层" },
+      "celebration": "small"
+    }
+  ],
+  "endings": [
+    {
+      "id": "ascension",
+      "name": "飞升成仙",
+      "type": "true",
+      "condition": { "var": "realm", "op": "==", "value": "渡劫期" }
+    }
+  ]
+}
+```
+
+（其他类型模板的完整示例类似，需根据对应类型的推荐变量、推荐里程碑、推荐结局来构建）
 
 ### 安全屋章节
 
