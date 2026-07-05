@@ -4,16 +4,19 @@
 
 ## 阶段一：Schema 定义
 
-- [ ] 定义 `meta.rpg` 完整 schema
-- [ ] 定义 `choice.weight` 字段
-- [ ] 定义 `interaction.depth` 字段
-- [ ] 定义 `milestones` 顶层结构
-- [ ] 定义 `endings` 顶层结构
-- [ ] 定义 `delayedChanges` 字段
-- [ ] 定义 `condition.interaction` 前置交互条件
-- [ ] 定义 `candidateEndings` 节点字段
-- [ ] 定义 `interaction.hint` 字段
-- [ ] 统一 `genre` 枚举值
+- [x] 定义 `meta.rpg` 完整 schema（已完成：SCHEMA_v1.md）
+- [x] 定义 `choice.weight` 字段（已完成：SCHEMA_v1.md §6.5）
+- [x] 定义 `interaction.depth` 字段（已完成：SCHEMA_v1.md §7）
+- [x] 定义 `milestones` 顶层结构（已完成：SCHEMA_v1.md §9）
+- [x] 定义 `endings` 顶层结构（已完成：SCHEMA_v1.md §10）
+- [x] 定义 `delayedChanges` 字段（已完成：SCHEMA_v1.md §8）
+- [x] 定义 `condition.interaction` 前置交互条件（已完成：SCHEMA_v1.md §13.2）
+- [x] 定义 `candidateEndings` 节点字段（已完成：SCHEMA_v1.md §11）
+- [x] 定义 `interaction.hint` 字段（已完成：SCHEMA_v1.md §7）
+- [x] 统一 `genre` 枚举值（已完成：SCHEMA_v1.md §2）
+- [x] 补充 `choice.weightTag` 说明（已完成：GENRE_TEMPLATES.md §通用规则）
+- [x] 补充 `importantFlag` 说明（已完成：GENRE_TEMPLATES.md §通用规则）
+- [x] 补充 `candidateEndings` 说明（已完成：GENRE_TEMPLATES.md §修仙类型）
 
 ## 阶段二：核心引擎
 

@@ -93,11 +93,34 @@ P1-4 Skill 类型识别
 
 ---
 
+## 2.5 当前进度（2026-07-04 更新）
+
+### ✅ 阶段一：Schema 定义（已完成并锁定）
+
+**完成时间**：2026-07-04  
+**交付物**：
+- `docs/SCHEMA_v1.md`（897 行）：锁定 RPG JSON Schema v1.0 正式定义
+- `docs/GENRE_TEMPLATES.md`（887 行）：5 种类型小说玩法模板
+- `story-to-game-source/scripts/validate.py`：13 条 RPG 校验规则（RPG-001~013）
+
+**已完成任务**：
+- [x] P0-1: 定义 `meta.rpg` 完整 schema
+- [x] P0-1.5: 定义 `choice.weight`、`milestones`、`endings`、`delayedChanges`、`interaction.depth` 字段
+- [x] P0-1.5: 定义 `condition.interaction` 前置交互条件
+- [x] P0-1.5: 定义 `candidateEndings` 节点字段
+- [x] 统一 `genre` 枚举值
+- [x] 补充 `choice.weightTag`、`importantFlag`、`candidateEndings` 说明
+- [x] P0-7: validate.py 增强（RPG-001 到 RPG-013）
+
+**下一步**：进入阶段二（核心引擎开发）
+
+---
+
 ## 3. 阶段划分
 
 ### 阶段一：Schema 定义与评审
 
-**目标**：锁定 JSON Schema，确保所有字段定义清晰
+**目标**：✅ 已完成 — 锁定 JSON Schema，确保所有字段定义清晰
 
 **任务**：
 - P0-1: 定义 `meta.rpg` 完整 schema

@@ -62,6 +62,30 @@ Q4 2026（10-12 月）: 核心互动 + 社区 + UI V2
 
 ---
 
+## 2.5 当前进度（2026-07-04 更新）
+
+### ✅ 阶段一：Schema 定义（已完成）
+
+以下任务已完成并锁定：
+
+| 任务 | 状态 | 交付物 |
+|------|------|--------|
+| `meta.rpg` 完整 schema | ✅ | `SCHEMA_v1.md` |
+| `choice.weight` 字段 | ✅ | `SCHEMA_v1.md` §6.5 |
+| `interaction.depth` 字段 | ✅ | `SCHEMA_v1.md` §7 |
+| `milestones` 顶层结构 | ✅ | `SCHEMA_v1.md` §9 |
+| `endings` 顶层结构 | ✅ | `SCHEMA_v1.md` §10 |
+| `delayedChanges` 字段 | ✅ | `SCHEMA_v1.md` §8 |
+| `condition.interaction` | ✅ | `SCHEMA_v1.md` §13.2 |
+| `candidateEndings` 字段 | ✅ | `SCHEMA_v1.md` §11 |
+| `genre` 枚举值统一 | ✅ | `SCHEMA_v1.md` §2 |
+| 类型模板（5 种） | ✅ | `GENRE_TEMPLATES.md` |
+| `validate.py` RPG 规则 | ✅ | 13 条规则（RPG-001~013） |
+
+**下一步**：进入阶段二（核心引擎开发）
+
+---
+
 ## 3. Q3 2026：MVP 验证（7-9 月）
 
 ### 3.1 季度目标
