@@ -2,6 +2,25 @@
 
 > 本仓库基于原 `Story-to-game` 项目导入，并新增 RPG 化、类型小说玩法模板、场景交互和后续阶段开发规划。原项目文件保持可用；新增规划文档位于 `docs/`，解包后的 Skill 源码位于 `story-to-game-source/`，便于后续基于文本 diff 持续开发。
 
+## 变更日志
+
+### 2026-07-04：系统性对齐完善（v1.1）
+
+基于 `SCHEMA_v1.md` 与 `GENRE_TEMPLATES.md` 的系统性对齐，完成以下改进：
+
+**文档更新**：
+- `GENRE_TEMPLATES.md`：补充 `choice.weightTag`、`importantFlag`、`candidateEndings` 说明和完整示例 JSON
+- `JSON剧本规则文档.md`：补充 `candidateEndings`、`weight`、`weightTag`、`weightHint` 字段说明
+- `json-format-spec.md`：补充顶层结构和节点结构的可选字段示例
+- `step4-system.md`：新增第六节"RPG 扩展状态系统设计"
+
+**工具改进**：
+- `validate.py`：修正 13 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~013）
+
+**详细报告**：参见 `docs/ALIGNMENT_REPORT.md`（如有）
+
+---
+
 ## 后续开发规划
 
 当前规划目标是将项目从“高质量互动文学播放器”逐步升级为“类型小说轻 RPG 文游生成器”。
