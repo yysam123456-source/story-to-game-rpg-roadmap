@@ -1,0 +1,72 @@
+/* ================================================
+   mystery-vfx.css — Typewriter Effect & Clue Flash
+   Cold, analytical atmosphere
+   ================================================ */
+
+/* Typewriter cursor blink for narrative */
+[data-genre="mystery"] .typewriter-cursor::after {
+  content: '|';
+  color: var(--c-brand);
+  animation: cursorBlink 1s steps(1) infinite;
+  font-weight: var(--weight-normal);
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Clue discovery flash */
+[data-genre="mystery"] .vfx-clue-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-transition);
+  background: radial-gradient(circle at center,
+    rgba(100, 116, 139, 0) 0%,
+    rgba(100, 116, 139, 0.15) 50%,
+    rgba(100, 116, 139, 0) 100%
+  );
+  animation: clueFlash 0.8s ease-out forwards;
+}
+
+@keyframes clueFlash {
+  0% { opacity: 0; transform: scale(0.8); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* Magnifying glass spotlight effect */
+[data-genre="mystery"] .vfx-spotlight {
+  position: fixed;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: calc(var(--z-vfx) + 1);
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 70%
+  );
+  box-shadow: 0 0 60px rgba(100, 116, 139, 0.1);
+  transition: left 0.3s ease, top 0.3s ease;
+}
+
+/* Film grain overlay */
+[data-genre="mystery"] .vfx-film-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-vfx) + 1);
+  opacity: 0.03;
+  animation: grainFlicker 0.15s steps(1) infinite;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes grainFlicker {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(1px, 1px); }
+}

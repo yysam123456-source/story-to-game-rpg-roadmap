@@ -1,0 +1,284 @@
+/* ================================================
+   save-system.css — Save/Load UI
+   Modal overlay with save slots, thumbnails, meta
+   ================================================ */
+
+/* ── Overlay ──────────────────────────────── */
+#save-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+
+#save-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Panel ────────────────────────────────── */
+.save-panel {
+  background: var(--c-bg-surface);
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-xl);
+  width: 580px;
+  max-width: 92vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(20px) scale(0.97);
+  transition: transform var(--duration-slow) var(--ease-out-expo);
+}
+
+#save-overlay.open .save-panel {
+  transform: translateY(0) scale(1);
+}
+
+/* Header */
+.save-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--c-border-default);
+}
+
+.save-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--c-text-primary);
+  letter-spacing: 0.5px;
+}
+
+.save-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.save-tab {
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-pill);
+  color: var(--c-text-secondary);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: all var(--duration-fast);
+}
+
+.save-tab:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--c-text-primary);
+}
+
+.save-tab.active {
+  background: var(--c-brand-glow);
+  color: var(--c-brand);
+  border-color: var(--c-brand);
+}
+
+.save-close-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--c-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast);
+}
+
+.save-close-btn:hover {
+  color: var(--c-text-error);
+  border-color: var(--c-state-error);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+/* ── Slot Grid ────────────────────────────── */
+.save-slots {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.save-slot {
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-expo);
+  position: relative;
+  overflow: hidden;
+}
+
+.save-slot:hover {
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.save-slot.selected {
+  border-color: var(--c-brand);
+  box-shadow: 0 0 0 1px var(--c-brand), var(--shadow-glow);
+}
+
+/* Slot thumbnail area */
+.save-slot-thumbnail {
+  width: 100%;
+  height: 100px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-base);
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--c-border-subtle);
+}
+
+.save-slot-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.save-slot-thumbnail .empty-icon {
+  color: var(--c-text-muted);
+  opacity: 0.3;
+}
+
+/* Slot info */
+.save-slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.save-slot-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--c-text-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.save-slot-label .slot-number {
+  color: var(--c-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+.save-slot-meta {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.save-slot-meta span::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--c-text-muted);
+  margin-right: var(--space-1);
+  vertical-align: middle;
+}
+
+.save-slot-meta span:first-child::before {
+  display: none;
+}
+
+/* Empty slot */
+.save-slot.empty .save-slot-label {
+  color: var(--c-text-muted);
+  font-weight: 400;
+}
+
+/* ── Footer Actions ───────────────────────── */
+.save-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--c-border-default);
+}
+
+.save-action-btn {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.save-action-btn.primary {
+  background: var(--c-brand);
+  color: var(--c-bg-base);
+  border: 1px solid var(--c-brand);
+}
+
+.save-action-btn.primary:hover {
+  filter: brightness(1.15);
+  box-shadow: var(--shadow-glow);
+}
+
+.save-action-btn.primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+}
+
+.save-action-btn.secondary {
+  background: transparent;
+  color: var(--c-text-secondary);
+  border: 1px solid var(--c-border-default);
+}
+
+.save-action-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--c-text-primary);
+}
+
+.save-action-btn.danger {
+  background: transparent;
+  color: var(--c-state-error);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.save-action-btn.danger:hover {
+  background: rgba(248, 113, 113, 0.08);
+  border-color: var(--c-state-error);
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+  .save-slots {
+    grid-template-columns: 1fr;
+    padding: var(--space-4);
+  }
+
+  .save-header, .save-footer {
+    padding: var(--space-4);
+  }
+}

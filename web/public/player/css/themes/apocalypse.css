@@ -1,0 +1,66 @@
+/* ================================================
+   apocalypse.css — Post-Apocalyptic Survival Theme
+   Military green tones, gritty wasteland feel
+   ================================================ */
+
+[data-genre="apocalypse"] {
+  --c-brand: #8D6E63;
+  --c-brand-light: #A1887F;
+  --c-brand-dark: #6D4C41;
+  --c-brand-glow: rgba(141, 110, 99, 0.2);
+  --c-brand-glow-strong: rgba(141, 110, 99, 0.4);
+
+  --c-bg-base: #080806;
+  --c-bg-surface: #12120e;
+  --c-bg-elevated: #1e1e16;
+  --c-bg-overlay: rgba(18, 18, 14, 0.85);
+
+  --c-text-primary: #d4d0c0;
+  --c-text-secondary: #8a8670;
+  --c-text-muted: #585646;
+
+  --c-border-default: rgba(141, 110, 99, 0.08);
+  --c-border-subtle: rgba(141, 110, 99, 0.04);
+  --c-border-brand: rgba(141, 110, 99, 0.15);
+
+  --glass-bg: rgba(18, 18, 14, 0.7);
+  --glass-bg-hover: rgba(30, 28, 22, 0.8);
+  --glass-border: rgba(141, 110, 99, 0.1);
+  --glass-border-hover: rgba(141, 110, 99, 0.22);
+
+  --shadow-glow: 0 0 30px rgba(141, 110, 99, 0.12);
+
+  --stat-color-1: #FF9800;
+  --stat-color-2: #4CAF50;
+  --stat-color-3: #F44336;
+  --stat-color-4: #9e9e9e;
+  --stat-color-5: #8D6E63;
+  --stat-color-6: #ff7043;
+
+  --atmo-glow-1: radial-gradient(ellipse 600px 400px at 30% 20%, rgba(141, 110, 99, 0.05) 0%, transparent 100%);
+  --atmo-glow-2: radial-gradient(ellipse 500px 400px at 70% 80%, rgba(255, 152, 0, 0.04) 0%, transparent 100%);
+  --atmo-glow-3: radial-gradient(ellipse 400px 500px at 90% 30%, rgba(158, 158, 158, 0.03) 0%, transparent 100%);
+}
+
+/* Ambient background with noise texture */
+[data-genre="apocalypse"] #game-root {
+  background-image:
+    var(--atmo-glow-1),
+    var(--atmo-glow-2),
+    var(--atmo-glow-3);
+}
+
+/* Scene viewport border glow */
+[data-genre="apocalypse"] #scene-viewport::after {
+  box-shadow: inset 0 0 40px rgba(141, 110, 99, 0.06), 0 0 20px rgba(141, 110, 99, 0.04);
+}
+
+/* Resource warning blink */
+[data-genre="apocalypse"] .resource-warning {
+  animation: resourceBlink 1s infinite;
+}
+
+@keyframes resourceBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

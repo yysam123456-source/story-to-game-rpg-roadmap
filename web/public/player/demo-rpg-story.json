@@ -1,0 +1,188 @@
+{
+  "meta": {
+    "title": "修仙入门试炼",
+    "genre": "xianxia",
+    "author": "RPG Demo",
+    "version": "1.0",
+    "rpg": {
+      "enabled": true,
+      "primaryStats": [
+        { "key": "realm", "label": "境界", "type": "text", "icon": "icon-star" },
+        { "key": "cultivation", "label": "修为", "type": "number", "icon": "icon-fire" },
+        { "key": "spiritual", "label": "灵力", "type": "bar", "max": 100, "icon": "icon-bolt" },
+        { "key": "mind", "label": "心境", "type": "bar", "maxKey": "maxMind", "icon": "icon-brain" },
+        { "key": "reputation", "label": "声望", "type": "number", "icon": "icon-crown" },
+        { "key": "hp", "label": "气血", "type": "bar", "maxKey": "maxHp", "icon": "icon-heart" }
+      ],
+      "hiddenStats": {
+        "karma": { "label": "因果", "type": "number" }
+      }
+    }
+  },
+  "initialState": {
+    "realm": "炼气期",
+    "cultivation": 10,
+    "spiritual": 50,
+    "mind": 30,
+    "maxMind": 50,
+    "reputation": 5,
+    "hp": 100,
+    "maxHp": 100,
+    "karma": 0
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "narrative",
+      "chapter": "第一章 · 初入仙门",
+      "text": "你站在青云宗的山门前，云雾缭绕间隐约可见亭台楼阁。一位白须老者缓缓走来，目光如炬地打量着你。\n\n\"年轻人，你可知修仙之路艰辛万分？前方无路可退，唯有一往无前。\"他说道。\n\n你深吸一口气，感受到体内微弱的灵气在流转。",
+      "choices": [
+        {
+          "text": "恭敬行礼，请求拜入宗门",
+          "weight": "branch",
+          "weightHint": "这将决定你在宗门中的地位起点",
+          "changes": {
+            "reputation": 5,
+            "mind": 3,
+            "show": true,
+            "feedback": { "style": "toast", "duration": 2500 }
+          },
+          "next": "gate_test"
+        },
+        {
+          "text": "展示自己修炼所得，证明资质",
+          "weight": "critical",
+          "weightHint": "高风险高回报的选择，可能影响后续剧情走向",
+          "condition": { "var": "cultivation", "op": ">=", "value": 10 },
+          "conditionDisplay": "disabled",
+          "changes": {
+            "cultivation": 3,
+            "spiritual": -10,
+            "show": true,
+            "feedback": { "style": "toast" }
+          },
+          "next": "gate_test"
+        },
+        {
+          "text": "询问关于修仙界的疑问",
+          "weight": "minor",
+          "changes": {
+            "mind": 5,
+            "show": true
+          },
+          "next": "gate_test"
+        },
+        {
+          "text": "默默观察四周环境",
+          "weight": "cosmetic",
+          "changes": {},
+          "next": "gate_test"
+        }
+      ]
+    },
+    {
+      "id": "gate_test",
+      "type": "narrative",
+      "chapter": "第一章 · 入门考验",
+      "text": "老者微微点头，示意你跟随他进入山门。穿过层层云雾，你们来到一处广场。广场中央矗立着一块巨大的测灵石，散发着淡淡的蓝光。\n\n\"将手放在测灵石上，让我看看你的资质。\"",
+      "choices": [
+        {
+          "text": "全力运转灵力，冲击测灵石",
+          "weight": "critical",
+          "condition": {
+            "all": [
+              { "var": "spiritual", "op": ">=", "value": 20 },
+              { "var": "mind", "op": ">=", "value": 20 }
+            ]
+          },
+          "conditionDisplay": "hide",
+          "changes": {
+            "cultivation": 10,
+            "spiritual": -20,
+            "hp": -5,
+            "show": true,
+            "feedback": { "style": "inline" }
+          },
+          "next": "inner_gate"
+        },
+        {
+          "text": "平稳输出灵力，保持稳定",
+          "weight": "branch",
+          "changes": {
+            "cultivation": 5,
+            "spiritual": -10,
+            "mind": 2,
+            "show": true
+          },
+          "next": "inner_gate"
+        },
+        {
+          "text": "先调整心态，再缓缓输入",
+          "weight": "minor",
+          "condition": { "var": "mind", "op": ">=", "value": 25 },
+          "conditionDisplay": "disabled",
+          "changes": {
+            "mind": 5,
+            "cultivation": 3,
+            "show": true
+          },
+          "next": "inner_gate"
+        }
+      ]
+    },
+    {
+      "id": "inner_gate",
+      "type": "narrative",
+      "chapter": "第一章 · 内门之路",
+      "text": "测灵石光芒大作，老者眼中闪过一丝惊讶。\n\n\"不错，资质尚可。从今日起，你便是我青云宗的外门弟子。\"\n\n你恭敬地接过弟子令牌，感受到上面流转的灵气。修仙之路，正式开启。",
+      "choices": [
+        {
+          "text": "前往藏经阁挑选功法",
+          "weight": "branch",
+          "changes": {
+            "cultivation": 2,
+            "show": true
+          },
+          "next": "end_chapter1"
+        },
+        {
+          "text": "先去弟子居所安顿",
+          "weight": "minor",
+          "changes": {
+            "mind": 3,
+            "hp": 10,
+            "show": true
+          },
+          "next": "end_chapter1"
+        }
+      ]
+    },
+    {
+      "id": "end_chapter1",
+      "type": "ending",
+      "chapter": "第一章 · 完",
+      "text": "夜幕降临，你站在居所窗前，望着满天星辰。修仙之路漫长而艰辛，但你的心中充满坚定。\n\n（第一章完）",
+      "candidateEndings": ["x_chapter1_complete"],
+      "choices": []
+    }
+  ],
+  "milestones": [
+    {
+      "id": "first_step",
+      "name": "踏入仙途",
+      "desc": "成为青云宗外门弟子",
+      "condition": { "flag": "joined_sect" },
+      "celebration": "small",
+      "once": true
+    }
+  ],
+  "endings": [
+    {
+      "id": "x_chapter1_complete",
+      "name": "初入仙门",
+      "desc": "成功拜入青云宗，开启修仙之路",
+      "type": "true",
+      "closing": "修仙之路，始于足下。"
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+/* ================================================
+   notifications.css — Notification System
+   Two types: stat-change (floating deltas) & text toast
+   ================================================ */
+
+/* ── Container ─────────────────────────────── */
+#notifications {
+  position: fixed;
+  top: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  pointer-events: none;
+  max-width: 320px;
+  width: 100%;
+}
+
+/* ── Type 1: Stat Change Card ──────────────── */
+.stat-change-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border-default);
+  pointer-events: auto;
+  animation: statCardIn var(--duration-slow) var(--ease-out-expo);
+  transition: opacity var(--duration-normal), transform var(--duration-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle top glow line */
+.stat-change-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+}
+
+.stat-change-card.positive::before {
+  background: linear-gradient(90deg, transparent, var(--c-state-success), transparent);
+  box-shadow: 0 0 12px var(--c-state-success);
+}
+
+.stat-change-card.negative::before {
+  background: linear-gradient(90deg, transparent, var(--c-state-error), transparent);
+  box-shadow: 0 0 12px var(--c-state-error);
+}
+
+/* Icon area */
+.stat-change-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-change-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stat-change-card.positive .stat-change-icon {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--c-state-success);
+}
+
+.stat-change-card.negative .stat-change-icon {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--c-state-error);
+}
+
+/* Text label */
+.stat-change-label {
+  font-size: var(--text-sm);
+  color: var(--c-text-secondary);
+  font-weight: 400;
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.3px;
+}
+
+/* Delta value */
+.stat-change-delta {
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  letter-spacing: -0.3px;
+}
+
+.stat-change-card.positive .stat-change-delta {
+  color: var(--c-state-success);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+}
+
+.stat-change-card.negative .stat-change-delta {
+  color: var(--c-state-error);
+  text-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+}
+
+/* ── Type 2: Text Toast ───────────────────── */
+.notification {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  pointer-events: auto;
+  animation: notifSlideIn var(--duration-slow) var(--ease-out-expo);
+  transition: opacity var(--duration-normal), transform var(--duration-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left accent strip */
+.notification::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+}
+
+.notification.positive::before { background: var(--c-state-success); }
+.notification.negative::before { background: var(--c-state-error); }
+.notification.neutral::before { background: var(--c-brand); }
+.notification.info::before { background: var(--c-state-info); }
+
+/* Notification icon */
+.notification-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.notification.positive .notification-icon {
+  background: rgba(74, 222, 128, 0.1);
+  color: var(--c-state-success);
+}
+
+.notification.negative .notification-icon {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--c-state-error);
+}
+
+.notification.neutral .notification-icon {
+  background: var(--c-brand-glow);
+  color: var(--c-brand);
+}
+
+.notification.info .notification-icon {
+  background: rgba(96, 165, 250, 0.1);
+  color: var(--c-state-info);
+}
+
+/* Notification content */
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-text {
+  font-size: var(--text-sm);
+  color: var(--c-text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Stack: older items fade ──────────────── */
+#notifications > *:nth-child(2) {
+  opacity: 0.7;
+  transform: scale(0.97);
+}
+
+#notifications > *:nth-child(3) {
+  opacity: 0.5;
+  transform: scale(0.94);
+}
+
+/* ── Exit animation ──────────────────────── */
+.notification.exiting,
+.stat-change-card.exiting {
+  opacity: 0;
+  transform: translateX(40px) scale(0.95);
+}
+
+/* ── Animations ──────────────────────────── */
+@keyframes notifSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes statCardIn {
+  0% {
+    opacity: 0;
+    transform: translateX(40px) scale(0.92);
+  }
+  60% {
+    transform: translateX(-4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+  #notifications {
+    top: var(--space-4);
+    right: var(--space-4);
+    left: var(--space-4);
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  #notifications {
+    right: var(--space-3);
+    left: var(--space-3);
+    top: auto;
+    bottom: var(--space-16);
+  }
+}

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>RPG Game UI V2 - Game Main</title>
+
+  <!-- Design Tokens -->
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <!-- Themes -->
+  <link rel="stylesheet" href="../css/themes/xianxia.css">
+  <link rel="stylesheet" href="../css/themes/horror.css">
+  <link rel="stylesheet" href="../css/themes/mystery.css">
+  <link rel="stylesheet" href="../css/themes/apocalypse.css">
+  <link rel="stylesheet" href="../css/themes/palace.css">
+  <!-- Components -->
+  <link rel="stylesheet" href="../css/components/scene-viewport.css">
+  <link rel="stylesheet" href="../css/components/status-bar.css">
+  <link rel="stylesheet" href="../css/components/narrative.css">
+  <link rel="stylesheet" href="../css/components/interactions.css">
+  <link rel="stylesheet" href="../css/components/inventory.css">
+  <link rel="stylesheet" href="../css/components/menu.css">
+  <link rel="stylesheet" href="../css/components/notifications.css">
+  <link rel="stylesheet" href="../css/components/chapter-nav.css">
+  <!-- VFX -->
+  <link rel="stylesheet" href="../css/vfx/shared.css">
+  <link rel="stylesheet" href="../css/vfx/xianxia-vfx.css">
+  <link rel="stylesheet" href="../css/vfx/horror-vfx.css">
+  <link rel="stylesheet" href="../css/vfx/mystery-vfx.css">
+  <link rel="stylesheet" href="../css/vfx/apocalypse-vfx.css">
+  <link rel="stylesheet" href="../css/vfx/palace-vfx.css">
+  <link rel="stylesheet" href="../css/components/portrait.css">
+  <link rel="stylesheet" href="../css/components/save-system.css">
+  <link rel="stylesheet" href="../css/components/achievements.css">
+  <link rel="stylesheet" href="../css/components/endings.css">
+  <!-- RPG Core Engine Extensions -->
+  <link rel="stylesheet" href="../css/components/rpg-extensions.css">
+  <!-- Story Import -->
+  <link rel="stylesheet" href="../css/components/story-import.css">
+</head>
+<body>
+
+<!-- SVG Icon Sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <defs>
+    <!-- Menu (hamburger) -->
+    <symbol id="icon-menu" viewBox="0 0 24 24">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </symbol>
+    <!-- Close (X) -->
+    <symbol id="icon-close" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+    <!-- Back (arrow left) -->
+    <symbol id="icon-back" viewBox="0 0 24 24">
+      <polyline points="15 18 9 12 15 6"/>
+    </symbol>
+    <!-- Box / Inventory -->
+    <symbol id="icon-box" viewBox="0 0 24 24">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+    </symbol>
+    <!-- Settings (gear) -->
+    <symbol id="icon-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </symbol>
+    <!-- Save (download) -->
+    <symbol id="icon-save" viewBox="0 0 24 24">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </symbol>
+    <!-- Load (folder open) -->
+    <symbol id="icon-folder" viewBox="0 0 24 24">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+    </symbol>
+    <!-- Meditate (person sitting) -->
+    <symbol id="icon-meditate" viewBox="0 0 24 24">
+      <circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 11h8"/><path d="M7 14c0 0 1 4 5 4s5-4 5-4"/><path d="M7 14v3M17 14v3"/>
+    </symbol>
+    <!-- Search (magnifying glass) -->
+    <symbol id="icon-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </symbol>
+    <!-- Sword (combat) -->
+    <symbol id="icon-sword" viewBox="0 0 24 24">
+      <line x1="4" y1="20" x2="20" y2="4"/><line x1="4" y1="16" x2="8" y2="20"/><line x1="14" y1="10" x2="10" y2="14"/>
+    </symbol>
+    <!-- Moon (rest) -->
+    <symbol id="icon-moon" viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </symbol>
+    <!-- Coin (shop) -->
+    <symbol id="icon-coin" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 7c-2.5 0-5 2.5-5 5s2.5 5 5 5"/>
+    </symbol>
+    <!-- Map (location marker) -->
+    <symbol id="icon-map" viewBox="0 0 24 24">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+    </symbol>
+    <!-- Person (character) -->
+    <symbol id="icon-person" viewBox="0 0 24 24">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </symbol>
+    <!-- Heart -->
+    <symbol id="icon-heart" viewBox="0 0 24 24">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </symbol>
+    <!-- Brain -->
+    <symbol id="icon-brain" viewBox="0 0 24 24">
+      <path d="M12 2a5 5 0 0 0-5 5c0 .9.24 1.74.66 2.47A4 4 0 0 0 5 13a4 4 0 0 0 3.47 3.97A5 5 0 0 0 12 22a5 5 0 0 0 3.53-5.03A4 4 0 0 0 19 13a4 4 0 0 0-2.66-3.53A5 5 0 0 0 17 7a5 5 0 0 0-5-5z"/>
+      <line x1="12" y1="2" x2="12" y2="22"/>
+    </symbol>
+    <!-- Star -->
+    <symbol id="icon-star" viewBox="0 0 24 24">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </symbol>
+    <!-- Eye -->
+    <symbol id="icon-eye" viewBox="0 0 24 24">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+    </symbol>
+    <!-- Eye off -->
+    <symbol id="icon-eye-off" viewBox="0 0 24 24">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+    </symbol>
+    <!-- Shield -->
+    <symbol id="icon-shield" viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </symbol>
+    <!-- Fire -->
+    <symbol id="icon-fire" viewBox="0 0 24 24">
+      <path d="M12 2c-4 4-8 7-8 12a8 8 0 0 0 16 0c0-5-4-8-8-12z"/>
+    </symbol>
+    <!-- Bolt -->
+    <symbol id="icon-bolt" viewBox="0 0 24 24">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+    </symbol>
+    <!-- Drop -->
+    <symbol id="icon-drop" viewBox="0 0 24 24">
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+    </symbol>
+    <!-- Compass -->
+    <symbol id="icon-compass" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+    </symbol>
+    <!-- Book -->
+    <symbol id="icon-book" viewBox="0 0 24 24">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </symbol>
+    <!-- Users -->
+    <symbol id="icon-users" viewBox="0 0 24 24">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </symbol>
+    <!-- Run -->
+    <symbol id="icon-run" viewBox="0 0 24 24">
+      <circle cx="14" cy="4" r="2"/><path d="M6 20l3-6"/><path d="M16 20l-2-6"/><path d="M9 14l5-2 2-4 3 2"/>
+    </symbol>
+    <!-- Ghost -->
+    <symbol id="icon-ghost" viewBox="0 0 24 24">
+      <path d="M12 2a7 7 0 0 0-7 7v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9a7 7 0 0 0-7-7z"/><line x1="9" y1="13" x2="9" y2="17"/><line x1="15" y1="13" x2="15" y2="17"/><path d="M7 22v-2M17 22v-2"/>
+    </symbol>
+    <!-- Puzzle -->
+    <symbol id="icon-puzzle" viewBox="0 0 24 24">
+      <path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 2.935c.447.168.855.501.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-2.933-3.214c.464-.18.894-.527.968-1.02a1.026 1.026 0 0 0-.29-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.315 8.685a.98.98 0 0 1 .837-.276c.47.07.802.48.968.925a2.501 2.501 0 1 0 3.214-2.935c-.447-.168-.855-.501-.925-.968a.979.979 0 0 1 .276-.837l1.61-1.61a2.404 2.404 0 0 1 1.705-.707c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.969a2.5 2.5 0 1 1 2.933 3.214c-.464.18-.894.527-.968 1.02z"/>
+    </symbol>
+    <!-- Bulb (intuition) -->
+    <symbol id="icon-bulb" viewBox="0 0 24 24">
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>
+    </symbol>
+    <!-- File -->
+    <symbol id="icon-file" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+    </symbol>
+    <!-- Bell -->
+    <symbol id="icon-bell" viewBox="0 0 24 24">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </symbol>
+    <!-- Crown -->
+    <symbol id="icon-crown" viewBox="0 0 24 24">
+      <polyline points="2 18 6 8 10 14 12 6 14 14 18 8 22 18"/><line x1="2" y1="22" x2="22" y2="22"/>
+    </symbol>
+    <!-- Food -->
+    <symbol id="icon-food" viewBox="0 0 24 24">
+      <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+    </symbol>
+    <!-- Chevron down -->
+    <symbol id="icon-chevron-down" viewBox="0 0 24 24">
+      <polyline points="6 9 12 15 18 9"/>
+    </symbol>
+    <!-- Image placeholder -->
+    <symbol id="icon-image" viewBox="0 0 24 24">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div id="game-root" data-genre="xianxia">
+
+  <!-- VFX Layer -->
+  <div id="vfx-layer" aria-hidden="true"></div>
+
+  <!-- Menu Toggle Button -->
+  <button id="menu-toggle" aria-label="打开菜单">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-menu"/></svg>
+  </button>
+
+  <!-- Menu Overlay -->
+  <div id="menu-overlay" aria-hidden="true" role="dialog" aria-label="游戏菜单">
+    <div class="menu-panel">
+      <div class="menu-header">
+        <h2>游戏菜单</h2>
+        <button id="menu-close" class="menu-close" aria-label="关闭菜单">
+          <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-close"/></svg>
+        </button>
+      </div>
+      <div class="menu-list">
+        <button class="menu-item" onclick="window.uiController._toggleInventory()" aria-label="背包">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-box"/></svg>
+          <span>背包</span>
+        </button>
+        <button class="menu-item" onclick="window.themeEngine.triggerChapterTransition(window.state ? window.state.genre : 'xianxia')" aria-label="章节过渡">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-map"/></svg>
+          <span>章节过渡</span>
+        </button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" onclick="window.audioSystem.toggleBGM()" aria-label="背景音乐">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-moon"/></svg>
+          <span>背景音乐</span>
+        </button>
+        <button class="menu-item" onclick="window.audioSystem.toggleSFX()" aria-label="音效">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-settings"/></svg>
+          <span>音效</span>
+        </button>
+        <div class="menu-divider"></div>
+        <button class="menu-item" onclick="document.body.classList.toggle('colorblind-mode')" aria-label="色盲模式">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-eye"/></svg>
+          <span>色盲辅助</span>
+        </button>
+        <button class="menu-item" onclick="window.uiController._closeMenu(); window.saveSystem.open('save')" aria-label="存档">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>存档</span>
+        </button>
+        <button class="menu-item" onclick="window.uiController._closeMenu(); window.saveSystem.open('load')" aria-label="读档">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          <span>读档</span>
+        </button>
+        <button class="menu-item" onclick="window.uiController._closeMenu(); window.achievementSystem.open()" aria-label="成就">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span>成就</span>
+        </button>
+        <button class="menu-item" onclick="window.uiController._closeMenu(); window.endingSystem.open()" aria-label="结局">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M16 8l-4 4-4-4"/></svg>
+          <span>结局</span>
+        </button>
+      </div>
+      <!-- Genre Switcher -->
+      <div style="margin-top:var(--space-6);padding-top:var(--space-4);border-top:1px solid var(--c-border-subtle)">
+        <div style="font-size:var(--text-xs);font-weight:var(--weight-semibold);color:var(--c-text-muted);text-transform:uppercase;letter-spacing:var(--letter-wider);margin-bottom:var(--space-3)">切换题材</div>
+        <div class="genre-switcher">
+          <button class="genre-pill" data-genre="xianxia">修仙</button>
+          <button class="genre-pill" data-genre="horror">恐怖</button>
+          <button class="genre-pill" data-genre="mystery">悬疑</button>
+          <button class="genre-pill" data-genre="apocalypse">末日</button>
+          <button class="genre-pill" data-genre="palace">宫斗</button>
+        </div>
+      </div>
+      <div class="menu-divider"></div>
+      <button class="menu-item" id="menu-import-story" aria-label="导入剧本">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        <span>导入剧本</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.rpgStoryLoader.loadFromUrl('../demo-rpg-story.json')" aria-label="加载RPG剧本">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>加载 Demo</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.themeEngine._testChapterTransition()" aria-label="测试转场">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        <span>测试转场动画</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.uiController._testInteractionFlow()" aria-label="测试交互">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>测试交互流程</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.uiController._testVFX()" aria-label="测试VFX">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>测试VFX特效</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.uiController._testNotifications()" aria-label="测试通知">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span>测试通知弹窗</span>
+      </button>
+      <div class="menu-footer">
+        <span class="version-text">RPG Game UI V2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main id="game-main">
+
+    <!-- Scene Viewport -->
+    <section id="scene-viewport" aria-label="场景图">
+      <div class="scene-placeholder">
+        <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-image"/></svg>
+      </div>
+      <div class="scene-label">
+        <span class="scene-tag">场景</span>
+        <span>初始位置</span>
+      </div>
+      <div id="genre-tag" class="genre-tag">修仙</div>
+    </section>
+
+    <!-- Status Bar -->
+    <section id="status-bar" aria-label="角色状态">
+      <div class="status-header">
+        <span id="status-title" class="status-title">修行状态</span>
+        <button id="status-toggle" class="status-toggle" aria-label="展开/收起状态栏">
+          <span>展开</span>
+          <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-chevron-down"/></svg>
+        </button>
+      </div>
+      <div id="status-mini" class="status-mini"></div>
+      <div id="status-full" class="status-full">
+        <div id="status-full-content" class="stat-grid"></div>
+      </div>
+    </section>
+
+    <!-- Narrative Area -->
+    <section id="narrative-area" aria-label="叙事区域">
+      <!-- Chapter Nav -->
+      <div id="chapter-nav" aria-label="章节进度"></div>
+
+      <!-- Chapter Indicator -->
+      <div class="chapter-indicator">
+        <svg class="chapter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-book"/></svg>
+        <span id="chapter-indicator-text" class="chapter-text">第一章 · 初入仙门</span>
+      </div>
+
+      <!-- Narrative Text -->
+      <div id="narrative-text" role="article">你站在青云宗的山门前，云雾缭绕间隐约可见亭台楼阁。一位白须老者缓缓走来，目光如炬地打量着你。
+
+"年轻人，你可知修仙之路艰辛万分？前方无路可退，唯有一往无前。"他说道。
+
+你深吸一口气，感受到体内微弱的灵气在流转。虽然刚踏上这条路，但你的心中充满坚定。</div>
+
+      <!-- Choices -->
+      <div id="choices-area" role="group" aria-label="剧情选项"></div>
+    </section>
+
+    <!-- Interactions -->
+    <section id="interactions-area" aria-label="交互操作">
+      <div class="interactions-label">交互</div>
+      <div id="interactions-grid" class="interactions-grid"></div>
+    </section>
+
+    <!-- Save/Load System -->
+    <div id="save-overlay">
+      <div class="save-panel">
+        <div class="save-header">
+          <div>
+            <div class="save-title">进度存档</div>
+          </div>
+          <div class="save-tabs">
+            <button class="save-tab active" data-tab="save">存档</button>
+            <button class="save-tab" data-tab="load">读档</button>
+          </div>
+          <button class="save-close-btn" id="save-close" aria-label="关闭">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="save-slots" id="save-slots-container"></div>
+        <div class="save-footer">
+          <button class="save-action-btn danger" onclick="window.saveSystem.deleteSave(window.saveSystem.selectedSlot)">删除存档</button>
+          <button class="save-action-btn secondary" onclick="window.saveSystem.close()">取消</button>
+          <button class="save-action-btn primary" id="save-confirm-btn" onclick="window.saveSystem[window.saveSystem.currentTab+'Game'](window.saveSystem.selectedSlot)">确认存档</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievement System -->
+    <div id="achievement-overlay">
+      <div class="achievement-panel">
+        <div class="achievement-header">
+          <div class="achievement-header-top">
+            <div class="achievement-title">成就</div>
+            <button class="save-close-btn" id="achievement-close" aria-label="关闭">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          <div class="achievement-summary">
+            <div class="achievement-count" id="achievement-unlocked-count">0</div>
+            <div>
+              <div class="achievement-count-label">已解锁</div>
+              <div class="achievement-progress">
+                <div class="achievement-progress-fill" id="achievement-progress-fill" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="achievement-count" id="achievement-total-count">0</div>
+            <div class="achievement-count-label">总数</div>
+          </div>
+        </div>
+        <div class="achievement-categories">
+          <button class="achievement-cat-tab active" data-cat="all">全部</button>
+          <button class="achievement-cat-tab" data-cat="cultivation">修炼</button>
+          <button class="achievement-cat-tab" data-cat="combat">战斗</button>
+          <button class="achievement-cat-tab" data-cat="detective">侦探</button>
+          <button class="achievement-cat-tab" data-cat="survival">生存</button>
+          <button class="achievement-cat-tab" data-cat="court">宫廷</button>
+          <button class="achievement-cat-tab" data-cat="intrigue">权谋</button>
+          <button class="achievement-cat-tab" data-cat="collection">收集</button>
+          <button class="achievement-cat-tab" data-cat="challenge">挑战</button>
+        </div>
+        <div class="achievement-list" id="achievement-list"></div>
+      </div>
+    </div>
+
+    <!-- Ending System -->
+    <div id="ending-overlay">
+      <div class="ending-panel">
+        <div class="ending-header">
+          <div class="ending-title">多结局</div>
+          <div class="ending-stats" id="ending-stats">已达成 <strong>0</strong> / 0 个结局</div>
+          <button class="save-close-btn" id="ending-close" aria-label="关闭">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="ending-list" id="ending-list"></div>
+        <div class="ending-footer">
+          <div class="ending-mini-tracker" id="ending-mini-tracker"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Inventory Toggle -->
+  <button id="inventory-toggle" aria-label="打开背包">
+    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-box"/></svg>
+    <span id="inv-badge" class="inv-badge">6</span>
+  </button>
+
+  <!-- Inventory Backdrop -->
+  <div id="inventory-backdrop"></div>
+
+  <!-- Inventory Panel -->
+  <aside id="inventory-panel" aria-hidden="true" aria-label="背包">
+    <div class="inventory-header">
+      <h2>背包</h2>
+      <button id="inventory-close" class="inventory-close" aria-label="关闭背包">
+        <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-close"/></svg>
+      </button>
+    </div>
+    <div class="inv-filter-tabs" id="inv-filter-tabs"></div>
+    <div id="inventory-content"></div>
+  </aside>
+
+  <!-- Notifications -->
+  <div id="notifications" aria-live="polite" aria-label="通知"></div>
+
+</div>
+
+<!-- Story Import Overlay -->
+<div id="story-import-overlay" class="hidden">
+  <div class="story-import-panel">
+    <div class="story-import-header">
+      <div class="story-import-title">
+        <svg class="import-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-book"/></svg>
+        <span>导入剧本</span>
+      </div>
+      <p class="story-import-desc">选择或拖拽一个 JSON 剧本文件开始游戏</p>
+    </div>
+    <div id="story-drop-zone" class="story-drop-zone">
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>拖拽 JSON 文件到此处</p>
+      <span>或</span>
+      <button id="story-file-picker-btn" class="story-file-picker-btn">选择文件</button>
+      <input type="file" id="story-file-input" accept=".json" style="display:none">
+    </div>
+    <div id="story-import-status" class="story-import-status" style="display:none"></div>
+    <div class="story-import-actions">
+      <button id="story-import-cancel" class="story-import-cancel-btn">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Story Mode Indicator -->
+<div id="story-mode-indicator" class="story-mode-indicator" style="display:none">
+  <span id="story-mode-text"></span>
+  <button id="story-change-btn" class="story-change-btn">更换剧本</button>
+</div>
+
+<!-- Scripts -->
+<script src="../js/portrait.js"></script>
+<script src="../js/save-system.js"></script>
+<script src="../js/achievements.js"></script>
+<script src="../js/endings.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/state.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/vfx.js"></script>
+<script src="../js/audio.js"></script>
+<script src="../js/ui.js"></script>
+<!-- RPG Core Engine -->
+<script src="../js/rpg-core.js"></script>
+<script src="../js/rpg-status-bar.js"></script>
+<script src="../js/rpg-choice.js"></script>
+<script src="../js/rpg-story-loader.js"></script>
+<script>
+  // Bootstrap
+  document.addEventListener('DOMContentLoaded', function () {
+    // Create system instances
+    window.state = new window.GameState('xianxia');
+    window.audioSystem = new window.AudioSystem();
+    window.vfxEngine = new window.VFXEngine();
+    window.themeEngine = new window.ThemeEngine();
+    window.uiController = new window.UIController();
+    window.portraitSystem = new window.PortraitSystem();
+    window.saveSystem = new window.SaveSystem();
+    window.achievementSystem = new window.AchievementSystem();
+    window.endingSystem = new window.EndingSystem();
+
+    // Create RPG engine instances
+    window.rpgCore = new window.RPGCore();
+    window.rpgStatusBar = new window.RPGStatusBar(window.rpgCore, window.state);
+    window.rpgChoiceRenderer = new window.RPGChoiceRenderer(window.rpgCore, window.state, window.uiController);
+    window.rpgStoryLoader = new window.RPGStoryLoader(window.rpgCore, window.state, window.themeEngine, window.uiController);
+
+    // Connect state listeners to UI
+    window.uiController.connectStateListeners();
+
+    // Initialize UI bindings
+    window.uiController.init();
+    window.portraitSystem.init();
+    window.saveSystem.init();
+    window.achievementSystem.init();
+    window.endingSystem.init();
+
+    // Initialize story import UI
+    window.RPGStoryLoader.initImportUI(window.rpgStoryLoader);
+
+    // Bind menu import button
+    document.getElementById('menu-import-story').addEventListener('click', function () {
+      window.uiController._closeMenu();
+      window.RPGStoryLoader.showImportOverlay();
+    });
+
+    // Auto-load from URL parameter: ?story=work_id
+    var urlParams = new URLSearchParams(window.location.search);
+    var storyId = urlParams.get('story');
+    if (storyId) {
+      // Hide import UI since we're loading directly
+      var importOverlay = document.getElementById('story-import-overlay');
+      if (importOverlay) importOverlay.classList.add('hidden');
+
+      // Fetch from platform API
+      fetch('../../api/works/' + storyId + '?format=script')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.success && data.data) {
+            window.rpgStoryLoader.load(data.data);
+          } else {
+            console.error('Failed to load story:', data.error);
+            window.themeEngine.switchGenre('xianxia');
+          }
+        })
+        .catch(function(err) {
+          console.error('Error loading story:', err);
+          window.themeEngine.switchGenre('xianxia');
+        });
+    } else {
+      // Load default genre (xianxia) — legacy demo mode
+      window.themeEngine.switchGenre('xianxia');
+    }
+  });
+</script>
+
+</body>
+</html>

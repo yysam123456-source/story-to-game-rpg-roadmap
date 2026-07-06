@@ -1,0 +1,118 @@
+/* ================================================
+   tokens.css — Design Token System
+   RPG Game UI V2 | Next-Gen Game Style
+   ================================================ */
+
+:root {
+  /* ── Colour System ─────────────────────── */
+  --c-bg-base: #08080e;
+  --c-bg-surface: #111118;
+  --c-bg-elevated: #1a1a24;
+  --c-bg-overlay: rgba(17, 17, 24, 0.85);
+
+  --c-text-primary: #e8e8f2;
+  --c-text-secondary: #8888a0;
+  --c-text-muted: #55556a;
+  --c-text-accent: var(--c-brand);
+
+  --c-brand: #c9a86c;
+  --c-brand-light: #e2cc9e;
+  --c-brand-dark: #a8874a;
+  --c-brand-glow: rgba(201, 168, 108, 0.2);
+  --c-brand-glow-strong: rgba(201, 168, 108, 0.4);
+
+  --c-state-success: #4ade80;
+  --c-state-warning: #fbbf24;
+  --c-state-error: #f87171;
+  --c-state-info: #60a5fa;
+
+  --c-border-default: rgba(255, 255, 255, 0.06);
+  --c-border-subtle: rgba(255, 255, 255, 0.03);
+  --c-border-brand: rgba(201, 168, 108, 0.15);
+
+  /* ── Glassmorphism System ───────────────── */
+  --glass-bg: rgba(17, 17, 24, 0.7);
+  --glass-bg-hover: rgba(26, 26, 36, 0.8);
+  --glass-blur: 20px;
+  --glass-blur-heavy: 28px;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* ── Shadow System ───────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 30px var(--c-brand-glow);
+  --shadow-glow-strong: 0 0 50px var(--c-brand-glow-strong);
+
+  /* ── Border Radius ────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 9999px;
+
+  /* ── Typography ───────────────────────────── */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "Georgia", "Noto Serif SC", "STSong", serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Fira Code", "Menlo", monospace;
+
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+  --text-2xl: 28px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+  --leading-narrative: 1.85;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --letter-tight: -0.02em;
+  --letter-normal: 0;
+  --letter-wide: 0.05em;
+  --letter-wider: 0.1em;
+
+  /* ── Spacing ─────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Animation ────────────────────────────── */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* ── Z-Index Layers ──────────────────────── */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-vfx: 9998;
+  --z-transition: 9999;
+  --z-accessibility: 99999;
+}

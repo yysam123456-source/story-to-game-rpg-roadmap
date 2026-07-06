@@ -2,39 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { StoryScript } from '@/types';
-import { StoryPlayer } from '@/components/player/story-player';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function PlayPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [script, setScript] = useState<StoryScript | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Verify work exists before showing iframe
   useEffect(() => {
     if (!id) return;
 
-    async function loadScript() {
+    async function verifyWork() {
       try {
-        setLoading(true);
-        const res = await fetch(`/api/works/${id}?format=script`);
+        const res = await fetch(`/api/works/${id}?format=meta`);
         const data = await res.json();
-        if (data.success) {
-          setScript(data.data);
-        } else {
-          setError(data.error || '加载失败');
+        if (!data.success) {
+          setError(data.error || '作品不存在');
         }
       } catch {
-        setError('网络错误');
+        setError('网络错误，无法验证作品');
       } finally {
         setLoading(false);
       }
     }
 
-    loadScript();
+    verifyWork();
   }, [id]);
 
   if (loading) {
@@ -57,17 +52,14 @@ export default function PlayPage() {
     );
   }
 
-  if (!script) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0a0a0c] to-[#12121a] flex items-center justify-center">
-        <p className="text-muted-foreground">作品不存在</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a0a0c] to-[#12121a] px-4 py-8">
-      <StoryPlayer script={script} />
+    <div className="h-[calc(100vh-64px)] bg-[#0a0a0c]">
+      <iframe
+        src={`/player/pages/game-main.html?story=${id}`}
+        className="w-full h-full border-0"
+        title="Story Player"
+        allow="autoplay"
+      />
     </div>
   );
 }
