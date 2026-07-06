@@ -1,0 +1,18 @@
+{
+  "name": "RPG游戏UI V2",
+  "version": "1.0.0",
+  "config": {
+    "canvasWidth": 900,
+    "canvasHeight": 1600
+  },
+  "data": [
+    {
+      "id": "page-game-main",
+      "type": "page",
+      "title": "游戏主界面",
+      "devMetadata": {
+        "htmlSrc": "pages/game-main.html"
+      }
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+/* ================================================
+   palace-vfx.css — Petal Fall & Curtain Sweep
+   Elegant, opulent atmosphere
+   ================================================ */
+
+/* Falling petals */
+[data-genre="palace"] .vfx-petal {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, rgba(249, 168, 212, 0.8), rgba(249, 168, 212, 0));
+  border-radius: 50% 0 50% 50%;
+  animation: petalFall 5s ease-in-out forwards;
+}
+
+@keyframes petalFall {
+  0% {
+    transform: translateY(-20px) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(25vh) translateX(30px) rotate(72deg);
+  }
+  60% {
+    transform: translateY(50vh) translateX(-20px) rotate(144deg);
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(100vh) translateX(10px) rotate(216deg);
+    opacity: 0;
+  }
+}
+
+/* Curtain sweep for transitions */
+[data-genre="palace"] .vfx-curtain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-transition);
+  animation: curtainOpen 1.5s ease-in-out forwards;
+}
+
+/* Gold sparkle particles */
+[data-genre="palace"] .vfx-sparkle {
+  width: 3px;
+  height: 3px;
+  background: rgba(255, 215, 0, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+  animation: sparkleFloat 3s ease-in-out infinite;
+}
+
+@keyframes sparkleFloat {
+  0% {
+    transform: translateY(0) scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-10px) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-50px) scale(0.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-80px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Silk banner wave */
+[data-genre="palace"] .vfx-silk-wave {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  pointer-events: none;
+  z-index: calc(var(--z-vfx) + 1);
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(219, 39, 119, 0.3),
+    rgba(255, 215, 0, 0.2),
+    rgba(219, 39, 119, 0.3),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: silkWave 3s ease-in-out infinite;
+}
+
+@keyframes silkWave {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

@@ -1,0 +1,53 @@
+/* ================================================
+   xianxia-vfx.css — Qi Particles & Realm Breakthrough
+   Ethereal floating spirit energy
+   ================================================ */
+
+[data-genre="xianxia"] .vfx-qi-particle {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, rgba(127, 211, 252, 0.9) 0%, rgba(127, 211, 252, 0) 70%);
+  box-shadow: 0 0 12px rgba(127, 211, 252, 0.4);
+  animation: qiFloat 4s ease-in-out infinite;
+}
+
+@keyframes qiFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-40vh) translateX(20px) scale(0.8);
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-80vh) translateX(-10px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* Realm breakthrough flash */
+[data-genre="xianxia"] .vfx-breakthrough {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-transition);
+  background: radial-gradient(circle at center,
+    rgba(201, 168, 108, 0) 0%,
+    rgba(201, 168, 108, 0.6) 40%,
+    rgba(201, 168, 108, 0) 100%
+  );
+  animation: breakthroughFlash 1.5s ease-out forwards;
+}
+
+@keyframes breakthroughFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  30% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(2); }
+}

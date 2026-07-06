@@ -1,0 +1,84 @@
+/* ================================================
+   horror-vfx.css — Blood Drips, Scanlines, Screen Shake
+   Oppressive, unsettling atmosphere
+   ================================================ */
+
+/* Blood drip particles */
+[data-genre="horror"] .vfx-blood-drop {
+  width: 4px;
+  height: 8px;
+  background: linear-gradient(to bottom, rgba(153, 27, 27, 0.8), rgba(153, 27, 27, 0));
+  border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+  animation: bloodDrip 3s ease-in forwards;
+}
+
+@keyframes bloodDrip {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+/* Screen shake */
+[data-genre="horror"].screen-shake #game-root {
+  animation: screenShake 0.3s ease-in-out;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3px, 1px); }
+  20% { transform: translate(2px, -2px); }
+  30% { transform: translate(-1px, 3px); }
+  40% { transform: translate(3px, -1px); }
+  50% { transform: translate(-2px, 2px); }
+  60% { transform: translate(1px, -3px); }
+  70% { transform: translate(-3px, 1px); }
+  80% { transform: translate(2px, 2px); }
+  90% { transform: translate(-1px, -1px); }
+}
+
+/* Scanline overlay */
+[data-genre="horror"] .vfx-scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: calc(var(--z-vfx) + 1);
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(220, 38, 38, 0.02) 2px,
+    rgba(220, 38, 38, 0.02) 4px
+  );
+  animation: scanlineScroll 8s linear infinite;
+}
+
+@keyframes scanlineScroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 100vh; }
+}
+
+/* Jump scare flash */
+[data-genre="horror"] .vfx-scare-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-transition);
+  background: rgba(220, 38, 38, 0.15);
+  animation: scareFlash 0.2s ease-out forwards;
+}
+
+@keyframes scareFlash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

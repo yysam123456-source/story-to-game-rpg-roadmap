@@ -64,6 +64,23 @@ story-to-game-source/
 ├── SKILL.md
 ├── references/
 └── scripts/
+
+rpg-game-ui-v2/                    # UI 原型（5 种题材主题、VFX、状态栏、交互系统）
+├── index.html
+├── UI-DESIGN-SPEC.md
+├── css/
+│   ├── base.css
+│   ├── tokens.css                 # Design Tokens
+│   ├── themes/                    # 5 种题材主题
+│   └── vfx/                       # 视觉特效
+├── js/
+│   ├── state.js                   # 游戏状态管理
+│   ├── theme.js                   # 主题切换引擎
+│   ├── ui.js                      # UI 控制器
+│   ├── vfx.js                     # 视觉特效引擎
+│   └── ...                        # 其他模块
+└── pages/
+    └── game-main.html
 ```
 
 开发原则：

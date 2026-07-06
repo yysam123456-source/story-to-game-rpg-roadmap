@@ -1,0 +1,152 @@
+/* ================================================
+   interactions.css — Interaction Button Grid
+   Secondary actions with dashed borders
+   ================================================ */
+
+#interactions-area {
+  margin-bottom: var(--space-6);
+}
+
+.interactions-label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--c-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-wider);
+  margin-bottom: var(--space-3);
+}
+
+.interactions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+
+/* Interaction button — dashed border, no glassmorphism */
+.interaction-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--c-border-default);
+  background: transparent;
+  color: var(--c-text-secondary);
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out-expo);
+  min-height: 72px;
+}
+
+.interaction-btn .btn-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--c-brand);
+  opacity: 0.7;
+  transition: opacity var(--duration-fast), transform var(--duration-normal);
+}
+
+.interaction-btn .btn-label {
+  font-weight: var(--weight-medium);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Hover — dashed to solid, slight move */
+.interaction-btn:hover {
+  border-style: solid;
+  border-color: var(--c-border-brand);
+  color: var(--c-text-primary);
+  background: rgba(255, 255, 255, 0.02);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.interaction-btn:hover .btn-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Focus */
+.interaction-btn:focus-visible {
+  border-style: solid;
+  border-color: var(--c-brand);
+}
+
+/* Active / press */
+.interaction-btn:active {
+  transform: translateY(0);
+  transition-duration: var(--duration-fast);
+}
+
+/* Disabled state */
+.interaction-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-style: dotted;
+  color: var(--c-text-muted);
+  transform: none;
+  filter: grayscale(0.6);
+}
+
+.interaction-btn:disabled:hover {
+  border-style: dotted;
+  border-color: var(--c-border-default);
+  transform: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .interactions-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: var(--space-2);
+  }
+  .interaction-btn {
+    padding: var(--space-3) var(--space-2);
+    min-height: 64px;
+  }
+  .interaction-btn .btn-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .interaction-btn .btn-label {
+    font-size: var(--text-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .interactions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── Exploring State ────────────────── */
+.interaction-btn.exploring {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.interaction-btn.exploring .btn-label.exploring {
+  position: relative;
+}
+
+.interaction-btn.exploring .btn-label.exploring::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: var(--space-2);
+  border: 2px solid var(--c-brand);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spinLoader 0.8s linear infinite;
+}
+
+@keyframes spinLoader {
+  to { transform: rotate(360deg); }
+}

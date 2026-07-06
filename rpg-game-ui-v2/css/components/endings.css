@@ -1,0 +1,286 @@
+/* ================================================
+   endings.css — Multi-Ending Indicator System
+   Shows possible endings, current progress, unlocked status
+   ================================================ */
+
+/* ── Ending Tracker Panel ─────────────────── */
+#ending-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-out-expo);
+}
+
+#ending-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ending-panel {
+  background: var(--c-bg-surface);
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-xl);
+  width: 560px;
+  max-width: 92vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  transform: translateY(20px) scale(0.97);
+  transition: transform var(--duration-slow) var(--ease-out-expo);
+}
+
+#ending-overlay.open .ending-panel {
+  transform: translateY(0) scale(1);
+}
+
+/* Header */
+.ending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--c-border-default);
+}
+
+.ending-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--c-text-primary);
+}
+
+.ending-stats {
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+}
+
+.ending-stats strong {
+  color: var(--c-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Ending List ──────────────────────────── */
+.ending-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Single ending item */
+.ending-item {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border-default);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.ending-item:hover {
+  border-color: var(--glass-border-hover);
+}
+
+/* Left status indicator */
+.ending-status-dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid var(--c-border-default);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ending-status-dot svg {
+  width: 20px;
+  height: 20px;
+  color: var(--c-text-muted);
+  opacity: 0.3;
+}
+
+/* Unlocked ending */
+.ending-item.unlocked .ending-status-dot {
+  border-color: var(--c-brand);
+  background: var(--c-brand-glow);
+  box-shadow: 0 0 20px var(--c-brand-glow);
+}
+
+.ending-item.unlocked .ending-status-dot svg {
+  color: var(--c-brand);
+  opacity: 1;
+}
+
+/* Current ending in progress */
+.ending-status-dot.current {
+  border-color: var(--c-brand-dark);
+  animation: endingDotPulse 2s ease infinite;
+}
+
+@keyframes endingDotPulse {
+  0%, 100% { box-shadow: 0 0 4px var(--c-brand-glow); }
+  50% { box-shadow: 0 0 14px var(--c-brand-glow); }
+}
+
+/* Hidden ending (not discovered yet) */
+.ending-item.hidden .ending-status-dot {
+  border-style: dashed;
+}
+
+.ending-item.hidden .ending-status-dot svg {
+  color: var(--c-text-muted);
+  opacity: 0.15;
+}
+
+/* Ending info */
+.ending-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ending-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--c-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.ending-item.hidden .ending-name {
+  color: var(--c-text-muted);
+  font-style: italic;
+}
+
+.ending-desc {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-2);
+}
+
+.ending-item.hidden .ending-desc {
+  filter: blur(4px);
+  user-select: none;
+}
+
+/* Ending tags */
+.ending-tags {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.ending-tag {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.3px;
+}
+
+.ending-tag.type {
+  color: var(--c-brand);
+  background: var(--c-brand-glow);
+}
+
+.ending-tag.type.true-ending {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.ending-tag.type.dark-ending {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.ending-tag.type.romance-ending {
+  color: #f472b6;
+  background: rgba(244, 114, 182, 0.1);
+}
+
+.ending-tag.type.neutral-ending {
+  color: var(--c-text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ending-tag.type.noble-ending {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+}
+
+.ending-tag.type.hidden-ending {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1);
+}
+
+.ending-tag.hidden-tag {
+  color: var(--c-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ending-tag.unlock-hint {
+  color: var(--c-state-info);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+/* ── Mini Ending Tracker (in menu/sidebar) ── */
+.ending-mini-tracker {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.ending-mini-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-border-default);
+  border: 1px solid var(--c-border-subtle);
+  transition: all var(--duration-fast);
+}
+
+.ending-mini-dot.unlocked {
+  background: var(--c-brand);
+  border-color: var(--c-brand);
+  box-shadow: 0 0 6px var(--c-brand-glow);
+}
+
+.ending-mini-dot.current {
+  background: var(--c-brand-dark);
+  border-color: var(--c-brand);
+  animation: endingPulse 2s ease infinite;
+}
+
+@keyframes endingPulse {
+  0%, 100% { box-shadow: 0 0 4px var(--c-brand-glow); }
+  50% { box-shadow: 0 0 12px var(--c-brand-glow); }
+}
+
+/* ── Footer ───────────────────────────────── */
+.ending-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--c-border-subtle);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 768px) {
+  .ending-list {
+    padding: var(--space-4);
+  }
+}
