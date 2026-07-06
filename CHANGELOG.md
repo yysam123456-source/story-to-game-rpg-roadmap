@@ -16,6 +16,36 @@
 
 ---
 
+## [1.2.0] - 2026-07-06
+
+### 新增
+- `SCHEMA_v1.md`：新增 endings[].closing 字段定义、milestones[].once 字段定义
+- `validate.py`：新增 RPG-014 ~ RPG-018 共 5 条校验规则（endings.type 枚举、milestones.celebration 枚举、interaction.depth 枚举、condition var 引用检查、hiddenStats 引用检查）
+- `GENRE_TEMPLATES.md`：新增全局"安全屋章节设计"章节（去重，从 5 个类型模板中提取）
+
+### 改进
+- `v2-PRD.md`：P0-7 校验规则改为引用 `SCHEMA_v1.md` 第 16 节，消除与 validate.py 的编号冲突
+- `v2-PRD.md`：`meta.rpg.enabled` 从"必填"改为"可选，默认 false"
+- `json-format-spec.md`：旧 `isEnding` 节点内结局标注为兼容保留，推荐顶层 `endings[]` + `candidateEndings`
+- `json-format-spec.md`：新增 condition.interaction 条件类型示例
+- `step4-system.md`：统一结局类型命名为小写（`failure`/`true`/`dark`/`neutral`/`hidden`/`noble`）
+- `step4-system.md`：补充 closing 字段说明并引用 `SCHEMA_v1.md`
+- `README.md`：新增 `SCHEMA_v1.md` 入口链接、修复目录结构描述、修复启动器文件名
+
+### 修复
+- **17 个跨引用不一致问题**：规则数量 13→18 的同步（7 个文件）、结局类型全大写→小写（6 个文件，29 处替换）
+- `SCHEMA_v1.md`：删除 `mode` 字段重复行
+- `剧情游戏启动器_开发者调试版.html`：内嵌示例数据中结局类型同步为小写
+- `测试案例-成人日.json`：结局类型同步为小写
+- `JSON剧本规则文档.md`：结局类型同步为小写
+- `SKILL.md`：结局类型同步为小写
+- `step5-writing.md`：RASH ENDING → failure
+
+### 关闭
+- GitHub Issue #9：validate.py 增强已完成（RPG-001 ~ RPG-018）
+
+---
+
 ## [1.1.0] - 2026-07-04
 
 ### 新增
