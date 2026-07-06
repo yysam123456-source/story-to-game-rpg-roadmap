@@ -66,10 +66,28 @@ export const AI_PROVIDERS = {
   },
 };
 
-function buildSystemPrompt(genre: string, enableRPG: boolean): string {
+function buildSystemPrompt(genre: string, enableRPG: boolean, rules?: Record<string, unknown>): string {
   const rpgHint = enableRPG
     ? `\n\n【RPG 模式已启用】\n请在 meta.rpg 中配置 primaryStats（最多5个可见数值），并在选项 changes 中设计数值变动。参考类型模板：修仙作品推荐配置境界、修为、灵力、心境、气血。`
     : '';
+
+  let rulesHint = '';
+  if (rules) {
+    const parts = [];
+    if (rules.pacing) parts.push(`节奏密度：${rules.pacing === 'compact' ? '紧凑（每2-3句一个选择）' : rules.pacing === 'relaxed' ? '舒缓（每7-10句一个选择）' : '适中（每4-6句一个选择）'}`);
+    if (rules.choiceStyle) parts.push(`选项风格：${rules.choiceStyle === 'direct' ? '直接台词' : rules.choiceStyle === 'inner_monologue' ? '内心独白' : '行动描述'}`);
+    if (rules.statImpact) parts.push(`数值影响强度：${rules.statImpact === 'light' ? '轻度' : rules.statImpact === 'heavy' ? '重度' : '中度'}`);
+    if (rules.hiddenContentRatio) parts.push(`隐藏内容比例：${rules.hiddenContentRatio === 'low' ? '少' : rules.hiddenContentRatio === 'high' ? '多' : '中'}`);
+    if (rules.endingBias) parts.push(`结局倾向：${rules.endingBias === 'heavy' ? 'HE偏多' : rules.endingBias === 'dark' ? 'BE偏多' : rules.endingBias === 'random' ? '随机' : '均衡'}`);
+    if (rules.narrativePerson) parts.push(`叙事人称：${rules.narrativePerson === 'first' ? '第一人称"我"' : '第二人称"你"'}`);
+    if (rules.dialogueDensity) parts.push(`对白密度：${rules.dialogueDensity === 'low' ? '低（重叙述）' : rules.dialogueDensity === 'high' ? '高（重对话）' : '中'}`);
+    if (rules.informationAsymmetry) parts.push('信息不对称：启用（玩家与角色知道的信息不同）');
+    if (rules.timePressure) parts.push('时间压力：启用（加入倒计时或时限机制）');
+    if (rules.npcRelations) parts.push('NPC关系网络：启用（设计可变化的好感度系统）');
+    if (parts.length > 0) {
+      rulesHint = '\n\n【创作者自定义规则】\n' + parts.join('\n');
+    }
+  }
 
   return `你是一个专业的互动叙事游戏编剧。你的任务是将用户提供的小说文本改写为符合「分支剧情游戏启动器」格式的 JSON 剧本。
 
@@ -80,7 +98,7 @@ function buildSystemPrompt(genre: string, enableRPG: boolean): string {
 4. choices 的 targetNodeId 必须指向存在的节点
 5. 选项必须自然、有叙事意义，不是简单的"是/否"
 6. 支持条件分支：choice.condition 使用 {variable, operator, value} 格式
-7. 支持数值变化：choice.changes 使用 {variable, value, show?} 格式${rpgHint}
+7. 支持数值变化：choice.changes 使用 {variable, value, show?} 格式${rpgHint}${rulesHint}
 
 当前类型：${genre}
 
@@ -91,12 +109,21 @@ function buildUserPrompt(
   novelText: string,
   genre: string,
   enableRPG: boolean,
-  title?: string
+  title?: string,
+  rules?: Record<string, unknown>
 ): string {
   const titleHint = title ? `\n作品标题：${title}` : '';
   const rpgHint = enableRPG ? '\n请启用 RPG 数值系统，设计符合该类型的主状态值。' : '';
+  let rulesHint = '';
+  if (rules) {
+    if (rules.timePressure) rulesHint += '\n- 加入时间压力机制：设置倒计时或时限节点';
+    if (rules.npcRelations) rulesHint += '\n- 设计 NPC 关系网络：至少3个有名字的角色，带好感度变化';
+    if (rules.informationAsymmetry) rulesHint += '\n- 信息不对称：设计角色知道但玩家不知道的隐藏信息';
+    if (rules.pacing === 'compact') rulesHint += '\n- 节奏紧凑：每2-3句就给一个选择';
+    if (rules.pacing === 'relaxed') rulesHint += '\n- 节奏舒缓：充分叙述后再给选择';
+  }
 
-  return `请将以下小说文本改写为互动叙事游戏剧本。${titleHint}\n类型：${genre}${rpgHint}\n\n小说文本：\n\n${novelText}\n\n要求：\n1. 生成 40-80 个节点\n2. 3-5 个不同结局\n3. 5-10 个成就\n4. 每 1-5 句正文给玩家一次选择\n5. 直接输出纯 JSON，不要 markdown`;
+  return `请将以下小说文本改写为互动叙事游戏剧本。${titleHint}\n类型：${genre}${rpgHint}${rulesHint}\n\n小说文本：\n\n${novelText}\n\n要求：\n1. 生成 40-80 个节点\n2. 3-5 个不同结局\n3. 5-10 个成就\n4. 每 1-5 句正文给玩家一次选择\n5. 直接输出纯 JSON，不要 markdown`;
 }
 
 /**
@@ -107,10 +134,11 @@ export async function* generateStoryStream(
   novelText: string,
   genre: string,
   enableRPG: boolean,
-  title?: string
+  title?: string,
+  rules?: Record<string, unknown>
 ): AsyncGenerator<AIStreamResponse> {
-  const systemPrompt = buildSystemPrompt(genre, enableRPG);
-  const userPrompt = buildUserPrompt(novelText, genre, enableRPG, title);
+  const systemPrompt = buildSystemPrompt(genre, enableRPG, rules);
+  const userPrompt = buildUserPrompt(novelText, genre, enableRPG, title, rules);
 
   const response = await fetch(`${API_BASE}/chat/completions`, {
     method: 'POST',
@@ -179,10 +207,11 @@ export async function generateStory(
   novelText: string,
   genre: string,
   enableRPG: boolean,
-  title?: string
+  title?: string,
+  rules?: Record<string, unknown>
 ): Promise<string> {
-  const systemPrompt = buildSystemPrompt(genre, enableRPG);
-  const userPrompt = buildUserPrompt(novelText, genre, enableRPG, title);
+  const systemPrompt = buildSystemPrompt(genre, enableRPG, rules);
+  const userPrompt = buildUserPrompt(novelText, genre, enableRPG, title, rules);
 
   const response = await fetch(`${API_BASE}/chat/completions`, {
     method: 'POST',

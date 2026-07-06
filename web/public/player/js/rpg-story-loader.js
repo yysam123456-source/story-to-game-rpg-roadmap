@@ -14,6 +14,9 @@ window.RPGStoryLoader = class RPGStoryLoader {
     this.story = null;
     this.currentNodeId = null;
     this.isStoryMode = false; // true = loaded a story script, false = legacy demo mode
+    this._countdownTimer = null;
+    this._countdownValue = 0;
+    this._countdownWarningShown = false;
   }
 
   /* ================================================================
@@ -71,6 +74,19 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
 
+    // Initialize NPC affinities
+    if (storyJson.npcRelations) {
+      this.state.npcAffinities = {};
+      for (const npc of storyJson.npcRelations) {
+        this.state.npcAffinities[npc.id] = npc.initialAffinity || 0;
+      }
+    }
+
+    // Initialize time pressure
+    if (storyJson.timePressure) {
+      this._initTimePressure(storyJson.timePressure);
+    }
+
     // Set genre from meta
     if (storyJson.meta.genre) {
       this.state.genre = storyJson.meta.genre;
@@ -114,6 +130,12 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
     // Check milestones
     this._checkMilestones(node);
+
+    // Check auto-unlock achievements
+    this._checkAutoUnlockAchievements();
+
+    // Check time pressure consequences
+    this._checkTimePressure(node);
 
     // Check endings
     if (node.type === 'ending' || (node.choices && node.choices.length === 0 && node.candidateEndings)) {
@@ -498,5 +520,142 @@ window.RPGStoryLoader = class RPGStoryLoader {
   // Listen for parent messages
   _initParentListener() {
     window.addEventListener('message', this._onParentMessage.bind(this));
+  }
+
+  /* ================================================================
+   * 9. Time Pressure System
+   * ================================================================ */
+
+  _initTimePressure(config) {
+    if (!config || !config.enabled) return;
+    this._timePressureConfig = config;
+    this._countdownValue = config.countdown || 0;
+    this._countdownWarningShown = false;
+
+    if (this._countdownValue > 0) {
+      this._startCountdown();
+    }
+
+    // Show initial UI
+    if (this.ui) {
+      this.ui.showTimePressureUI(config.label || '时间', this._countdownValue, config.countdown);
+    }
+  }
+
+  _startCountdown() {
+    this._stopCountdown();
+    this._countdownTimer = setInterval(() => {
+      this._countdownValue--;
+      if (this.ui) {
+        this.ui.updateTimePressureUI(this._countdownValue, this._timePressureConfig.countdown);
+      }
+
+      // Warning at 30% remaining
+      const warningThreshold = Math.floor(this._timePressureConfig.countdown * 0.3);
+      if (this._countdownValue <= warningThreshold && !this._countdownWarningShown) {
+        this._countdownWarningShown = true;
+        if (this.ui) {
+          this.ui.showNotification(this._timePressureConfig.warningMessage || '时间紧迫！', 0, 'negative');
+        }
+      }
+
+      // Timeout
+      if (this._countdownValue <= 0) {
+        this._stopCountdown();
+        this._handleTimeout();
+      }
+    }, 1000);
+  }
+
+  _stopCountdown() {
+    if (this._countdownTimer) {
+      clearInterval(this._countdownTimer);
+      this._countdownTimer = null;
+    }
+  }
+
+  _handleTimeout() {
+    const config = this._timePressureConfig;
+    if (!config) return;
+
+    // Apply timeout consequence
+    if (config.timeoutNode) {
+      this.navigateTo(config.timeoutNode);
+    }
+    if (config.timeoutFlag) {
+      this.rpg.setFlag(config.timeoutFlag);
+    }
+    if (this.ui) {
+      this.ui.showNotification(config.timeoutMessage || '时间耗尽！', 0, 'negative');
+    }
+  }
+
+  _checkTimePressure(node) {
+    // Apply per-node decay if configured
+    const config = this._timePressureConfig;
+    if (!config || !config.globalDecay) return;
+
+    const decay = config.globalDecay;
+    if (decay.variables) {
+      for (const [key, delta] of Object.entries(decay.variables)) {
+        if (this.state.stats[key] !== undefined) {
+          this.state.stats[key] += delta;
+        }
+      }
+    }
+    if (decay.affinity && this.state.npcAffinities) {
+      for (const [npcId, delta] of Object.entries(decay.affinity)) {
+        if (this.state.npcAffinities[npcId] !== undefined) {
+          this.state.npcAffinities[npcId] += delta;
+        }
+      }
+    }
+
+    // Show decay feedback
+    if (this.ui && (decay.message || decay.variables)) {
+      this.ui.showNotification(decay.message || '时间流逝，状态发生变化...', 0, 'info');
+    }
+  }
+
+  /* ================================================================
+   * 10. Auto-Unlock Achievement Check
+   * ================================================================ */
+
+  _checkAutoUnlockAchievements() {
+    if (!this.story || !this.story.achievements) return;
+    if (!window.achievementSystem) return;
+
+    for (const [id, def] of Object.entries(this.story.achievements)) {
+      if (window.achievementSystem.unlocked && window.achievementSystem.unlocked.has(id)) continue;
+      if (this.rpg.checkAutoUnlock(id, def, this.state)) {
+        window.achievementSystem.register({ id, name: def.title, desc: def.description, category: def.category || 'general', rarity: def.rarity || 'common' });
+        window.achievementSystem.tryUnlock(id);
+      }
+    }
+  }
+
+  /* ================================================================
+   * 11. NPC Affinity Helpers
+   * ================================================================ */
+
+  getNPCAffinity(npcId) {
+    return this.state && this.state.npcAffinities ? (this.state.npcAffinities[npcId] || 0) : 0;
+  }
+
+  setNPCAffinity(npcId, value) {
+    if (!this.state.npcAffinities) this.state.npcAffinities = {};
+    const old = this.state.npcAffinities[npcId] || 0;
+    this.state.npcAffinities[npcId] = value;
+    if (this.ui) {
+      const delta = value - old;
+      const label = this._getNPCLabel(npcId) || npcId;
+      this.ui.showNotification(`${label} 好感度 ${delta > 0 ? '+' : ''}${delta}`, delta, delta >= 0 ? 'positive' : 'negative');
+    }
+  }
+
+  _getNPCLabel(npcId) {
+    if (!this.story || !this.story.npcRelations) return npcId;
+    const npc = this.story.npcRelations.find(n => n.id === npcId);
+    return npc ? npc.name : npcId;
   }
 };

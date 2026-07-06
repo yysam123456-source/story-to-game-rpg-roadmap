@@ -80,6 +80,7 @@ async function localDeleteWork(id: string): Promise<void> {
 // ===== Vercel Blob 存储 =====
 async function blobSaveWork(id: string, meta: WorkMeta, script: StoryScript): Promise<void> {
   // 延迟导入，仅在需要时加载
+  // @ts-ignore
   const { put } = await import('@vercel/blob');
   await put(`works/${id}.meta.json`, JSON.stringify(meta), {
     access: 'public',
@@ -93,6 +94,7 @@ async function blobSaveWork(id: string, meta: WorkMeta, script: StoryScript): Pr
 
 async function blobGetWorkMeta(id: string): Promise<WorkMeta | null> {
   try {
+    // @ts-ignore
     const { head } = await import('@vercel/blob');
     const info = await head(`works/${id}.meta.json`);
     if (!info?.url) return null;
@@ -106,6 +108,7 @@ async function blobGetWorkMeta(id: string): Promise<WorkMeta | null> {
 
 async function blobGetWorkScript(id: string): Promise<StoryScript | null> {
   try {
+    // @ts-ignore
     const { head } = await import('@vercel/blob');
     const info = await head(`works/${id}.json`);
     if (!info?.url) return null;
@@ -120,6 +123,7 @@ async function blobGetWorkScript(id: string): Promise<StoryScript | null> {
 async function blobListWorks(): Promise<WorkMeta[]> {
   // Vercel Blob 列出功能有限，这里用本地索引文件
   try {
+    // @ts-ignore
     const { get } = await import('@vercel/blob');
     const indexBlob = await get('works/index.json');
     if (!indexBlob) return [];
@@ -138,6 +142,7 @@ async function blobListWorks(): Promise<WorkMeta[]> {
 }
 
 async function blobDeleteWork(id: string): Promise<void> {
+  // @ts-ignore
   const { del } = await import('@vercel/blob');
   try { await del(`works/${id}.meta.json`); } catch { /* ignore */ }
   try { await del(`works/${id}.json`); } catch { /* ignore */ }

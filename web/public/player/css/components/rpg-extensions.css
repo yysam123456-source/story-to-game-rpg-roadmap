@@ -284,7 +284,248 @@
 }
 
 /* ================================================================
-   5. Responsive
+   5. Time Pressure Bar
+   ================================================================ */
+
+.time-pressure-bar {
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-xs);
+  color: var(--c-text-secondary);
+  min-width: 180px;
+}
+
+.time-pressure-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.time-pressure-label svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.7;
+}
+
+.time-pressure-track {
+  flex: 1;
+  height: 6px;
+  background: var(--c-bg-elevated);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.time-pressure-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-brand-dark), var(--c-brand-light));
+  border-radius: var(--radius-pill);
+  transition: width 1s linear;
+}
+
+.time-pressure-fill.warning {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+  animation: pulse-warning 1s ease-in-out infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.time-pressure-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-bold);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* ================================================================
+   6. NPC Relations Panel
+   ================================================================ */
+
+#npc-relations-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 320px;
+  max-width: 85vw;
+  background: var(--c-bg-surface);
+  border-left: 1px solid var(--c-border-subtle);
+  z-index: var(--z-modal);
+  transform: translateX(100%);
+  transition: transform var(--duration-slow) var(--ease-out-expo);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+#npc-relations-panel.open {
+  transform: translateX(0);
+}
+
+#npc-relations-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal);
+}
+
+#npc-relations-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#npc-relations-content {
+  flex: 1;
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+.npc-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  transition: background var(--duration-fast);
+}
+
+.npc-card:hover {
+  background: var(--glass-bg-hover);
+}
+
+.npc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.npc-name {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--c-text-primary);
+}
+
+.npc-role {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  background: var(--c-bg-elevated);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.npc-affinity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.npc-affinity-label {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  white-space: nowrap;
+}
+
+.npc-affinity-track {
+  flex: 1;
+  height: 6px;
+  background: var(--c-bg-elevated);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.npc-affinity-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width var(--duration-normal);
+}
+
+.npc-affinity-fill.positive {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+
+.npc-affinity-fill.negative {
+  background: linear-gradient(90deg, #dc2626, #f87171);
+}
+
+.npc-affinity-value {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+  min-width: 28px;
+  text-align: right;
+}
+
+.npc-desc {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  line-height: var(--leading-normal);
+  margin-top: var(--space-2);
+}
+
+.npc-empty {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--c-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* NPC Relations Toggle Button */
+#npc-relations-toggle {
+  position: fixed;
+  bottom: 88px;
+  right: var(--space-4);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-circle);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--c-text-secondary);
+  cursor: pointer;
+  z-index: var(--z-floating);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-fast);
+}
+
+#npc-relations-toggle:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--c-border-default);
+  transform: scale(1.05);
+}
+
+#npc-relations-toggle svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ================================================================
+   7. Responsive
    ================================================================ */
 
 @media (max-width: 768px) {
@@ -300,5 +541,16 @@
 
   .choice-weight-tag {
     display: none; /* Hide weight tags on mobile for space */
+  }
+
+  #npc-relations-panel {
+    width: 100%;
+    max-width: none;
+  }
+
+  .time-pressure-bar {
+    top: 48px;
+    min-width: 140px;
+    padding: var(--space-1) var(--space-2);
   }
 }

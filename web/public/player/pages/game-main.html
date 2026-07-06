@@ -217,6 +217,10 @@
           <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-box"/></svg>
           <span>背包</span>
         </button>
+        <button class="menu-item" onclick="window.uiController._toggleNPCRelations()" aria-label="角色关系">
+          <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-users"/></svg>
+          <span>角色关系</span>
+        </button>
         <button class="menu-item" onclick="window.themeEngine.triggerChapterTransition(window.state ? window.state.genre : 'xianxia')" aria-label="章节过渡">
           <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-map"/></svg>
           <span>章节过渡</span>
@@ -453,6 +457,11 @@
     <span id="inv-badge" class="inv-badge">6</span>
   </button>
 
+  <!-- NPC Relations Toggle -->
+  <button id="npc-relations-toggle" aria-label="角色关系">
+    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-users"/></svg>
+  </button>
+
   <!-- Inventory Backdrop -->
   <div id="inventory-backdrop"></div>
 
@@ -466,6 +475,20 @@
     </div>
     <div class="inv-filter-tabs" id="inv-filter-tabs"></div>
     <div id="inventory-content"></div>
+  </aside>
+
+  <!-- NPC Relations Backdrop -->
+  <div id="npc-relations-backdrop"></div>
+
+  <!-- NPC Relations Panel -->
+  <aside id="npc-relations-panel" aria-hidden="true" aria-label="角色关系">
+    <div class="inventory-header">
+      <h2>角色关系</h2>
+      <button id="npc-relations-close" class="inventory-close" aria-label="关闭">
+        <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-close"/></svg>
+      </button>
+    </div>
+    <div id="npc-relations-content"></div>
   </aside>
 
   <!-- Notifications -->

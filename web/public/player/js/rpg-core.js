@@ -189,7 +189,40 @@ window.RPGCore = class RPGCore {
       return { result, reason: result ? '' : `需要先进行: ${cond.interaction}` };
     }
 
+    // { affinity: { npc: "npcId", op: ">=", value: 10 } }
+    if (cond.affinity !== undefined) {
+      const aff = cond.affinity;
+      const npcId = aff.npc;
+      const op = aff.op || '>=';
+      const value = parseFloat(aff.value);
+      const current = state ? (state.npcAffinities ? state.npcAffinities[npcId] : 0) : 0;
+      if (isNaN(value)) {
+        return { result: false, reason: `好感度比较值无效` };
+      }
+      let result = false;
+      switch (op) {
+        case '>=': result = current >= value; break;
+        case '<=': result = current <= value; break;
+        case '>':  result = current > value; break;
+        case '<':  result = current < value; break;
+        case '==': result = current === value; break;
+        case '!=': result = current !== value; break;
+      }
+      return { result, reason: result ? '' : `需要与 ${npcId} 的好感度 ${op} ${value}` };
+    }
+
     return { result: false, reason: '未知的条件类型' };
+  }
+
+  /* ================================================================
+   * 4.5 Auto-Unlock Achievement Detection
+   * ================================================================ */
+
+  checkAutoUnlock(achievementId, achievementDef, state) {
+    if (!achievementDef || !achievementDef.autoUnlock) return false;
+    const cond = achievementDef.autoUnlock;
+    const result = this.evaluateCondition(cond, state);
+    return result.result;
   }
 
   /* ================================================================

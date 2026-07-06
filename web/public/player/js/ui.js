@@ -31,6 +31,7 @@ window.UIController = class UIController {
     this._bindAccessibility();
     this._bindStatListeners();
     this._bindSettingsControls();
+    this._bindNPCRelationsToggle();
   }
 
   /* ── Menu Toggle ─────────────────────── */
@@ -521,6 +522,98 @@ window.UIController = class UIController {
         setTimeout(() => sparkle.remove(), 3000);
       }, i * 100);
     }
+  }
+
+  /* ── Time Pressure UI ──────────────── */
+  showTimePressureUI(label, current, max) {
+    let el = document.getElementById('time-pressure-bar');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'time-pressure-bar';
+      el.className = 'time-pressure-bar';
+      const root = document.getElementById('game-root');
+      if (root) root.appendChild(el);
+    }
+    const pct = max > 0 ? Math.max(0, Math.min(100, (current / max) * 100)) : 0;
+    const isWarning = pct <= 30;
+    el.innerHTML = `
+      <div class="time-pressure-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>${label}</span>
+      </div>
+      <div class="time-pressure-track">
+        <div class="time-pressure-fill ${isWarning ? 'warning' : ''}" style="width:${pct}%"></div>
+      </div>
+      <div class="time-pressure-value">${current}s</div>
+    `;
+    el.style.display = 'flex';
+  }
+
+  updateTimePressureUI(current, max) {
+    this.showTimePressureUI(this._timePressureLabel || '时间', current, max);
+  }
+
+  hideTimePressureUI() {
+    const el = document.getElementById('time-pressure-bar');
+    if (el) el.style.display = 'none';
+  }
+
+  /* ── NPC Relations Panel ───────────── */
+  _bindNPCRelationsToggle() {
+    const toggle = document.getElementById('npc-relations-toggle');
+    const close = document.getElementById('npc-relations-close');
+    const backdrop = document.getElementById('npc-relations-backdrop');
+    if (toggle) toggle.addEventListener('click', () => this._toggleNPCRelations());
+    if (close) close.addEventListener('click', () => this._toggleNPCRelations());
+    if (backdrop) backdrop.addEventListener('click', () => this._toggleNPCRelations());
+  }
+
+  _toggleNPCRelations() {
+    const panel = document.getElementById('npc-relations-panel');
+    const backdrop = document.getElementById('npc-relations-backdrop');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    if (backdrop) backdrop.classList.toggle('visible', !isOpen);
+    panel.setAttribute('aria-hidden', String(isOpen));
+    if (!isOpen) this._renderNPCRelations();
+  }
+
+  _renderNPCRelations() {
+    const container = document.getElementById('npc-relations-content');
+    if (!container) return;
+
+    const story = window.rpgStoryLoader ? window.rpgStoryLoader.story : null;
+    const npcs = story && story.npcRelations ? story.npcRelations : [];
+    const affinities = window.state && window.state.npcAffinities ? window.state.npcAffinities : {};
+
+    if (npcs.length === 0) {
+      container.innerHTML = '<div class="npc-empty">暂无角色关系数据</div>';
+      return;
+    }
+
+    container.innerHTML = npcs.map(npc => {
+      const val = affinities[npc.id] || 0;
+      const max = 100;
+      const pct = Math.max(0, Math.min(100, ((val + 50) / 100) * 100));
+      const isPositive = val >= 0;
+      return `
+        <div class="npc-card">
+          <div class="npc-header">
+            <span class="npc-name">${npc.name}</span>
+            <span class="npc-role">${npc.role || ''}</span>
+          </div>
+          <div class="npc-affinity">
+            <span class="npc-affinity-label">好感度</span>
+            <div class="npc-affinity-track">
+              <div class="npc-affinity-fill ${isPositive ? 'positive' : 'negative'}" style="width:${pct}%"></div>
+            </div>
+            <span class="npc-affinity-value">${val > 0 ? '+' : ''}${val}</span>
+          </div>
+          ${npc.description ? `<div class="npc-desc">${npc.description}</div>` : ''}
+        </div>
+      `;
+    }).join('');
   }
 
   /* ── Settings Controls ──────────────── */

@@ -13,7 +13,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { text, genre, title, enableRPG = false } = body;
+    const { text, genre, title, enableRPG = false, rules } = body;
 
     if (!text || typeof text !== 'string') {
       return new Response(
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
           );
 
           // 流式生成
-          const generator = generateStoryStream(text, genre || 'general', enableRPG, title);
+          const generator = generateStoryStream(text, genre || 'general', enableRPG, title, rules);
           for await (const chunk of generator) {
             if (chunk.done) break;
             fullContent += chunk.content;
