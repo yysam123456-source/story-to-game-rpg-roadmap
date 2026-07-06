@@ -109,6 +109,9 @@ window.RPGStoryLoader = class RPGStoryLoader {
     this.currentNodeId = nodeId;
     this._renderNode(node);
 
+    // Notify parent (iframe communication)
+    this._postToParent('nodeChange', { nodeId, chapter: node.chapter });
+
     // Check milestones
     this._checkMilestones(node);
 
@@ -218,6 +221,13 @@ window.RPGStoryLoader = class RPGStoryLoader {
     }
   }
 
+  makeChoice(index) {
+    if (!this.story || !this.currentNodeId) return;
+    const node = this.currentNode;
+    if (!node || !node.choices) return;
+    this._handleStoryChoice(index, node.choices);
+  }
+
   /* ================================================================
    * 3. Mode Indicator
    * ================================================================ */
@@ -252,12 +262,8 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
       // Show celebration (if achievement system exists)
       if (window.achievementSystem) {
-        window.achievementSystem.unlock({
-          id: ms.id,
-          name: ms.name,
-          desc: ms.desc,
-          category: 'story'
-        });
+        window.achievementSystem.register({ id: ms.id, name: ms.name, desc: ms.desc, category: 'story', rarity: 'common' });
+        window.achievementSystem.tryUnlock(ms.id);
       }
 
       // Show notification
@@ -284,12 +290,7 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
       // Unlock ending
       if (window.endingSystem) {
-        window.endingSystem.unlock({
-          id: ending.id,
-          name: ending.name,
-          desc: ending.desc,
-          type: ending.type || 'true'
-        });
+        window.endingSystem.discover(ending.id);
       }
 
       // Show ending notification
@@ -452,5 +453,50 @@ window.RPGStoryLoader = class RPGStoryLoader {
   get currentNode() {
     if (!this.story || !this.currentNodeId) return null;
     return this.story.nodes.find(n => n.id === this.currentNodeId) || null;
+  }
+
+  /* ================================================================
+   * 8. Iframe Communication (postMessage)
+   * ================================================================ */
+
+  _postToParent(type, data) {
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({
+          source: 'rpg-player',
+          type: type,
+          data: data
+        }, '*');
+      } catch (e) {
+        // Not in iframe, ignore
+      }
+    }
+  }
+
+  _onParentMessage(event) {
+    if (!event.data || event.data.source !== 'platform') return;
+
+    switch (event.data.type) {
+      case 'getState':
+        this._postToParent('stateResponse', {
+          nodeId: this.currentNodeId,
+          isStoryMode: this.isStoryMode,
+          genre: this.state ? this.state.genre : null,
+          chapter: this.state ? this.state.chapter : null,
+          stats: this.state ? this.state.getAll() : null
+        });
+        break;
+
+      case 'navigateTo':
+        if (event.data.nodeId) {
+          this.navigateTo(event.data.nodeId);
+        }
+        break;
+    }
+  }
+
+  // Listen for parent messages
+  _initParentListener() {
+    window.addEventListener('message', this._onParentMessage.bind(this));
   }
 };

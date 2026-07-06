@@ -30,6 +30,7 @@ window.UIController = class UIController {
     this._bindTouchGestures();
     this._bindAccessibility();
     this._bindStatListeners();
+    this._bindSettingsControls();
   }
 
   /* ── Menu Toggle ─────────────────────── */
@@ -519,6 +520,37 @@ window.UIController = class UIController {
         window.vfxEngine._container.appendChild(sparkle);
         setTimeout(() => sparkle.remove(), 3000);
       }, i * 100);
+    }
+  }
+
+  /* ── Settings Controls ──────────────── */
+  _bindSettingsControls() {
+    // BGM volume slider
+    const bgmSlider = document.getElementById('bgm-volume-slider');
+    if (bgmSlider && window.audioSystem) {
+      bgmSlider.addEventListener('input', () => {
+        window.audioSystem.setBGMVolume(parseInt(bgmSlider.value, 10) / 100);
+      });
+    }
+
+    // SFX volume slider
+    const sfxSlider = document.getElementById('sfx-volume-slider');
+    if (sfxSlider && window.audioSystem) {
+      sfxSlider.addEventListener('input', () => {
+        window.audioSystem.setSFXVolume(parseInt(sfxSlider.value, 10) / 100);
+      });
+    }
+
+    // Font size slider
+    const fontSlider = document.getElementById('font-size-slider');
+    const fontValue = document.getElementById('font-size-value');
+    if (fontSlider) {
+      fontSlider.addEventListener('input', () => {
+        const size = parseInt(fontSlider.value, 10);
+        this.settings.fontSize = size;
+        document.documentElement.style.setProperty('--text-base', size + 'px');
+        if (fontValue) fontValue.textContent = size + 'px';
+      });
     }
   }
 

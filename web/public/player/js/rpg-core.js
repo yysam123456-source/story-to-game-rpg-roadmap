@@ -230,8 +230,22 @@ window.RPGCore = class RPGCore {
     // Handle inventory changes
     if (changes.inventory && state) {
       for (const invChange of changes.inventory) {
-        // invChange: { item: "name", category: "cat", qty: 1 }
-        // For now, simplified — full inventory system in Q4
+        // invChange: { item: "name", category: "cat", qty: 1, desc: "description" }
+        const category = invChange.category || 'misc';
+        if (!state.inventory) state.inventory = {};
+        if (!state.inventory[category]) state.inventory[category] = [];
+        
+        const existing = state.inventory[category].find(i => i.name === invChange.item);
+        if (existing) {
+          existing.qty = (existing.qty || 1) + (invChange.qty || 1);
+        } else {
+          state.inventory[category].push({
+            name: invChange.item,
+            desc: invChange.desc || invChange.item,
+            qty: invChange.qty || 1
+          });
+        }
+        
         results.push({
           key: `item:${invChange.item}`,
           label: invChange.item,

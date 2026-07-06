@@ -145,8 +145,40 @@ window.ThemeEngine = class ThemeEngine {
       const config = window.GENRE_CONFIGS[genre];
       genreTag.textContent = config ? config.name : '';
     }
-    // Scene image would be swapped here when assets exist
-    // For now, placeholder remains
+    
+    // Load scene image based on genre
+    const sceneImg = document.getElementById('scene-image');
+    if (sceneImg) {
+      const genreImages = {
+        xianxia: '../assets/images/scenes/xianxia-default.svg',
+        horror: '../assets/images/scenes/horror-default.svg',
+        mystery: '../assets/images/scenes/mystery-default.svg',
+        apocalypse: '../assets/images/scenes/apocalypse-default.svg',
+        palace: '../assets/images/scenes/palace-default.svg'
+      };
+      const imgSrc = genreImages[genre] || '';
+      const placeholder = sceneImg.parentElement.querySelector('.scene-placeholder');
+      if (imgSrc) {
+        sceneImg.src = imgSrc;
+        sceneImg.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+        sceneImg.onerror = function() {
+          this.style.display = 'none';
+          if (placeholder) placeholder.style.display = 'flex';
+        };
+      } else {
+        sceneImg.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+      }
+    }
+    
+    // Also check for story-provided background
+    if (window.rpgStory && window.rpgStory.currentNode && window.rpgStory.currentNode.background) {
+      if (sceneImg) {
+        sceneImg.src = window.rpgStory.currentNode.background;
+        sceneImg.style.display = 'block';
+      }
+    }
   }
 
   /* ── Demo Story ─────────────────────── */

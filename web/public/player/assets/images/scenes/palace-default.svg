@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0a1a"/>
+      <stop offset="1" stop-color="#0d050d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg)"/>
+  <!-- Palace pillars -->
+  <rect x="100" y="50" width="20" height="350" fill="rgba(120,60,80,0.15)" rx="4"/>
+  <rect x="250" y="50" width="20" height="350" fill="rgba(120,60,80,0.15)" rx="4"/>
+  <rect x="530" y="50" width="20" height="350" fill="rgba(120,60,80,0.15)" rx="4"/>
+  <rect x="680" y="50" width="20" height="350" fill="rgba(120,60,80,0.15)" rx="4"/>
+  <!-- Roof beam -->
+  <rect x="80" y="40" width="640" height="12" fill="rgba(150,70,90,0.12)" rx="4"/>
+  <!-- Lanterns -->
+  <circle cx="175" cy="120" r="15" fill="rgba(200,100,50,0.08)" stroke="rgba(200,100,50,0.12)" stroke-width="1"/>
+  <circle cx="400" cy="100" r="18" fill="rgba(200,100,50,0.08)" stroke="rgba(200,100,50,0.12)" stroke-width="1"/>
+  <circle cx="625" cy="120" r="15" fill="rgba(200,100,50,0.08)" stroke="rgba(200,100,50,0.12)" stroke-width="1"/>
+  <!-- Screen -->
+  <rect x="300" y="160" width="200" height="150" fill="rgba(80,40,60,0.1)" rx="2" stroke="rgba(150,80,100,0.1)" stroke-width="1"/>
+  <text x="400" y="380" text-anchor="middle" fill="rgba(180,100,120,0.3)" font-size="14" font-family="system-ui">宫斗 · 殿堂</text>
+</svg>

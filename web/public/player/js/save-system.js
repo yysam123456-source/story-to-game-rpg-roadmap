@@ -11,6 +11,7 @@ class SaveSystem {
     this.currentTab = 'save';
     this.selectedSlot = null;
     this.slots = [];
+    this._sessionStart = Date.now();
   }
 
   init() {
@@ -91,7 +92,10 @@ class SaveSystem {
     slot.stats = { ...state.stats };
     slot.level = state.stats.level || 1;
     slot.realm = state.stats.realm || '入门';
-    slot.thumbnail = null; // Canvas capture placeholder
+    // Generate text summary instead of canvas capture
+    const statEntries = Object.entries(slot.stats).filter(([k]) => !['chapter', 'level'].includes(k));
+    const topStats = statEntries.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 3);
+    slot.summary = topStats.map(([k, v]) => `${window.state ? window.state.getStatLabel(k) : k}: ${v}`).join(' | ');
 
     this._persist();
     this._render();
@@ -125,7 +129,7 @@ class SaveSystem {
 
     // Refresh UI
     setTimeout(() => {
-      if (window.uiController) window.uiController._updateStatusBar();
+      if (window.themeEngine) window.themeEngine._renderStats();
     }, 100);
   }
 
@@ -154,10 +158,11 @@ class SaveSystem {
   }
 
   _formatPlayTime() {
-    const mins = Math.floor(Math.random() * 120) + 10;
-    if (mins < 60) return `${mins}分钟`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
+    const elapsed = Math.floor((Date.now() - this._sessionStart) / 60000);
+    if (elapsed < 1) return '不到1分钟';
+    if (elapsed < 60) return `${elapsed}分钟`;
+    const h = Math.floor(elapsed / 60);
+    const m = elapsed % 60;
     return `${h}时${m}分`;
   }
 
@@ -187,7 +192,7 @@ class SaveSystem {
       return `
         <div class="save-slot ${isSelected ? 'selected' : ''}" onclick="window.saveSystem.selectSlot(${slot.id})">
           <div class="save-slot-thumbnail">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--c-text-muted);opacity:0.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span class="save-summary">${slot.summary || slot.timestamp || ''}</span>
           </div>
           <div class="save-slot-info">
             <div class="save-slot-label">

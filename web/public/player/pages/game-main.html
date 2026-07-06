@@ -222,14 +222,28 @@
           <span>章节过渡</span>
         </button>
         <div class="menu-divider"></div>
-        <button class="menu-item" onclick="window.audioSystem.toggleBGM()" aria-label="背景音乐">
+        <button class="menu-item" onclick="window.audioSystem.toggleBGM()" id="menu-bgm-toggle" aria-label="背景音乐">
           <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-moon"/></svg>
           <span>背景音乐</span>
         </button>
-        <button class="menu-item" onclick="window.audioSystem.toggleSFX()" aria-label="音效">
+        <div class="menu-slider-row" id="bgm-volume-row">
+          <span class="slider-label">BGM音量</span>
+          <input type="range" min="0" max="100" value="40" class="menu-slider" id="bgm-volume-slider" aria-label="BGM音量">
+        </div>
+        <button class="menu-item" onclick="window.audioSystem.toggleSFX()" id="menu-sfx-toggle" aria-label="音效">
           <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-settings"/></svg>
           <span>音效</span>
         </button>
+        <div class="menu-slider-row" id="sfx-volume-row">
+          <span class="slider-label">音效音量</span>
+          <input type="range" min="0" max="100" value="60" class="menu-slider" id="sfx-volume-slider" aria-label="音效音量">
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-slider-row">
+          <span class="slider-label">字体大小</span>
+          <input type="range" min="12" max="22" value="14" class="menu-slider" id="font-size-slider" aria-label="字体大小">
+          <span class="slider-value" id="font-size-value">14px</span>
+        </div>
         <div class="menu-divider"></div>
         <button class="menu-item" onclick="document.body.classList.toggle('colorblind-mode')" aria-label="色盲模式">
           <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-eye"/></svg>
@@ -299,12 +313,13 @@
 
     <!-- Scene Viewport -->
     <section id="scene-viewport" aria-label="场景图">
+      <img id="scene-image" src="" alt="场景" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg)" />
       <div class="scene-placeholder">
         <svg class="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-image"/></svg>
       </div>
       <div class="scene-label">
         <span class="scene-tag">场景</span>
-        <span>初始位置</span>
+        <span id="scene-location-text">初始位置</span>
       </div>
       <div id="genre-tag" class="genre-tag">修仙</div>
     </section>
@@ -523,6 +538,7 @@
     window.rpgStatusBar = new window.RPGStatusBar(window.rpgCore, window.state);
     window.rpgChoiceRenderer = new window.RPGChoiceRenderer(window.rpgCore, window.state, window.uiController);
     window.rpgStoryLoader = new window.RPGStoryLoader(window.rpgCore, window.state, window.themeEngine, window.uiController);
+    window.rpgStoryLoader._initParentListener();
 
     // Connect state listeners to UI
     window.uiController.connectStateListeners();

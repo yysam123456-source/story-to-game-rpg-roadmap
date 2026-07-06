@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a0a0a"/>
+      <stop offset="1" stop-color="#0a0505"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg)"/>
+  <!-- Vignette -->
+  <rect width="800" height="400" rx="0" fill="none" stroke="rgba(80,0,0,0.3)" stroke-width="80"/>
+  <!-- Corridor -->
+  <path d="M250 0 L300 400 M550 0 L500 400" stroke="rgba(60,20,20,0.4)" stroke-width="2" fill="none"/>
+  <rect x="300" y="100" width="200" height="200" fill="rgba(30,10,10,0.3)" rx="2"/>
+  <!-- Light flicker -->
+  <circle cx="400" cy="200" r="3" fill="rgba(200,150,100,0.15)"/>
+  <text x="400" y="380" text-anchor="middle" fill="rgba(150,50,50,0.3)" font-size="14" font-family="system-ui">恐怖 · 暗廊</text>
+</svg>

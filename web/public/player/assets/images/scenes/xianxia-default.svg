@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1a3e"/>
+      <stop offset="1" stop-color="#0d0d1a"/>
+    </linearGradient>
+    <radialGradient id="moon" cx="0.7" cy="0.25" r="0.15">
+      <stop offset="0" stop-color="rgba(200,200,255,0.3)"/>
+      <stop offset="1" stop-color="transparent"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bg)"/>
+  <rect width="800" height="400" fill="url(#moon)"/>
+  <circle cx="560" cy="100" r="40" fill="rgba(200,200,255,0.08)" stroke="rgba(200,200,255,0.15)" stroke-width="1"/>
+  <!-- Mountains -->
+  <path d="M0 400 L150 180 L300 320 L400 200 L550 280 L700 150 L800 250 L800 400Z" fill="rgba(60,60,120,0.3)"/>
+  <path d="M0 400 L100 280 L250 350 L350 250 L500 320 L650 220 L800 300 L800 400Z" fill="rgba(40,40,80,0.4)"/>
+  <!-- Mist -->
+  <ellipse cx="400" cy="350" rx="500" ry="60" fill="rgba(100,100,200,0.08)"/>
+  <text x="400" y="380" text-anchor="middle" fill="rgba(150,150,200,0.3)" font-size="14" font-family="system-ui">修仙 · 灵山</text>
+</svg>
