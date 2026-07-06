@@ -15,7 +15,7 @@
 - `step4-system.md`：新增第六节"RPG 扩展状态系统设计"
 
 **工具改进**：
-- `validate.py`：修正 13 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~013）
+- `validate.py`：修正 18 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~018）
 
 **详细报告**：参见 `docs/ALIGNMENT_REPORT.md`（如有）
 
@@ -42,6 +42,7 @@
 - `docs/v2-IMPLEMENTATION.md`：阶段划分与交付标准。
 - `docs/v2-PRD.md`：产品需求文档 v3.0（RPG 状态、变化反馈、选择重量、渐进探索、里程碑、结局系统）。
 - `docs/RPG_JSON_SCHEMA_PROPOSAL.md`：RPG 化 JSON 扩展草案。
+- `docs/SCHEMA_v1.md`：已锁定的 JSON Schema 规范 v1.0（Phase 1 交付物）。
 - `docs/GENRE_TEMPLATES.md`：类型小说玩法模板（修仙/无限恐怖/悬疑/末世/宫斗）。
 - `docs/WECHAT_MINIPROGRAM_INTEGRATION.md`：微信小程序并行集成方案。
 - `docs/GITHUB_ISSUE_BACKLOG.md`：开发清单。
@@ -53,6 +54,7 @@ docs/
 ├── v2-ROADMAP.md              # 季度迭代路线图
 ├── v2-IMPLEMENTATION.md       # 阶段划分与交付标准
 ├── v2-PRD.md                  # 产品需求文档 v3.0
+├── SCHEMA_v1.md              # 已锁定的 JSON Schema
 ├── RPG_JSON_SCHEMA_PROPOSAL.md
 ├── GENRE_TEMPLATES.md
 ├── WECHAT_MINIPROGRAM_INTEGRATION.md
@@ -102,7 +104,7 @@ story-to-game-source/
 
 ## 快速开始
 ### 1. 运行互动文游启动器
-1. 下载 `剧情游戏启动器.html` 文件
+1. 下载 `剧情游戏启动器_开发者调试版.html` 文件
 2. 直接用 Chrome/Edge 浏览器打开（无需部署服务器）
 3. 点击「插入JSON剧本」，选择生成好的文游JSON文件，即可开始游玩
 
@@ -117,22 +119,19 @@ story-to-game-source/
 - **长篇优选（强烈推荐）**：Codex / Claude Code（超长上下文支持，更稳定处理中长篇小说/剧本）
 
 ## 目录结构
-story-to-game-suite/
-├── 剧情游戏启动器.html # 分支剧情游戏启动器（单文件）
-├── story-to-game/ # Story-to-Game AI 技能包
-│ ├── SKILL.md # 主工作流（九步核心规则）
-│ ├── references/ # 技能细分规则文档
-│ │ ├── json-format-spec.md # JSON 格式速查手册
-│ │ ├── step1-ingestion.md # 原作摄入与记忆索引
-│ │ ├── step2-style.md # 风格指纹提取
-│ │ ├── step3-structure.md # 结构拆解与分支设计
-│ │ ├── step4-system.md # 状态系统与结局矩阵
-│ │ ├── step5-writing.md # 分段写作规则
-│ │ └── step6-validation.md # 验证与输出规则
-│ └── scripts/
-│ └── validate.py # JSON 自动验证脚本（13 项检查）
-├── examples/ # 示例 JSON 剧本（可选）
-└── LICENSE # 许可证文件
+story-to-game-rpg-roadmap/
+├── docs/                          # 设计与规划文档
+├── story-to-game-source/          # 解包后的 Skill 源码
+│   ├── SKILL.md
+│   ├── references/
+│   │   ├── json-format-spec.md    # JSON 格式规范（含 RPG 扩展）
+│   │   └── step4-system.md         # 系统设计方法论
+│   └── scripts/
+│       └── validate.py             # 校验器（RPG-001 到 RPG-018）
+├── 剧情游戏启动器_开发者调试版.html
+├── 测试案例-成人日.json
+├── CHANGELOG.md
+└── README.md
 
 
 ## 设计理念

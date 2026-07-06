@@ -119,7 +119,6 @@
 |------|------|------|------|
 | `enabled` | boolean | ❌ | 是否启用 RPG 展示，默认 `false` |
 | `mode` | string | ❌ | `"light"`（轻 RPG，Q3 MVP）或 `"standard"`（标准 RPG，Q4+），默认 `"light"` |
-| `mode` | string | ❌ | `"light"`（轻 RPG，Q3 MVP）或 `"standard"`（标准 RPG，Q4+），默认 `"light"` |
 | `conditionDisplay` | string | ❌ | 条件选项展示策略：`"hide"` 或 `"disabled"`，默认 `"disabled"` |
 | `primaryStats` | array | ❌ | 玩家可见核心数值，见 §2.5 |
 | `hiddenStats` | array\<string\> | ❌ | 可用于条件但不展示的隐藏数值键名列表 |
@@ -625,6 +624,7 @@
 | `celebration` | string | ❌ | `"small"` / `"medium"` / `"large"`，默认 `"small"` |
 | `vfx` | string | ❌ | 题材专属特效标识（如 `"breakthrough"` / `"lightning"` / `"corruption"`） |
 | `segments` | array | ❌ | 达成时的叙事文本 |
+| `once` | boolean | ❌ | 是否只触发一次，默认 `true` |
 | `changes` | object | ❌ | 达成时附带的状态变化 |
 
 ### 9.1 celebration 级别
@@ -663,7 +663,8 @@
       ]},
       "hidden": false,
       "hint": null,
-      "failureNode": null
+      "failureNode": null,
+      "closing": "长生路上，不问归期。"
     }
   ]
 }
@@ -679,6 +680,7 @@
 | `hidden` | boolean | ❌ | 是否为隐藏结局，默认 `false` |
 | `hint` | string | ❌ | 给玩家方向性暗示（仅 `hidden: true` 时有意义） |
 | `failureNode` | string | ❌ | 失败后跳转节点 ID |
+| `closing` | string | ❌ | 结局收束语（情绪层最后余韵），与 `desc` 分开，用于结局展示时的尾声文本 |
 
 ### 10.1 ending type 枚举
 
@@ -890,6 +892,11 @@ HTML 端用 `localStorage`，小程序端用 `wx.setStorageSync` / `wx.getStorag
 | RPG-011 | warning | `endings` 存在但无 `milestones` |
 | RPG-012 | suggestion | 修仙类型建议至少 3 个 milestones |
 | RPG-013 | suggestion | 建议至少 2 个 endings（含隐藏结局） |
+| RPG-014 | error | `endings[].type` 必须在 §10.1 枚举范围内 |
+| RPG-015 | error | `milestones[].celebration` 必须在 `small`/`medium`/`large` 范围内 |
+| RPG-016 | error | `interactions[].depth` 必须在 `surface`/`deep`/`ultimate` 范围内 |
+| RPG-017 | warning | `condition` 中 `var` 引用的变量必须在 `variables` 中存在 |
+| RPG-018 | warning | `hiddenStats` 中的变量必须在 `variables` 中存在 |
 
 ---
 

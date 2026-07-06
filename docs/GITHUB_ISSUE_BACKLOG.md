@@ -27,7 +27,7 @@
 - [ ] 实现 `changes` 变化计算 + Toast
 - [ ] 实现 condition 解析（字符串 + 对象）
 - [ ] 实现 `conditionDisplay`（hide/disabled）
-- [ ] validate.py 增强（RPG-001 到 RPG-013）
+- [ ] validate.py 增强（RPG-001 到 RPG-018）
 - [ ] Core 抽离（story/condition/change/save-model）
 
 ## 阶段三：修仙 Demo

@@ -630,7 +630,7 @@ default
 {
   "isEnding": true,
   "title": "结局：潮声归来",
-  "type": "TRUE ENDING",
+  "type": "true",
   "achievement": "true_tide",
   "description": "你喊出了那个早已不该被记得的名字。",
   "closing": "后来你仍会在每个雨夜醒来，但这一次，你知道潮声不是为了带走你，而是为了把你送回岸上。"
@@ -646,7 +646,7 @@ default
   "ending_true": {
     "isEnding": true,
     "title": "结局：潮声归来",
-    "type": "TRUE ENDING",
+    "type": "true",
     "progress": 100,
   "ambient": "tide",
     "achievement": "true_tide",
@@ -681,12 +681,14 @@ default
 
 | 类型 | 建议 type | 说明 |
 | --- | --- | --- |
-| 草率结局 | `RASH ENDING` / `BAD ENDING` | 玩家明显选了某种错误选项后，直接进入较短结局线 |
-| 分支结局 | `BRANCH ENDING` | 关键抉择后还有较长剧情，甚至继续分叉，最终抵达的结局 |
-| 普通结局 | `NORMAL ENDING` | 合理完成故事，但未抵达核心真相或最佳状态 |
-| 真结局 | `TRUE ENDING` | 原著内容或作者认定的核心结局 |
-| 隐藏结局 | `HIDDEN ENDING` | 需要特殊变量、flag、路线或多次选择才能进入 |
-| 特殊结局 | `SPECIAL ENDING` | 可以是玩笑、元叙事、极端路线、彩蛋路线等 |
+| 草率结局 | `failure` | 玩家明显选了某种错误选项后，直接进入较短结局线 |
+| 分支结局 | `dark` | 关键抉择后还有较长剧情，甚至继续分叉，最终抵达的结局 |
+| 普通结局 | `neutral` | 合理完成故事，但未抵达核心真相或最佳状态 |
+| 真结局 | `true` | 原著内容或作者认定的核心结局 |
+| 隐藏结局 | `hidden` | 需要特殊变量、flag、路线或多次选择才能进入 |
+| 特殊结局 | `noble` | 可以是玩笑、元叙事、极端路线、彩蛋路线等 |
+
+> **注意**：结局类型枚举值统一为小写（`true`/`dark`/`neutral`/`noble`/`hidden`/`failure`），详见 `SCHEMA_v1.md` 第 10.1 节。
 
 ### 结局判定建议
 
@@ -834,7 +836,7 @@ default
     "ending_rash_silence": {
       "isEnding": true,
       "title": "结局：无人回信",
-      "type": "RASH ENDING",
+      "type": "failure",
       "progress": 100,
       "description": "第二天早晨，门缝里什么也没有。",
       "closing": "你再也没有收到回信。可偶尔你会想，也许沉默本身，就是那个人最后留下的答案。"
@@ -842,7 +844,7 @@ default
     "ending_normal_room": {
       "isEnding": true,
       "title": "结局：留在房间的人",
-      "type": "NORMAL ENDING",
+      "type": "neutral",
       "progress": 100,
       "description": "你没有去天台。雨停后，你开始怀疑那封信是否真的存在过。",
       "closing": "多年以后，你仍会记得那个没有走出去的夜晚。门一直在那里，只是你再也没有伸手。"
@@ -850,7 +852,7 @@ default
     "ending_true": {
       "isEnding": true,
       "title": "结局：潮声归来",
-      "type": "TRUE ENDING",
+      "type": "true",
       "progress": 100,
       "ambient": "tide",
       "achievement": "true_tide",

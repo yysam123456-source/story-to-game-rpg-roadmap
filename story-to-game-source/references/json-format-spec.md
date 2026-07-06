@@ -326,12 +326,14 @@ default
 
 ## 结局 endings
 
+> **注意**：节点内 `isEnding` 方式为兼容保留。新作品推荐使用顶层 `endings[]` + `candidateEndings` 方式（见"RPG 扩展"章节中的 endings 定义）。
+
 ```json
 {
   "ending_id": {
     "isEnding": true,
     "title": "结局标题",
-    "type": "TRUE ENDING",
+    "type": "true",
     "progress": 100,
     "ambient": "sea",
     "achievement": "achievement_id",
@@ -358,12 +360,12 @@ default
 `description` 是结局的主体叙述（发生了什么），`closing` 是最后的余韵（留给玩家的感受）。播放器会将两者连接显示。
 
 结局 type 可选值：
-- `RASH ENDING` — 草率结局
-- `BRANCH ENDING` — 分支结局
-- `NORMAL ENDING` — 普通结局
-- `TRUE ENDING` — 真结局
-- `HIDDEN ENDING` — 隐藏结局
-- `SPECIAL ENDING` — 特殊结局
+- `failure` — 草率结局
+- `dark` — 分支结局
+- `neutral` — 普通结局
+- `true` — 真结局
+- `hidden` — 隐藏结局
+- `noble` — 特殊结局
 
 ## 特效 effect 可选值
 
@@ -594,6 +596,8 @@ default
 { "candidateEndings": ["ascension", "demon_path"] }
 ```
 
+- `closing`（string，可选）：结局收束语，情绪层最后余韵
+
 `type` 枚举：`true` / `dark` / `romance` / `neutral` / `noble` / `hidden` / `failure`。
 
 ### inventory（背包）
@@ -625,4 +629,8 @@ default
 ```
 
 条件单元类型：`var` / `flag` / `item` / `interaction`。
+
+```json
+{ "interaction": "find_secret", "completed": true }
+```
 

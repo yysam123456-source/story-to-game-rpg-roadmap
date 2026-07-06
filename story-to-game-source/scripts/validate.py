@@ -188,7 +188,7 @@ def validate(path):
             target = nodes.get(target_id, {})
             if target.get('isEnding'):
                 etype = target.get('type', '')
-                if etype not in ('RASH ENDING', 'BAD ENDING'):
+                if etype not in ('failure',):
                     errors.append(
                         f'节点 "{nid}" 的选项直接跳到非草率结局 '
                         f'"{target_id}"——结局前必须有收束节点'
@@ -335,6 +335,83 @@ def validate(path):
         warnings.append('RPG-012: 修仙类型建议至少包含 3 个 milestones')
     if len(data.get('endings', [])) < 2:
         warnings.append('RPG-013: 建议至少定义 2 个 endings（含隐藏结局）')
+
+    # === 26. endings[].type 枚举校验（RPG-014） ===
+    VALID_ENDING_TYPES = {"true", "dark", "romance", "neutral", "noble", "hidden", "failure"}
+    if "endings" in data:
+        for e in data["endings"]:
+            if "type" in e and e["type"] not in VALID_ENDING_TYPES:
+                errors.append(f"RPG-014: endings[{e.get('id','?')}] 的 type '{e['type']}' 不在允许范围内：{VALID_ENDING_TYPES}")
+
+    # === 27. milestones[].celebration 枚举校验（RPG-015） ===
+    VALID_CELEBRATION_TYPES = {"small", "medium", "large"}
+    if "milestones" in data:
+        for m in data["milestones"]:
+            if "celebration" in m and m["celebration"] not in VALID_CELEBRATION_TYPES:
+                errors.append(f"RPG-015: milestones[{m.get('id','?')}] 的 celebration '{m['celebration']}' 不在允许范围内：{VALID_CELEBRATION_TYPES}")
+
+    # === 28. interactions[].depth 枚举校验（RPG-016） ===
+    VALID_DEPTH_TYPES = {"surface", "deep", "ultimate"}
+    if "nodes" in data:
+        for nid, node in data["nodes"].items():
+            for ia in node.get("interactions", []):
+                if "depth" in ia and ia["depth"] not in VALID_DEPTH_TYPES:
+                    errors.append(f"RPG-016: node[{nid}] interactions[{ia.get('id','?')}] 的 depth '{ia['depth']}' 不在允许范围内：{VALID_DEPTH_TYPES}")
+
+    # === 29. condition 中 var 引用检查（RPG-017） ===
+    def extract_var_refs(condition, prefix=""):
+        """从条件对象中递归提取所有 var 引用"""
+        refs = []
+        if isinstance(condition, dict):
+            if "var" in condition:
+                refs.append(condition["var"])
+            if "all" in condition:
+                for sub in condition["all"]:
+                    refs.extend(extract_var_refs(sub, prefix))
+            if "any" in condition:
+                for sub in condition["any"]:
+                    refs.extend(extract_var_refs(sub, prefix))
+            if "interaction" in condition:
+                pass  # interaction 类型不引用 variables
+        return refs
+
+    all_vars = set(data.get("variables", {}).keys())
+    all_conditions = []
+
+    # 收集所有 condition
+    if "nodes" in data:
+        for nid, node in data["nodes"].items():
+            for c in node.get("choices", []):
+                if "condition" in c:
+                    all_conditions.append(("node", nid, c["condition"]))
+            for ia in node.get("interactions", []):
+                if "condition" in ia:
+                    all_conditions.append(("node", nid, ia["condition"]))
+
+    if "milestones" in data:
+        for m in data["milestones"]:
+            if "condition" in m:
+                all_conditions.append(("milestone", m.get("id","?"), m["condition"]))
+
+    if "endings" in data:
+        for e in data["endings"]:
+            if "condition" in e:
+                all_conditions.append(("ending", e.get("id","?"), e["condition"]))
+
+    for src_type, src_id, cond in all_conditions:
+        if isinstance(cond, dict):
+            for var_ref in extract_var_refs(cond):
+                if var_ref not in all_vars:
+                    warnings.append(f"RPG-017: {src_type}[{src_id}] condition 引用了变量 '{var_ref}'，但该变量未在 variables 中定义")
+
+    # === 30. hiddenStats 变量引用检查（RPG-018） ===
+    if "meta" in data and "rpg" in data["meta"]:
+        hidden = data["meta"]["rpg"].get("hiddenStats", [])
+        for hvar in hidden:
+            if hvar not in all_vars:
+                errors.append(f"RPG-018: meta.rpg.hiddenStats 引用了 '{hvar}'，但该变量未在 variables 中定义")
+
+    # === RPG Checks End ===
 
     # === 报告 ===
     print(f'\n{"="*50}')

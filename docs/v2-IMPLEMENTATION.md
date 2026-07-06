@@ -77,7 +77,7 @@ P1-4 Skill 类型识别
 - `changes.show` 变化反馈
 - 条件选项置灰/隐藏（conditionDisplay）
 - `choice.weight`（critical/branch 识别和视觉差异化）
-- validate.py RPG-001 到 RPG-008
+- validate.py RPG-001 到 RPG-018
 
 ### Q3 MVP 应该 / Stretch Goal（2 项）
 - `milestones` 基础支持（small/medium 庆祝，不含 large VFX）
@@ -101,7 +101,7 @@ P1-4 Skill 类型识别
 **交付物**：
 - `docs/SCHEMA_v1.md`（897 行）：锁定 RPG JSON Schema v1.0 正式定义
 - `docs/GENRE_TEMPLATES.md`（887 行）：5 种类型小说玩法模板
-- `story-to-game-source/scripts/validate.py`：13 条 RPG 校验规则（RPG-001~013）
+- `story-to-game-source/scripts/validate.py`：18 条 RPG 校验规则（RPG-001~018）
 
 **已完成任务**：
 - [x] P0-1: 定义 `meta.rpg` 完整 schema
@@ -110,7 +110,7 @@ P1-4 Skill 类型识别
 - [x] P0-1.5: 定义 `candidateEndings` 节点字段
 - [x] 统一 `genre` 枚举值
 - [x] 补充 `choice.weightTag`、`importantFlag`、`candidateEndings` 说明
-- [x] P0-7: validate.py 增强（RPG-001 到 RPG-013）
+- [x] P0-7: validate.py 增强（RPG-001 到 RPG-018）
 
 **下一步**：进入阶段二（核心引擎开发）
 
@@ -150,7 +150,7 @@ P1-4 Skill 类型识别
 - P0-5: 实现字符串 condition 解析（向后兼容）
 - P0-5: 实现对象 condition 解析（all/any/var/flag/item/interaction）
 - P0-5: 实现 `conditionDisplay`（hide/disabled）
-- P0-7: validate.py 增强（RPG-001 到 RPG-013）
+- P0-7: validate.py 增强（RPG-001 到 RPG-018）
 - Core 抽离：抽出 `story-engine`、`condition-engine`、`change-engine`、`save-model`
 
 **交付物**：播放器可显示状态栏、变化反馈、条件选项、选择重量

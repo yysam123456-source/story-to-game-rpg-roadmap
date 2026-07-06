@@ -33,10 +33,10 @@
 - `README.md`：新增变更日志部分
 
 ### 修复
-- `validate.py`：修正 13 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~013）
+- `validate.py`：修正 18 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~018）
 
 ### 验证
-- ✅ `validate.py` 的 13 条 RPG 校验规则全部通过测试
+- ✅ `validate.py` 的 18 条 RPG 校验规则全部通过测试
 - ✅ 文档一致性检查通过（`choice.weightTag`、`importantFlag`、`candidateEndings` 在所有相关文档中均有说明）
 
 ---
@@ -55,19 +55,19 @@
 ### 改进
 - `json-format-spec.md`：更新为包含 RPG 扩展的完整 JSON 格式速查手册
 - `step4-system.md`：补充 RPG 状态系统设计指导
-- `validate.py`：实现 13 条 RPG 校验规则（RPG-001~013）
+- `validate.py`：实现 18 条 RPG 校验规则（RPG-001~018）
 
 ### 文档
 - 系统性对齐 `SCHEMA_v1.md` 与 `GENRE_TEMPLATES.md`
 - 系统性对齐 `json-format-spec.md` 与 `SCHEMA_v1.md`
-- 创建 `ALIGNMENT_REPORT.md` 记录对齐分析结果
+- 创建 `ALIGNMENT_REPORT.md`（如有）记录对齐分析结果
 
 ---
 
 ## [0.9.0] - 2026-06-XX
 
 ### 初始版本
-- `剧情游戏启动器.html`：分支剧情游戏启动器（单文件）
+- `剧情游戏启动器_开发者调试版.html`：分支剧情游戏启动器（单文件）
 - `SKILL.md`：Story-to-Game AI 技能定义（九步工作流）
 - `step1-ingestion.md` ~ `step6-validation.md`：AI 技能细分规则文档
 - `validate.py`：JSON 自动验证脚本（基础 13 项检查）

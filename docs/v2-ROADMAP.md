@@ -80,7 +80,7 @@ Q4 2026（10-12 月）: 核心互动 + 社区 + UI V2
 | `candidateEndings` 字段 | ✅ | `SCHEMA_v1.md` §11 |
 | `genre` 枚举值统一 | ✅ | `SCHEMA_v1.md` §2 |
 | 类型模板（5 种） | ✅ | `GENRE_TEMPLATES.md` |
-| `validate.py` RPG 规则 | ✅ | 13 条规则（RPG-001~013） |
+| `validate.py` RPG 规则 | ✅ | 18 条规则（RPG-001~018） |
 
 **下一步**：进入阶段二（核心引擎开发）
 

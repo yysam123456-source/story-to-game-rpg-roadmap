@@ -179,7 +179,7 @@ Parallel Track: 微信小程序播放器
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `enabled` | boolean | 是 | 是否启用 RPG 模式 |
+| `enabled` | boolean | 否 | 是否启用 RPG 模式，默认 `false`，缺失时按 `false` 处理 |
 | `mode` | string | 否 | `"light"`（轻 RPG）或 `"standard"`（标准 RPG） |
 | `primaryStats` | array | 否 | 可见数值列表，最多 5 个 |
 | `primaryStats[].key` | string | 是 | 对应 `variables` 中的键 |
@@ -518,23 +518,7 @@ if conditionDisplay === "disabled":
 
 **需求描述**：校验器需要支持新的 RPG 字段校验。
 
-**新增校验规则**：
-
-| 规则 | 级别 | 说明 |
-|------|------|------|
-| RPG-001 | error | `meta.rpg.enabled=true` 时，`primaryStats` 不能为空 |
-| RPG-002 | error | `primaryStats[].key` 必须在 `variables` 中存在 |
-| RPG-003 | error | `type="bar"` 时必须有 `max` 字段 |
-| RPG-004 | warning | `primaryStats` 超过 5 个 |
-| RPG-005 | error | `hiddenStats` 中的变量必须在 `variables` 中存在 |
-| RPG-006 | error | `changes.set` 修改的变量不存在于 `variables` |
-| RPG-007 | warning | `condition` 引用的变量不存在于 `variables` |
-| RPG-008 | error | `changes.inventory` 导致道具数量为负 |
-| RPG-009 | warning | `choice.weight` 取值不在 `critical/branch/minor/cosmetic` 范围内 |
-| RPG-010 | warning | `interaction.depth` 取值不在 `surface/deep/ultimate` 范围内 |
-| RPG-011 | error | `milestones[].condition` 引用的变量不存在于 `variables` |
-| RPG-012 | error | `endings[].condition` 引用的变量不存在于 `variables` |
-| RPG-013 | warning | `delayedChanges.set` 修改的变量不存在于 `variables` |
+**校验规则**：详见 [`SCHEMA_v1.md` 第 16 节](./SCHEMA_v1.md)（RPG-001 到 RPG-018），覆盖 primaryStats、weight、depth、milestones、endings、delayedChanges、condition 引用等维度。
 
 **验收标准**：
 - 所有新增规则正确执行
@@ -1640,7 +1624,7 @@ endings tracker (存档/菜单界面):
 | 变化反馈 | 选择后显示数值变化 Toast | 目视检查 |
 | 条件选项 | 不满足条件时置灰/隐藏 | 单元测试 |
 | 修仙 Demo | 40-80 节点，3-5 结局，可完整游玩 | 玩家测试 |
-| 校验器 | 新增 13 条校验规则（RPG-001 ~ RPG-013） | 自动化测试 |
+| 校验器 | 新增 18 条校验规则（RPG-001 ~ RPG-018） | 自动化测试 |
 | 兼容性 | 旧 JSON 不受影响 | 回归测试 |
 | 性能 | 加载 < 3 秒，选择响应 < 100ms | 性能测试 |
 | 小程序技术验证 | 同一份修仙 Demo 可在小程序端播放 | 真机测试 |
