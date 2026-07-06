@@ -1,8 +1,9 @@
-# Story-to-Game v3.0 开发实施计划
+# Story-to-Game 全栈轻量实施方案
 
-**日期**：2026-07-04
-**版本**：v3.0
-**基于**：v2-PRD.md + v2-ROADMAP.md
+**日期**：2026-07-06
+**版本**：v4.0（全栈轻量版）
+**架构**：静态前端 + 轻量 API + JSON 文件存储
+**基于**：v2-PRD.md + v2-ROADMAP.md + SCHEMA_v1.md + SKILL.md
 
 ---
 
@@ -12,259 +13,776 @@
 1. 向后兼容：所有新功能必须可选，旧 JSON 完全不受影响
 2. 先 schema 后 UI：JSON 字段定义必须先稳定，再开发渲染
 3. 开发内容并行：引擎开发和内容撰写可以并行，但联调需要串行
-4. 双端同源：HTML 和微信小程序共享 JSON 协议与剧情 core，UI 分端实现
+4. 双端同源 JSON 协议：HTML 播放器与 API 接口共享同一份 JSON Schema
 5. 每阶段有交付：每阶段结束必须有可演示的进度
 6. 风险早发现：Schema 评审必须完成，核心 UI 联调必须验证通过
+7. 轻量优先：后端最小化，不引入数据库和用户系统，JSON 文件即存储
+8. AI 驱动：核心内容生成通过 AI 服务完成，人工可编辑作为兜底
 ```
 
 ---
 
-## 2. 依赖关系图
+## 2. 系统架构
+
+### 2.1 架构总览
 
 ```
-P0-1 meta.rpg schema
-  ├── P0-1.5 choice.weight schema
-  │     ├── P0-2.5 choice.weight UI（与P0-2并行）
-  │     └── P0-6 修仙Demo
-  ├── P0-2 顶部状态栏 UI
-  │     ├── P0-3 状态详情抽屉
-  │     └── P0-6 修仙 Demo（内容依赖 schema，开发依赖 UI）
-  ├── P0-2.5 milestone基础框架
-  │     └── P0-6 修仙Demo
-  ├── P0-4 变化反馈 Toast
-  │     └── P0-6 修仙 Demo
-  ├── P0-5 条件选项置灰
-  │     └── P0-6 修仙 Demo
-  └── P0-7 validate.py 增强
-        └── P0-6 修仙 Demo
-
-P0-6 修仙 Demo
-  └── Q3 用户测试
-
-Core 抽离
-  ├── story-engine
-  ├── condition-engine
-  ├── change-engine
-  ├── save-model
-  ├── HTML 播放器适配
-  └── 微信小程序技术验证
-
-P1-1 interactions
-  ├── P1-1.5 interaction.depth（渐进探索）
-  │     ├── P1-2.5 delayedChanges（三层后果）
-  │     └── P1-3 milestone庆祝UI
-  │           └── P1-3.5 endings数据包
-  ├── P1-2 inventory
-  └── P1-3 无限恐怖 Demo
-
-P1-4 Skill 类型识别
-  └── P1-3 无限恐怖 Demo
+┌──────────────────────────────────────────────────────────┐
+│                      前端（静态 HTML/CSS/JS）              │
+│                                                          │
+│  ┌─────────┐  ┌───────────┐  ┌──────────┐  ┌─────────┐ │
+│  │  Landing │  │  Instant   │  │ Creator  │  │ Library │ │
+│  │  首页    │  │  Preview   │  │  创作者页 │  │  作品库  │ │
+│  │          │  │  即时体验   │  │          │  │         │ │
+│  └─────────┘  └───────────┘  └──────────┘  └─────────┘ │
+│                       │              │              │    │
+│              ┌─────────────────────────────────────┐    │
+│              │     RPG 播放器（game-main.html）      │    │
+│              │     复用 rpg-game-ui-v2 架构         │    │
+│              └─────────────────────────────────────┘    │
+└──────────────────────────┬───────────────────────────────┘
+                           │ HTTP API
+                           ▼
+┌──────────────────────────────────────────────────────────┐
+│                后端（Python Flask）                        │
+│                                                          │
+│  ┌────────────────┐  ┌─────────────────────────────┐    │
+│  │  API 路由层     │  │  AI 生成服务                  │    │
+│  │                │  │  SKILL.md 九步工作流引擎       │    │
+│  │  POST /generate│  │  Claude 3.5 Sonnet (优先)    │    │
+│  │  GET  /works   │  │  GPT-4o (fallback)          │    │
+│  │  GET  /works/:id│  │  function calling 确保格式    │    │
+│  │  GET  /status/:id│ │                              │    │
+│  └────────────────┘  └─────────────────────────────┘    │
+│                           │                              │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │          files/ 目录（JSON 文件存储）               │    │
+│  │          {uuid}.json → 完整游戏 JSON              │    │
+│  └─────────────────────────────────────────────────┘    │
+└──────────────────────────────────────────────────────────┘
 ```
 
-**关键路径**：P0-1 → P0-2 → P0-2.5 → P0-4 → P0-6 → 用户测试
+### 2.2 技术选型
 
-**小程序并行路径**：Core 抽离 → 小程序加载内置 Demo → 状态栏/变化反馈/存档 → Q3 技术验证
-
----
-
-## 2.5 MVP 分层定义
-
-基于 PRD 和 Schema 的 MVP 必须支持列表，按优先级分为两层：
-
-### Q3 MVP 必须（6 项）
-- `meta.genre` 和 `meta.rpg.enabled`
-- `meta.rpg.primaryStats`（text/number/bar）
-- `changes.show` 变化反馈
-- 条件选项置灰/隐藏（conditionDisplay）
-- `choice.weight`（critical/branch 识别和视觉差异化）
-- validate.py RPG-001 到 RPG-018
-
-### Q3 MVP 应该 / Stretch Goal（2 项）
-- `milestones` 基础支持（small/medium 庆祝，不含 large VFX）
-- `endings` 基础定义（结局列表展示 + hidden 机制，不含 dot tracker）
-
-### Q4 必须（6 项）
-- `interactions` + `interaction.depth`
-- `inventory` + `changes.inventory`
-- `delayedChanges`（triggerNode: "next"）
-- `milestones.large` 庆祝 + 题材 VFX
-- `endings` 完整 UI（dot tracker + 回顾）
-- `condition.interaction` 前置依赖
+| 层级 | 技术 | 理由 |
+|------|------|------|
+| 前端 | HTML/CSS/JS（原生） | 沿用 rpg-game-ui-v2 架构，无构建依赖，单文件可部署 |
+| 后端 | Python Flask | 轻量、快速原型、AI SDK 生态成熟 |
+| AI | Claude 3.5 Sonnet / GPT-4o | Claude 长上下文优势 + GPT-4o 兜底 |
+| 存储 | JSON 文件（文件系统） | 零配置，无需数据库，适合轻量部署 |
+| 部署 | 前端静态托管 + Flask 单进程 | 最低成本运行 |
 
 ---
 
-## 2.5 当前进度（2026-07-04 更新）
+## 3. API 设计
 
-### ✅ 阶段一：Schema 定义（已完成并锁定）
+### 3.1 POST /api/generate
 
-**完成时间**：2026-07-04  
-**交付物**：
-- `docs/SCHEMA_v1.md`（897 行）：锁定 RPG JSON Schema v1.0 正式定义
-- `docs/GENRE_TEMPLATES.md`（887 行）：5 种类型小说玩法模板
-- `story-to-game-source/scripts/validate.py`：18 条 RPG 校验规则（RPG-001~018）
+接收小说文本 + 类型参数，调用 AI 执行 SKILL.md 九步工作流，生成完整游戏 JSON。
 
-**已完成任务**：
-- [x] P0-1: 定义 `meta.rpg` 完整 schema
-- [x] P0-1.5: 定义 `choice.weight`、`milestones`、`endings`、`delayedChanges`、`interaction.depth` 字段
-- [x] P0-1.5: 定义 `condition.interaction` 前置交互条件
-- [x] P0-1.5: 定义 `candidateEndings` 节点字段
-- [x] 统一 `genre` 枚举值
-- [x] 补充 `choice.weightTag`、`importantFlag`、`candidateEndings` 说明
-- [x] P0-7: validate.py 增强（RPG-001 到 RPG-018）
+**请求体**：
 
-**下一步**：进入阶段二（核心引擎开发）
+```json
+{
+  "text": "小说全文或大纲文本...",
+  "genre": "xianxia",
+  "title": "青炉夜火",
+  "mode": "standard",
+  "options": {
+    "quick": false,
+    "forceStandard": false
+  }
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `text` | string | 是 | 小说全文、大纲或片段 |
+| `genre` | string | 否 | 类型标识：`literary` / `xianxia` / `horror` / `mystery` / `apocalypse` / `palace` / `custom` |
+| `title` | string | 否 | 作品名称（不填则 AI 自动生成） |
+| `mode` | string | 否 | `standard`（标准九步流程）或 `quick`（快速模式，<500字素材自动触发） |
+| `options.quick` | boolean | 否 | 强制快速模式 |
+| `options.forceStandard` | boolean | 否 | 强制标准流程（即使文本很短） |
+
+**响应**：
+
+```json
+{
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "title": "青炉夜火",
+  "downloadUrl": "/api/works/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "status": "completed"
+}
+```
+
+**处理流程**：
+
+1. 生成 UUID 作为作品 ID
+2. 根据 `mode` 选择标准流程或快速模式
+3. 创建进度记录（供 `/api/generate/status/:id` 查询）
+4. 启动 AI 生成工作流（异步）
+5. 生成完成后保存 `files/{id}.json`
+6. 返回 `{id, title, downloadUrl}`
+
+### 3.2 GET /api/works
+
+扫描 `files/` 目录，列出所有作品。
+
+**响应**：
+
+```json
+{
+  "works": [
+    {
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "title": "青炉夜火",
+      "genre": "xianxia",
+      "description": "修仙题材互动文游",
+      "nodeCount": 350,
+      "createdAt": "2026-07-06T10:30:00Z"
+    }
+  ]
+}
+```
+
+**实现**：遍历 `files/` 目录，读取每个 JSON 文件的 `meta` 字段提取 `title`、`genre`、`description`，统计 `nodes` 数量，读取文件修改时间作为 `createdAt`。
+
+### 3.3 GET /api/works/:id
+
+读取指定作品完整 JSON。
+
+**响应**：直接返回 `files/{id}.json` 的完整内容（`Content-Type: application/json`）。
+
+**错误处理**：
+- 404：作品不存在
+- 500：文件读取失败
+
+### 3.4 GET /api/generate/status/:id
+
+流式返回生成进度（Server-Sent Events）。
+
+**响应格式**（SSE）：
+
+```
+event: step_complete
+data: {"step": 1, "name": "原作摄入与记忆索引构建", "status": "completed"}
+
+event: step_complete
+data: {"step": 2, "name": "风格指纹提取", "status": "completed"}
+
+event: step_complete
+data: {"step": 3, "name": "结构拆解与分支点识别", "status": "completed"}
+
+...
+
+event: generation_complete
+data: {"id": "a1b2c3d4-...", "title": "青炉夜火", "nodeCount": 350}
+```
+
+**步骤对应**：
+
+| 步骤 | SKILL.md 步骤 | name |
+|------|--------------|------|
+| 1 | Step 1 | 原作摄入与记忆索引构建 |
+| 2 | Step 2 | 风格指纹提取 |
+| 3 | Step 3 | 结构拆解与分支点识别 |
+| 4 | Step 4 | 状态系统与结局矩阵设计 |
+| 5 | Step 5-7 | 分段写作（按章节推进） |
+| 6 | Step 5-7 | 分段写作（持续中...） |
+| 7 | Step 5-7 | 分段写作（持续中...） |
+| 8 | Step 8 | 连通性验证与 JSON 输出 |
+
+### 3.5 目录结构
+
+```
+project/
+├── server/
+│   ├── app.py                 # Flask 主应用
+│   ├── config.py              # 配置（API keys、端口等）
+│   ├── services/
+│   │   ├── ai_service.py      # AI 调用封装（Claude/GPT-4o）
+│   │   ├── generator.py       # 生成工作流引擎
+│   │   └── validator.py       # validate.py 规则集成
+│   ├── routes/
+│   │   ├── generate.py        # POST /api/generate + GET /api/generate/status/:id
+│   │   └── works.py           # GET /api/works + GET /api/works/:id
+│   └── files/                 # JSON 文件存储目录
+│       ├── {uuid}.json
+│       └── ...
+├── frontend/
+│   ├── index.html             # 首页（Landing）
+│   ├── preview.html           # 即时体验页（Instant Preview）
+│   ├── creator.html           # 创作者页（Creator）
+│   ├── library.html            # 作品库页（Library）
+│   ├── game-main.html          # RPG 播放器（复用现有）
+│   ├── css/
+│   │   └── ...
+│   └── js/
+│       ├── rpg-engine.js      # 复用现有引擎
+│       ├── api-client.js       # API 调用封装
+│       └── ...
+└── docs/
+    ├── v2-IMPLEMENTATION.md   # 本文档
+    ├── SCHEMA_v1.md            # JSON Schema
+    └── ...
+```
 
 ---
 
-## 3. 阶段划分
+## 4. AI 生成服务内部流程
 
-### 阶段一：Schema 定义与评审
+### 4.1 标准流程（九步工作流）
 
-**目标**：✅ 已完成 — 锁定 JSON Schema，确保所有字段定义清晰
+```
+输入：小说文本 + genre 参数
+  │
+  ▼
+┌─────────────────────────────────────────┐
+│ 阶段一：分析与规划（Step 1-2）            │
+│                                         │
+│  Step 1: 原作摄入与记忆索引构建           │
+│    → 骨架层、人物层、场景层、文体层         │
+│    → 节奏回归校验                         │
+│    → 缓存中间结果到 memory/               │
+│                                         │
+│  Step 2: 风格指纹提取                     │
+│    → 叙述温度、对白风格、节奏型、视角转换    │
+│    → 原作禁区                             │
+│    → 缓存风格锚点到 memory/               │
+│                                         │
+│  → SSE 推送: step 1, 2 完成              │
+└─────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────┐
+│ 阶段二：系统设计（Step 3-4）              │
+│                                         │
+│  Step 3: 结构拆解与分支点识别             │
+│    → 节拍序列、分支点标记                  │
+│    → 分支拓扑图、汇合点                    │
+│    → 分支文学大纲                         │
+│                                         │
+│  Step 4: 状态系统与结局矩阵设计            │
+│    → val（主状态值）、variables、flags     │
+│    → 结局矩阵（true/neutral/dark/hidden）  │
+│    → 成就列表                             │
+│                                         │
+│  → SSE 推送: step 3, 4 完成              │
+└─────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────┐
+│ 阶段三：内容生成（Step 5-7）              │
+│                                         │
+│  按章节分批调用 AI，每章生成节点 JSON：     │
+│    → 章节设计文档（次级记忆）               │
+│    → 节点写作（segments/choices/changes）  │
+│    → 章节边界合并                          │
+│    → 每章完成后 SSE 推送进度              │
+│                                         │
+│  >100 节点必须分批                        │
+│  每批 50-100 节点                         │
+│                                         │
+│  → SSE 推送: step 5-7 进行中（含章节进度）  │
+└─────────────────────────────────────────┘
+  │
+  ▼
+┌─────────────────────────────────────────┐
+│ 阶段四：验证与输出（Step 8）               │
+│                                         │
+│  Step 8: 连通性验证                       │
+│    → 运行 validate.py 规则（RPG-001~018）  │
+│    → 节点可达性、引用完整性、变量一致性      │
+│    → 无死胡同、结局可达、progress 单调     │
+│    → 致命错误自动修复（最多重试 2 次）      │
+│                                         │
+│  → SSE 推送: step 8 完成                  │
+└─────────────────────────────────────────┘
+  │
+  ▼
+合并输出完整 JSON → 保存 files/{id}.json → 返回结果
+```
+
+### 4.2 快速模式
+
+当文本 < 500 字或用户指定 `mode: "quick"` 时进入快速模式：
+
+```
+输入：短文本（<500字）
+  │
+  ▼
+内部生成「创作摘要」（200字内，不展示）
+  → 标题 + 视角 + 核心张力 + 章节切分 + 结局方向
+  → SSE 推送: "快速模式启动"
+  │
+  ▼
+AI 一次性生成完整 JSON
+  → 40-80 节点 / 3-5 结局 / 5-10 成就
+  → 一次性落盘，不分批
+  → SSE 推送: "JSON 生成中..."
+  │
+  ▼
+运行 validate.py 校验
+  → 致命错误修复
+  → SSE 推送: "校验完成"
+  │
+  ▼
+保存 files/{id}.json → 返回结果
+```
+
+### 4.3 AI 调用策略
+
+| 策略 | 说明 |
+|------|------|
+| 主模型 | Claude 3.5 Sonnet（长上下文优势，适合中长篇小说） |
+| 备选模型 | GPT-4o（兜底） |
+| 切换条件 | Claude API 超时 / 限流 / 返回错误时自动切换 |
+| 格式保证 | 使用 function calling 强制 JSON 输出格式 |
+| Prompt 工程 | 每步注入 SKILL.md 对应步骤的参考文档 |
+| 上下文管理 | 中间结果缓存在服务端 memory/ 目录，跨步骤携带 |
+| 重试策略 | 单步最多重试 2 次，失败后标记该步骤为 warning 并继续 |
+| Token 预算 | 按文本体量自动估算总 token，避免超限 |
+
+### 4.4 Function Calling JSON 格式约束
+
+AI 输出的每一步中间结果和最终 JSON 均通过 function calling 约束格式：
+
+```python
+# 伪代码示意
+tools = [
+    {
+        "name": "output_step_result",
+        "parameters": {
+            "step": "integer",
+            "type": "string",  # "index" | "style" | "structure" | "system" | "nodes" | "validation"
+            "data": "object",  # 该步骤的结构化输出
+        }
+    },
+    {
+        "name": "output_final_json",
+        "parameters": {
+            "meta": "object",
+            "startNodeId": "string",
+            "variables": "object",
+            "flags": "array",
+            "achievements": "object",
+            "nodes": "object",
+            # ... 完整 Schema v1.0 字段
+        }
+    }
+]
+```
+
+---
+
+## 5. 前端设计
+
+### 5.1 页面架构
+
+沿用 `rpg-game-ui-v2/` 的 HTML/CSS/JS 架构，新增四个页面：
+
+| 页面 | 文件 | 功能 |
+|------|------|------|
+| Landing | `index.html` | 首页，产品介绍 + 快速入口 |
+| Instant Preview | `preview.html` | 即时体验页，左输入右预览 |
+| Creator | `creator.html` | 创作者页，完整生成 + 预览 |
+| Library | `library.html` | 作品库，浏览所有已生成作品 |
+
+### 5.2 首页（Landing）
+
+```
+┌──────────────────────────────────────────────┐
+│              Story-to-Game                     │
+│   小说 → AI 改编 → 可游玩的互动文游             │
+│                                                │
+│   [ 立即体验 ]  [ 创作作品 ]  [ 作品库 ]         │
+│                                                │
+│   ┌─────────────────────────────────────────┐  │
+│   │         RPG 播放器迷你 Demo               │  │
+│   │         （加载内置修仙片段）               │  │
+│   └─────────────────────────────────────────┘  │
+│                                                │
+│   特性介绍：类型模板 / 轻 RPG / 单文件部署        │
+└──────────────────────────────────────────────┘
+```
+
+### 5.3 即时体验页（Instant Preview）
+
+左半屏文本输入 + 右半屏播放器实时预览，适合快速试用：
+
+```
+┌──────────────────────┬───────────────────────┐
+│   文本输入区            │    RPG 播放器预览       │
+│                       │                       │
+│  ┌─────────────────┐  │  ┌─────────────────┐  │
+│  │ 文本框            │  │  │ 播放器画面       │  │
+│  │                  │  │  │                 │  │
+│  │ 粘贴小说片段...    │  │  │ 场景描写...      │  │
+│  │                  │  │  │                 │  │
+│  └─────────────────┘  │  │ ○ 选项 A        │  │
+│                       │  │ ○ 选项 B        │  │
+│  类型: [修仙 ▼]        │  │                 │  │
+│                       │  │                 │  │
+│  [快速生成]            │  └─────────────────┘  │
+│                       │                       │
+│  进度: Step 2/8 完成    │  状态栏: 灵力 ████░░  │
+│  ████████░░░░ 60%     │                       │
+└──────────────────────┴───────────────────────┘
+```
+
+**交互流程**：
+1. 用户粘贴文本（建议 < 500 字）
+2. 选择类型（默认 `literary`）
+3. 点击「快速生成」→ 调用 `POST /api/generate`（`mode: "quick"`）
+4. 通过 SSE 展示进度条
+5. 生成完成后，右侧播放器自动加载 JSON 并开始播放
+
+### 5.4 创作者页（Creator）
+
+完整的创作工作台，支持标准九步流程：
+
+```
+┌──────────────────────────────────────────────────┐
+│  创作者工作台                                       │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ 步骤 1: 文本输入                                 │ │
+│  │                                                │ │
+│  │ [粘贴小说全文] 或 [上传 .txt 文件]               │ │
+│  │ 类型: [修仙 ▼]  标题: [________]               │ │
+│  │ 模式: ○ 标准（九步流程）  ○ 快速                 │ │
+│  │                                                │ │
+│  │ 文本预览字数: 12,340 字  预估节点: ~430         │ │
+│  │ [开始生成]                                       │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ 生成进度                                        │ │
+│  │                                                │ │
+│  │ ✅ Step 1: 原作摄入与记忆索引构建                │ │
+│  │ ✅ Step 2: 风格指纹提取                         │ │
+│  │ ✅ Step 3: 结构拆解与分支点识别                  │ │
+│  │ ✅ Step 4: 状态系统与结局矩阵设计                │ │
+│  │ 🔄 Step 5-7: 分段写作（第 3/8 章）              │ │
+│  │ ⏳ Step 8: 连通性验证                            │ │
+│  │                                                │ │
+│  │ ████████████░░░░░░░░ 65%                       │ │
+│  └──────────────────────────────────────────────┘ │
+│                                                    │
+│  ┌──────────────────────────────────────────────┐ │
+│  │ 预览面板（生成完成后可用）                        │ │
+│  │                                                │ │
+│  │ [在播放器中预览]  [下载 JSON]  [分享链接]       │ │
+│  └──────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────┘
+```
+
+### 5.5 作品库页（Library）
+
+浏览所有已生成作品，点击即可游玩：
+
+```
+┌──────────────────────────────────────────────────┐
+│  作品库                                    [刷新]   │
+│                                                    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│  │ 青炉夜火   │ │ 七日医院   │ │ 深宫诡局   │          │
+│  │ 修仙       │ │ 无限恐怖   │ │ 宫斗       │          │
+│  │ 350 节点   │ │ 280 节点   │ │ 420 节点   │          │
+│  │ [开始游玩] │ │ [开始游玩] │ │ [开始游玩] │          │
+│  └──────────┘ └──────────┘ └──────────┘          │
+│                                                    │
+│  ┌──────────┐ ┌──────────┐                        │
+│  │ ...       │ │ ...       │                        │
+│  └──────────┘ └──────────┘                        │
+└──────────────────────────────────────────────────┘
+```
+
+**数据来源**：`GET /api/works` 返回作品列表。
+
+**播放器集成**：点击「开始游玩」→ 调用 `GET /api/works/:id` 获取 JSON → RPG 播放器（`game-main.html`）加载并播放。
+
+### 5.6 播放器适配
+
+复用现有 `game-main.html` + `RPGStoryLoader`，适配从 API URL 加载 JSON：
+
+```javascript
+// 原有：从本地文件加载
+const storyData = await fetch('./story.json').then(r => r.json());
+
+// 适配：从 API 加载
+const storyData = await fetch(`/api/works/${workId}`).then(r => r.json());
+```
+
+改动范围：仅修改 JSON 数据源，播放器引擎逻辑不变。
+
+---
+
+## 6. 阶段划分（8 个阶段）
+
+### 阶段一：后端 API 服务搭建
+
+**目标**：Flask 后端可运行，四个 API 端点可用
 
 **任务**：
-- P0-1: 定义 `meta.rpg` 完整 schema
-- P0-1.5: 定义 `choice.weight`、`milestones`、`endings`、`delayedChanges`、`interaction.depth` 字段
-- P0-1.5: 定义 `condition.interaction` 前置交互条件
-- P0-1.5: 定义 `candidateEndings` 节点字段
-- 统一 `genre` 枚举值
+- 搭建 Flask 项目骨架（app.py / config.py / routes/）
+- 实现 `POST /api/generate`（接收参数，返回 UUID 和占位响应）
+- 实现 `GET /api/works`（扫描 files/ 目录）
+- 实现 `GET /api/works/:id`（读取 JSON 文件）
+- 实现 `GET /api/generate/status/:id`（SSE 端点骨架）
+- 创建 `files/` 目录结构
+- 编写 `api-client.js`（前端 API 调用封装）
+- CORS 配置（前后端分离开发时需要）
+- 错误处理与日志
 
-**交付物**：Schema 文档通过评审
+**交付物**：可运行的 Flask 服务，API 可通过 curl 测试
 
-**风险检查点**：如果 schema 评审不通过，需在此阶段修正
+**风险检查点**：CORS、文件权限、UUID 生成策略
 
 ---
 
-### 阶段二：核心引擎开发
+### 阶段二：AI 生成服务（快速模式先行）
 
-**目标**：实现状态栏、变化反馈、条件选项、选择重量
+**目标**：AI 能生成符合 Schema v1.0 的游戏 JSON
 
 **任务**：
-- P0-2: 实现 `meta.rpg` 解析器
-- P0-2: 实现顶部状态栏组件（text/number/bar）
-- P0-2: 状态栏样式（暗色/亮色主题适配、Glassmorphism）
-- P0-2.5: 实现 `choice.weight` UI（critical/branch/minor/cosmetic 视觉差异化）
-- P0-2.5: 实现 `weightHint` 悬停/长按提示
-- P0-3: 实现状态详情抽屉
-- P0-4: 实现 `changes` 变化计算引擎和 Toast 组件
-- P0-5: 实现字符串 condition 解析（向后兼容）
-- P0-5: 实现对象 condition 解析（all/any/var/flag/item/interaction）
-- P0-5: 实现 `conditionDisplay`（hide/disabled）
-- P0-7: validate.py 增强（RPG-001 到 RPG-018）
-- Core 抽离：抽出 `story-engine`、`condition-engine`、`change-engine`、`save-model`
+- 封装 Claude 3.5 Sonnet API 调用（`ai_service.py`）
+- 封装 GPT-4o API 调用（`ai_service.py`）
+- 实现 fallback 逻辑（Claude 失败自动切换 GPT-4o）
+- 定义 function calling 的 JSON 输出 schema
+- 实现快速模式生成工作流（`generator.py`）
+  - 内部生成创作摘要
+  - AI 一次性输出完整 JSON
+  - function calling 格式校验
+- 集成 `validate.py` 校验（RPG-001 到 RPG-018）
+- 实现 SSE 进度推送
+- 中间结果缓存（`memory/` 目录）
 
-**交付物**：播放器可显示状态栏、变化反馈、条件选项、选择重量
+**交付物**：输入短文本 → 输出合规 JSON（可通过 validate.py）
 
-**风险检查点**：bar 类型渲染性能、移动端适配
-
----
-
-### 阶段三：修仙 Demo 与联调
-
-**目标**：制作可玩的修仙 Demo，验证核心玩法假设
-
-**内容任务**：
-- 确定修仙 Demo 故事大纲（主角、关键选择、结局方向）
-- 列出修仙 Demo 需要的所有数值
-- 撰写修仙 Demo 节点（40-50 节点，聚焦核心验证）
-- 配置 `meta.rpg`（primaryStats、hiddenStats）
-- 为关键选择配置 `changes` 和 `show`
-- 配置 `choice.weight` 示例
-- 配置 milestones（至少 3 个：1 large + 1 medium + 1 small）
-- 配置 endings（至少 4 个：true/dark/neutral/hidden）
-- 配置 delayedChanges（每个 critical 选择配 1 个）
-
-**开发任务**：
-- 用 validate.py 校验 Demo JSON
-- 播放器加载修仙 Demo 联调
-- 测试状态栏、变化反馈、条件选项、选择重量
-- 测试 milestone 触发、delayedChanges 执行
-
-**交付物**：可完整游玩的修仙 Demo
-
-**风险检查点**：数值平衡、文本质量
+**风险检查点**：
+- Claude/GPT-4o 输出格式稳定性（function calling 是否可靠）
+- 长文本超 token 限制的处理
+- 快速模式生成质量（是否符合最高创作原则）
 
 ---
 
-### 阶段四：测试与迭代
+### 阶段三：前端首页 + 即时体验页
 
-**目标**：内部测试 + 用户测试 + 迭代修复
+**目标**：用户可打开网页，粘贴短文本，快速生成并预览
 
 **任务**：
-- 完整游玩修仙 Demo（多路线）
-- 记录 bug 和体验问题
+- 首页 `index.html`（Landing）
+  - 产品介绍文案
+  - 导航到三个子页面
+  - 迷你播放器 Demo（内置一段修仙片段 JSON）
+- 即时体验页 `preview.html`
+  - 左半屏文本输入区
+  - 右半屏播放器预览区
+  - 类型选择下拉框
+  - 快速生成按钮 + 进度条
+  - SSE 进度监听
+  - 生成完成后自动加载播放器
+- 响应式适配（移动端上下布局）
+- 样式沿用 rpg-game-ui-v2 设计体系
+
+**交付物**：可访问的网页，用户可粘贴文本 → 生成 → 预览
+
+**风险检查点**：移动端体验、SSE 连接稳定性
+
+---
+
+### 阶段四：创作者页（文本输入 + 生成 + 预览）
+
+**目标**：完整的创作工作台，支持标准九步流程
+
+**任务**：
+- 创作者页 `creator.html`
+  - 文本输入区（支持粘贴和文件上传）
+  - 类型 / 标题 / 模式选择
+  - 字数统计和预估节点数
+  - 生成进度面板（九步可视化）
+  - SSE 进度监听
+  - 预览面板（嵌入播放器）
+  - 下载 JSON 按钮
+- 实现标准流程生成工作流（`generator.py`）
+  - Step 1-2：索引 + 风格 → 缓存中间结果
+  - Step 3-4：结构 + 系统设计 → 生成分支拓扑和数值体系
+  - Step 5-7：按章节分批调用 AI → 逐章生成节点 JSON
+  - Step 8：运行 validate.py → 合并输出完整 JSON
+- 每步 SSE 进度推送
+- 上下文管理（中间结果跨步骤携带）
+
+**交付物**：输入中长篇文本 → 完整九步生成 → 预览可玩
+
+**风险检查点**：
+- 中长篇小说分批生成的上下文连续性
+- Token 消耗量与成本
+- 生成耗时（中长篇可能需要 3-5 分钟）
+
+---
+
+### 阶段五：作品库 + 播放器集成
+
+**目标**：浏览所有作品，点击即可游玩
+
+**任务**：
+- 作品库页 `library.html`
+  - 作品卡片列表（从 `GET /api/works` 获取）
+  - 每张卡片显示：标题、类型、节点数、简介
+  - 点击卡片 → 加载播放器
+  - 空状态提示
+  - 刷新按钮
+- 播放器适配
+  - `RPGStoryLoader` 支持 API URL 加载
+  - URL 参数传递作品 ID（`?id=xxx`）
+  - 加载状态提示
+  - 加载失败处理
+- 全站导航（四个页面间的导航栏）
+
+**交付物**：完整的浏览 → 游玩闭环
+
+**风险检查点**：大型 JSON 加载性能（>1000 节点）
+
+---
+
+### 阶段六：SKILL.md RPG 扩展升级
+
+**目标**：AI 生成服务支持完整的 RPG Schema（状态系统、里程碑、结局、交互等）
+
+**任务**：
+- 生成服务集成 `GENRE_TEMPLATES.md`（5 种类型模板）
+- AI prompt 注入类型专属模板（修仙：境界体系 / 无限恐怖：任务系统 / 等）
+- 生成 `meta.rpg` 完整配置
+  - `primaryStats`（text/number/bar）
+  - `conditionDisplay` 策略
+  - `hiddenStats`
+- 生成 `milestones`（至少 3 个：small + medium + large）
+- 生成 `endings`（至少 4 个：true + dark + neutral + hidden）
+- 生成 `delayedChanges`（关键选择的延迟后果）
+- 生成 `choice.weight` 标注（critical/branch/minor/cosmetic）
+- 生成 `interactions`（场景探索交互，含 depth 分级）
+- validate.py 集成增强（RPG 全部 18 条规则）
+- Function calling schema 更新（包含所有 RPG 扩展字段）
+
+**交付物**：AI 生成的 JSON 包含完整 RPG 系统，通过全部校验
+
+**风险检查点**：
+- AI 输出的 RPG 数值是否合理（平衡性）
+- milestones/endings 的条件逻辑是否自洽
+
+---
+
+### 阶段七：修仙 Demo 内容（通过 AI 生成服务真实生成）
+
+**目标**：用 AI 生成服务实际生成一个可玩的修仙 Demo
+
+**任务**：
+- 准备修仙小说素材（约 1-2 万字）
+- 调用标准流程生成完整修仙 JSON
+- 验证生成质量：
+  - 节点数 200-400
+  - 结局数 4-5（含 hidden）
+  - milestones 3 个以上
+  - RPG 状态系统完整
+  - 通过 validate.py 全部规则
+- 播放器加载并完整游玩测试
+- 多路线游玩（至少 3 条不同路线）
+- 修复发现的问题
+
+**交付物**：通过 AI 真实生成的可完整游玩修仙 Demo
+
+**风险检查点**：
+- AI 生成的文本质量是否达到 SKILL.md 最高创作原则标准
+- 分支的因果逻辑是否自洽
+- 数值平衡是否需要人工微调
+
+---
+
+### 阶段八：内测 + 修复
+
+**目标**：内部测试全流程，修复所有 P0/P1 问题
+
+**任务**：
+- 全流程测试（输入 → 生成 → 预览 → 游玩 → 作品库）
+- 多种类型测试（修仙 / 文学 / 悬疑至少各 1 个）
+- 多种文本长度测试（<500字 / 1万字 / 3万字）
 - 移动端测试（iOS Safari + Android Chrome）
-- 用户测试（5-10 名目标用户）
-- 收集反馈并迭代修复
+- 错误场景测试
+  - AI API 超时 / 限流
+  - 格式异常的 JSON
+  - 超大文件加载
+- 性能测试
+  - 大型 JSON（>1000 节点）加载和播放
+  - AI 生成耗时
+- 修复所有 P0 和 P1 问题
+- 更新文档
 
-**交付物**：用户测试报告、修复后的 Demo
+**交付物**：内测通过的全栈系统
 
----
-
-### 阶段五：发布准备
-
-**目标**：GitHub Release + 社区建设
-
-**任务**：
-- 制作演示视频和图文
-- 更新 GitHub README
-- 发布 GitHub Release v0.2
-- 社区运营（B站、小红书、V2EX、知乎、NGA）
-- 撰写复盘报告
-
-**交付物**：Release 包、演示视频、社区反馈
+**风险检查点**：AI API 成本与稳定性
 
 ---
 
-### 阶段六：Q4 扩展（场景交互 + 无限恐怖）
+## 7. 依赖关系图
 
-**目标**：增加互动深度，扩展类型覆盖
+```
+阶段一：后端 API 服务搭建
+  │
+  ├── 阶段二：AI 生成服务（快速模式先行）
+  │     │
+  │     ├── 阶段三：前端首页 + 即时体验页
+  │     │     │
+  │     │     └── 阶段四：创作者页（标准流程）
+  │     │           │
+  │     │           └── 阶段五：作品库 + 播放器集成
+  │     │
+  │     └── 阶段六：SKILL.md RPG 扩展升级
+  │           │
+  │           └── 阶段七：修仙 Demo 内容（AI 真实生成）
+  │                 │
+  │                 └── 阶段八：内测 + 修复
+  │
+  └── （阶段三、五可部分与二并行：前端页面骨架可先开发）
+```
 
-**任务**：
-- P1-1: `interactions` 字段 + UI
-- P1-1.5: `interaction.depth` 三级探索
-- P1-1.5: `interaction.hint` 字段
-- P1-2: `inventory` 字段 + 背包 UI
-- P1-2.5: `delayedChanges` 延迟后果引擎
-- P1-3: `milestones` 庆祝 UI（small/medium/large + VFX）
-- P1-3.5: `endings` 数据包 + dot tracker + hidden 结局
-- P1-4: 无限恐怖 Demo
-- P1-5: Skill 类型识别升级
-- P1-6: 调试器增强
+**关键路径**：阶段一 → 阶段二 → 阶段四 → 阶段六 → 阶段七 → 阶段八
 
----
-
-### 阶段七：Q1 扩展（类型扩展 + 小程序）
-
-**目标**：覆盖更多类型，建立小程序分发渠道
-
-**任务**：
-- 悬疑 Demo
-- 末世 Demo
-- 宫斗 Demo
-- 示例库整理
-- 小程序内测版（作品列表、云端 JSON、分享）
+**可并行路径**：阶段三可与阶段二并行（快速模式完成后集成）；阶段五可与阶段四并行
 
 ---
 
-### 阶段八：平台化探索
+## 8. MVP 分层定义
 
-**目标**：探索商业化路径
+### 全栈 MVP 必须（阶段 1-4 交付）
+- Flask 后端 4 个 API 端点
+- AI 快速模式生成（短文本 → JSON）
+- AI 标准模式生成（中长篇 → JSON）
+- SSE 进度推送
+- 首页 + 即时体验页 + 创作者页
+- 播放器从 API URL 加载 JSON
+- validate.py 校验集成
 
-**任务**：
-- 商业化方案设计
-- 创作者平台评估
-- 与橙光/易次元合作评估
-- OpenCore + 捐赠模式
+### 全栈 MVP 应该 / Stretch Goal（阶段 5-6 交付）
+- 作品库页
+- RPG 扩展完整支持（milestones / endings / interactions）
+- 5 种类型模板集成
+
+### 后续迭代（阶段 7-8 交付）
+- 修仙 Demo 真实生成验证
+- 全流程内测
 
 ---
 
-## 4. 每阶段检查清单
+## 9. 每阶段检查清单
 
 每个阶段结束，确认：
 
 ```
 □ 本阶段任务是否完成？
+□ API 是否可测试（后端阶段）？
+□ 页面是否可访问（前端阶段）？
+□ AI 生成质量是否达标（AI 阶段）？
 □ 是否有阻塞问题需要处理？
 □ 下阶段计划是否需要调整？
 □ 代码是否已提交并推送？
@@ -273,21 +791,43 @@ P1-4 Skill 类型识别
 
 ---
 
-## 5. 关键决策点
+## 10. 关键决策点
 
 | 决策 | 选项 | 建议 |
 |------|------|------|
-| 开发资源不足？ | 缩减 Demo 规模至 30 节点，将 milestones/endings 推迟到 Q4 | 先确保核心 P0-1 到 P0-5 完成 |
-| Schema 是否锁定？ | 锁定 / 继续调整 | 锁定，进入开发 |
-| milestone 基础框架是否纳入 Q3 MVP？ | 纳入 / 延后 | 纳入至少 small+medium |
-| Demo 是否可玩？ | 可玩 / 延期 | 延期不超过 1 周 |
-| 用户反馈是否达标？ | 达标 / 不达标 | 不达标则执行 Plan B |
-| 小程序技术路径是否成立？ | 成立 / 暂缓 | 同一份 JSON 能否稳定播放 |
-| large 里程碑的 VFX 复杂度？ | 全题材 VFX / 先做修仙 | 先做修仙，验证后扩展 |
-| hidden 结局的数量和复杂度？ | 每类型 1 个 / 每类型 2 个 | 每类型 1 个 hidden |
-| 是否进入小程序公开测试？ | 是 / 否 | 取决于 Q3/Q4 用户数据 |
-| 商业化方向？ | 平台 / 合作 / 捐赠 | 根据用户规模决定 |
+| Claude API 不可用？ | 仅用 GPT-4o / 等待恢复 | 仅用 GPT-4o，快速模式质量足够 |
+| AI 输出 JSON 格式不稳定？ | 增加重试 + 后处理脚本 / 切换模型 | 先重试 2 次，再后处理修复，最后切换 |
+| 文件存储不够用？ | 迁移到 SQLite / 云存储 | 视规模决定，初期文件系统足够 |
+| 前端需要构建工具？ | 继续原生 / 引入 Vite | 继续原生，保持单文件可部署优势 |
+| 生成耗时过长？ | 增加预估提示 / 分步预览 | 显示预估时间和每步进度，阶段四加入分步预览 |
+| 部署方式？ | 本地运行 / Docker / 云服务 | 初期本地/Docker，后续可迁移云服务 |
 
 ---
 
-> 本开发计划基于 v2-PRD 和 v2-ROADMAP，是可直接执行的阶段级别任务分解。v3.0 整合了 choice.weight 权重系统、milestone 里程碑框架、endings 多结局系统、delayedChanges 延迟后果机制、interaction.depth 渐进探索等新玩法机制。实际执行中可根据用户反馈灵活调整。
+## 11. 未来方向（本期不实施，仅记录）
+
+| 方向 | 说明 | 优先级 |
+|------|------|--------|
+| 微信小程序 | 基于同一份 JSON 协议开发小程序播放器，作为移动端入口 | P1（Q4） |
+| 用户系统 | 创作者账号、作品管理、游玩存档云端同步 | P2（2027 Q1） |
+| 多人协作 | 多人共创一部作品 | P3（远期） |
+
+---
+
+## 12. 当前已完成状态（2026-07-04 基线）
+
+### 已完成
+
+- Schema v1.0 锁定（`docs/SCHEMA_v1.md`，897 行）
+- 5 种类型小说玩法模板（`docs/GENRE_TEMPLATES.md`，887 行）
+- validate.py 18 条 RPG 校验规则（RPG-001 ~ RPG-018）
+- SKILL.md 九步工作流定义（含快速模式）
+- rpg-game-ui-v2 前端架构
+
+### 待开始
+
+本实施方案的全部 8 个阶段。
+
+---
+
+> 本文档为 Story-to-Game 全栈轻量实施方案，采用「静态前端 + 轻量 API + JSON 文件存储」架构，将 AI 生成能力产品化。保留所有工程原则（向后兼容、先 schema 后 UI、双端同源 JSON 协议等），删除数据库、用户系统、权限管理、商业化等非核心内容。实际执行中可根据 AI 生成质量和用户反馈灵活调整。
