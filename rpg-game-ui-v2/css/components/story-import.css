@@ -1,0 +1,241 @@
+/**
+ * story-import.css — Story Import Overlay & Mode Indicator
+ */
+
+/* ================================================================
+   1. Import Overlay
+   ================================================================ */
+
+#story-import-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  opacity: 1;
+  transition: opacity var(--duration-normal);
+}
+
+#story-import-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.story-import-panel {
+  width: 400px;
+  max-width: 90vw;
+  background: var(--c-bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-xl);
+  animation: fadeSlideUp var(--duration-normal) var(--ease-out-expo);
+}
+
+.story-import-header {
+  text-align: center;
+  margin-bottom: var(--space-5);
+}
+
+.story-import-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--c-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.story-import-title .import-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--c-brand-light);
+}
+
+.story-import-desc {
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+/* Drop Zone */
+.story-drop-zone {
+  border: 2px dashed var(--c-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  transition: all var(--duration-fast);
+  cursor: pointer;
+  background: var(--glass-bg);
+}
+
+.story-drop-zone:hover {
+  border-color: var(--c-brand-light);
+  background: rgba(201, 168, 108, 0.04);
+}
+
+.story-drop-zone.drag-over {
+  border-color: var(--c-brand-light);
+  background: rgba(201, 168, 108, 0.1);
+  box-shadow: 0 0 20px rgba(201, 168, 108, 0.15);
+}
+
+.story-drop-zone .drop-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--c-text-muted);
+  margin-bottom: var(--space-3);
+  transition: color var(--duration-fast);
+}
+
+.story-drop-zone:hover .drop-icon,
+.story-drop-zone.drag-over .drop-icon {
+  color: var(--c-brand-light);
+}
+
+.story-drop-zone p {
+  font-size: var(--text-sm);
+  color: var(--c-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.story-drop-zone span {
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+}
+
+.story-file-picker-btn {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-brand-light);
+  background: transparent;
+  color: var(--c-brand-light);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.story-file-picker-btn:hover {
+  background: rgba(201, 168, 108, 0.12);
+}
+
+/* Import Status */
+.story-import-status {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  text-align: center;
+  line-height: var(--leading-relaxed);
+}
+
+.story-import-status.success {
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  color: #4ade80;
+}
+
+.story-import-status.error {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+  color: #f87171;
+}
+
+/* Import Actions */
+.story-import-actions {
+  margin-top: var(--space-5);
+  text-align: center;
+}
+
+.story-import-cancel-btn {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--c-border-subtle);
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.story-import-cancel-btn:hover {
+  border-color: var(--c-border-default);
+  color: var(--c-text-secondary);
+}
+
+/* ================================================================
+   2. Story Mode Indicator
+   ================================================================ */
+
+.story-mode-indicator {
+  position: fixed;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-xs);
+  color: var(--c-text-secondary);
+  backdrop-filter: blur(12px);
+  animation: fadeSlideDown var(--duration-normal) var(--ease-out-expo);
+}
+
+.story-mode-indicator .rpg-badge {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(201, 168, 108, 0.15);
+  color: var(--c-brand-light);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xs);
+}
+
+.story-change-btn {
+  padding: 2px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--c-border-subtle);
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.story-change-btn:hover {
+  border-color: var(--c-brand-light);
+  color: var(--c-brand-light);
+}
+
+/* ================================================================
+   3. Responsive
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .story-import-panel {
+    padding: var(--space-4);
+    width: 95vw;
+  }
+
+  .story-drop-zone {
+    padding: var(--space-6) var(--space-3);
+  }
+
+  .story-mode-indicator {
+    top: var(--space-2);
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-3);
+  }
+}

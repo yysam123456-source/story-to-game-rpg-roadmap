@@ -36,6 +36,8 @@
   <link rel="stylesheet" href="../css/components/endings.css">
   <!-- RPG Core Engine Extensions -->
   <link rel="stylesheet" href="../css/components/rpg-extensions.css">
+  <!-- Story Import -->
+  <link rel="stylesheet" href="../css/components/story-import.css">
 </head>
 <body>
 
@@ -262,9 +264,13 @@
         </div>
       </div>
       <div class="menu-divider"></div>
-      <button class="menu-item" onclick="window.uiController._closeMenu(); window.rpgStoryLoader.loadFromUrl('../demo-rpg-story.json')" aria-label="加载RPG剧本">
+      <button class="menu-item" id="menu-import-story" aria-label="导入剧本">
         <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        <span>加载 RPG 剧本</span>
+        <span>导入剧本</span>
+      </button>
+      <button class="menu-item" onclick="window.uiController._closeMenu(); window.rpgStoryLoader.loadFromUrl('../demo-rpg-story.json')" aria-label="加载RPG剧本">
+        <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>加载 Demo</span>
       </button>
       <button class="menu-item" onclick="window.uiController._closeMenu(); window.themeEngine._testChapterTransition()" aria-label="测试转场">
         <svg class="item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
@@ -452,6 +458,36 @@
 
 </div>
 
+<!-- Story Import Overlay -->
+<div id="story-import-overlay" class="hidden">
+  <div class="story-import-panel">
+    <div class="story-import-header">
+      <div class="story-import-title">
+        <svg class="import-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-book"/></svg>
+        <span>导入剧本</span>
+      </div>
+      <p class="story-import-desc">选择或拖拽一个 JSON 剧本文件开始游戏</p>
+    </div>
+    <div id="story-drop-zone" class="story-drop-zone">
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>拖拽 JSON 文件到此处</p>
+      <span>或</span>
+      <button id="story-file-picker-btn" class="story-file-picker-btn">选择文件</button>
+      <input type="file" id="story-file-input" accept=".json" style="display:none">
+    </div>
+    <div id="story-import-status" class="story-import-status" style="display:none"></div>
+    <div class="story-import-actions">
+      <button id="story-import-cancel" class="story-import-cancel-btn">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Story Mode Indicator -->
+<div id="story-mode-indicator" class="story-mode-indicator" style="display:none">
+  <span id="story-mode-text"></span>
+  <button id="story-change-btn" class="story-change-btn">更换剧本</button>
+</div>
+
 <!-- Scripts -->
 <script src="../js/portrait.js"></script>
 <script src="../js/save-system.js"></script>
@@ -498,11 +534,17 @@
     window.achievementSystem.init();
     window.endingSystem.init();
 
-    // Load default genre (xianxia)
-    window.themeEngine.switchGenre('xianxia');
+    // Initialize story import UI
+    window.RPGStoryLoader.initImportUI(window.rpgStoryLoader);
 
-    // Auto-load demo RPG story (optional)
-    // window.rpgStoryLoader.loadFromUrl('../demo-rpg-story.json');
+    // Bind menu import button
+    document.getElementById('menu-import-story').addEventListener('click', function () {
+      window.uiController._closeMenu();
+      window.RPGStoryLoader.showImportOverlay();
+    });
+
+    // Load default genre (xianxia) — legacy demo mode
+    window.themeEngine.switchGenre('xianxia');
   });
 </script>
 
