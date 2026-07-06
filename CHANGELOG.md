@@ -1,111 +1,114 @@
-# 变更日志
+# Story-to-Game 变更日志
 
-本文档记录 Story-to-Game 项目的所有重要变更。
+## v1.3.0 — 2026-07-07
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
-版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+### 平台化迁移完成
 
----
+Story-to-Game 从"开源工具套件"正式进化为"在线 AI 互动叙事平台"。
 
-## [Unreleased]
+### 新增：Schema v1.1 扩展
 
-### 计划
-- i18n 支持（多语言剧本）
-- 补充 SCHEMA_v1.md 的更多示例
-- 为所有 5 种类型模板补充完整示例 JSON
+- `meta.rules` — 10 项创作者自定义规则（节奏密度、选项风格、数值影响、隐藏内容、结局倾向、叙事人称、对白密度、信息不对称、时间压力、NPC 关系）
+- `npcRelations` — NPC 关系网络（id / name / role / description / initialAffinity / hidden）
+- `timePressure` — 时间压力系统（countdown / timeoutNode / timeoutFlag / globalDecay / warningMessage / timeoutMessage）
+- `achievements.autoUnlock` — 成就自动解锁条件
+- 条件引擎新增 `affinity` 条件类型：`{ affinity: { npc, op, value } }`
 
----
+### 新增：SKILL.md 可玩性扩展（7 个方向）
 
-## [1.2.0] - 2026-07-06
+- A. 节奏控制 — pacing 字段 + 节点密度配置
+- B. 信息不对称 — hiddenInfo / knownBy / revealAfter 三层结构
+- C. 数值叙事绑定 — statsNarrative 字段 + 角色成长弧光
+- D. NPC 关系网络 — npcRelations + affinityChanges
+- E. 时间压力 — timePressure + countdown + globalDecay
+- F. 成就系统 — autoUnlock + conditionalUnlock
+- G. 自定义规则层 — meta.rules + 类型推荐默认值
 
-### 新增
-- `SCHEMA_v1.md`：新增 endings[].closing 字段定义、milestones[].once 字段定义
-- `validate.py`：新增 RPG-014 ~ RPG-018 共 5 条校验规则（endings.type 枚举、milestones.celebration 枚举、interaction.depth 枚举、condition var 引用检查、hiddenStats 引用检查）
-- `GENRE_TEMPLATES.md`：新增全局"安全屋章节设计"章节（去重，从 5 个类型模板中提取）
+### 新增：前端自定义规则配置 UI
 
-### 改进
-- `v2-PRD.md`：P0-7 校验规则改为引用 `SCHEMA_v1.md` 第 16 节，消除与 validate.py 的编号冲突
-- `v2-PRD.md`：`meta.rpg.enabled` 从"必填"改为"可选，默认 false"
-- `json-format-spec.md`：旧 `isEnding` 节点内结局标注为兼容保留，推荐顶层 `endings[]` + `candidateEndings`
-- `json-format-spec.md`：新增 condition.interaction 条件类型示例
-- `step4-system.md`：统一结局类型命名为小写（`failure`/`true`/`dark`/`neutral`/`hidden`/`noble`）
-- `step4-system.md`：补充 closing 字段说明并引用 `SCHEMA_v1.md`
-- `README.md`：新增 `SCHEMA_v1.md` 入口链接、修复目录结构描述、修复启动器文件名
+- `/instant` 页面新增可折叠规则面板
+- 类型选择时自动应用推荐配置（修仙→relaxed+npcRelations，恐怖→compact+timePressure 等）
+- 10 项规则全部可通过 UI 配置并传递给 AI 生成
 
-### 修复
-- **17 个跨引用不一致问题**：规则数量 13→18 的同步（7 个文件）、结局类型全大写→小写（6 个文件，29 处替换）
-- `SCHEMA_v1.md`：删除 `mode` 字段重复行
-- `剧情游戏启动器_开发者调试版.html`：内嵌示例数据中结局类型同步为小写
-- `测试案例-成人日.json`：结局类型同步为小写
-- `JSON剧本规则文档.md`：结局类型同步为小写
-- `SKILL.md`：结局类型同步为小写
-- `step5-writing.md`：RASH ENDING → failure
+### 新增：播放器引擎功能增强
 
-### 关闭
-- GitHub Issue #9：validate.py 增强已完成（RPG-001 ~ RPG-018）
+- **NPC 关系面板**：右下角悬浮按钮打开关系面板，显示好感度进度条和角色描述
+- **时间压力条**：顶部固定位置倒计时条，30% 阈值变红闪烁警告，超时自动跳转
+- **自动成就检测**：每节点导航后自动扫描 `autoUnlock` 条件，满足时即时解锁
+- **globalDecay**：每节点自动应用数值/好感度衰减
 
----
+### 架构调整
 
-## [1.1.0] - 2026-07-04
+- **播放器方案**：从"React 重写"改为"iframe 嵌入原生 JS 引擎"，保留 100% 原有功能
+- **AI 多提供商**：支持硅基流动 / DeepSeek / 百炼 / OpenAI / OpenRouter，环境变量切换
+- **部署双轨**：Vercel（国际）+ 国内云（腾讯云 CloudBase / 阿里云 / VPS），详见 `web/DEPLOY.md`
+- **存储抽象**：local 文件系统 / Vercel Blob / S3 预留接口
 
-### 新增
-- `GENRE_TEMPLATES.md`：为修仙类型补充完整示例 JSON
-- `step4-system.md`：新增第六节"RPG 扩展状态系统设计"
+### 引擎修复
 
-### 改进
-- `GENRE_TEMPLATES.md`：补充 `choice.weightTag` 和 `importantFlag` 说明
-- `GENRE_TEMPLATES.md`：补充 `candidateEndings` 结局检测方式说明
-- `JSON剧本规则文档.md`：补充 `candidateEndings` 字段说明
-- `JSON剧本规则文档.md`：补充 `weight`、`weightTag`、`weightHint` 字段到 choices 字段表
-- `json-format-spec.md`：补充顶层结构的可选字段（`flags`、`inventory`、`milestones`、`endings`、`mission`）
-- `json-format-spec.md`：补充节点结构的可选字段（`candidateEndings`、`interactions`、`delayedChanges`）
-- `step4-system.md`：补充 `importantFlag`、`weightTag`、`candidateEndings` 字段说明
-- `README.md`：新增变更日志部分
+- 修复 `rpg-story-loader.js` 成就/结局方法调用错误（unlock/register/discover 区分）
+- 修复 `save-system.js` 缩略图为关键信息+时间文本（替代 null thumbnail）
+- 修复 `rpg-core.js` applyChanges 背包实际写入逻辑
+- 修复 `theme.js` 场景图相对路径问题
+- 修复设置控件绑定（BGM/SFX 音量、字体大小）
+- 添加 iframe postMessage 通信接口（nodeChange / stateResponse / navigateTo）
 
-### 修复
-- `validate.py`：修正 18 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~018）
+### 清理
 
-### 验证
-- ✅ `validate.py` 的 18 条 RPG 校验规则全部通过测试
-- ✅ 文档一致性检查通过（`choice.weightTag`、`importantFlag`、`candidateEndings` 在所有相关文档中均有说明）
+- 删除旧版文档（JSON剧本规则文档.md、剧情游戏启动器_开发者调试版.html 等）
+- 删除废弃 React 播放器组件（`components/player/*`）
 
 ---
 
-## [1.0.0] - 2026-07-03
+## v1.2.0 — 2026-07-04
 
-### 新增
-- `SCHEMA_v1.md`：锁定 RPG JSON Schema v1.0 正式定义（897 行）
-- `GENRE_TEMPLATES.md`：5 种类型小说玩法模板（修仙/无限流/悬疑/末世/宫斗）
-- `RPG_JSON_SCHEMA_PROPOSAL.md`：RPG 化 JSON 扩展提案（771 行）
-- `WECHAT_MINIPROGRAM_INTEGRATION.md`：微信小程序并行集成方案
-- `v2-PRD.md`：产品需求文档 v3.0
-- `v2-IMPLEMENTATION.md`：阶段划分与交付标准
-- `v2-ROADMAP.md`：季度迭代路线图
+### 新增：核心 RPG 引擎 v2
 
-### 改进
-- `json-format-spec.md`：更新为包含 RPG 扩展的完整 JSON 格式速查手册
-- `step4-system.md`：补充 RPG 状态系统设计指导
-- `validate.py`：实现 18 条 RPG 校验规则（RPG-001~018）
+- `rpg-core.js` — 核心状态机 + 条件引擎（6 种条件类型）+ 变更引擎
+- `rpg-status-bar.js` — 状态栏渲染（primaryStats text/number/bar）
+- `rpg-choice.js` — 选项渲染 + 条件置灰/隐藏 + 权重标签（critical/branch/minor/cosmetic）
+- `rpg-story-loader.js` — JSON 加载 + 节点导航 + 自动路由 + 延迟变化 + 交互探索
+- 条件评估：数值比较、flag 检查、组合条件（all/any）、交互完成状态
+- 变更应用：变量加减、flag 管理、成就解锁、背包变更、延迟变化队列
 
-### 文档
-- 系统性对齐 `SCHEMA_v1.md` 与 `GENRE_TEMPLATES.md`
-- 系统性对齐 `json-format-spec.md` 与 `SCHEMA_v1.md`
-- 创建 `ALIGNMENT_REPORT.md`（如有）记录对齐分析结果
+### 新增：5 种类型主题系统
 
----
+- 修仙 / 恐怖 / 悬疑 / 末世 / 宫斗，各带专属状态系统、主题色、场景图、VFX
 
-## [0.9.0] - 2026-06-XX
+### 引擎修复
 
-### 初始版本
-- `剧情游戏启动器_开发者调试版.html`：分支剧情游戏启动器（单文件）
-- `SKILL.md`：Story-to-Game AI 技能定义（九步工作流）
-- `step1-ingestion.md` ~ `step6-validation.md`：AI 技能细分规则文档
-- `validate.py`：JSON 自动验证脚本（基础 13 项检查）
-- `JSON剧本规则文档.md`：面向内容创作者的 JSON 写作规范
+- 修复状态栏渲染与主题切换
+- 修复选项条件评估和权重显示
+- 修复交互按钮点击反馈
+- 修复背包面板渲染
 
 ---
 
-**版本说明**：
-- **v1.0**：基础文学模式 + RPG 扩展提案
-- **v1.1**：系统性对齐完善（文档一致性 + 校验规则修正）
-- **v2.0**：计划版本（i18n 支持 + 更多示例 + 播放器 RPG 功能实现）
+## v1.1.0 — 2026-07-03
+
+### 新增：前端页面骨架
+
+- `web/` 目录：Next.js 14 App Router 项目初始化
+- 首页 / — 产品介绍 + CTA
+- 即时体验页 /instant — 文本输入 + 生成 + 预览
+- 作品库页 /library — 作品卡片列表
+- 播放器页 /play/[id] — 动态路由加载作品
+- 3 个 API 路由：POST /api/generate、GET /api/works、GET /api/works/[id]
+- 存储抽象层：Vercel Blob / 本地文件系统
+- AI 客户端：SSE 流式生成，Claude/GPT-4o 双模型
+
+---
+
+## v1.0.0 — 2026-07-02
+
+### 初始版本：工具套件
+
+- `SCHEMA_v1.md` — JSON Schema v1.0 锁定
+- `SKILL.md` — AI 九步工作流定义
+- `validate.py` — 18 条 RPG 校验规则
+- `rpg-game-ui-v2/` — 原生 HTML/CSS/JS 播放器原型
+  - Glassmorphism 暗色系 UI
+  - 5 种题材主题切换
+  - 状态栏、背包、存档、场景系统
+  - 粒子特效 + 环境效果
+- `docs/GENRE_TEMPLATES.md` — 5 种类型小说玩法模板

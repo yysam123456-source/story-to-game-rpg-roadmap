@@ -1,171 +1,262 @@
-# Story-to-Game: 互动文游生成与运行套件
+# Story-to-Game
 
-> 本仓库基于原 `Story-to-game` 项目导入，并新增 RPG 化、类型小说玩法模板、场景交互和后续阶段开发规划。原项目文件保持可用；新增规划文档位于 `docs/`，解包后的 Skill 源码位于 `story-to-game-source/`，便于后续基于文本 diff 持续开发。
+> **在线 AI 互动叙事平台** —— 粘贴小说，AI 自动生成分支剧情游戏，即时游玩。
 
-## 变更日志
-
-### 2026-07-04：系统性对齐完善（v1.1）
-
-基于 `SCHEMA_v1.md` 与 `GENRE_TEMPLATES.md` 的系统性对齐，完成以下改进：
-
-**文档更新**：
-- `GENRE_TEMPLATES.md`：补充 `choice.weightTag`、`importantFlag`、`candidateEndings` 说明和完整示例 JSON
-- `JSON剧本规则文档.md`：补充 `candidateEndings`、`weight`、`weightTag`、`weightHint` 字段说明
-- `json-format-spec.md`：补充顶层结构和节点结构的可选字段示例
-- `step4-system.md`：新增第六节"RPG 扩展状态系统设计"
-
-**工具改进**：
-- `validate.py`：修正 18 条 RPG 校验规则编号与 `SCHEMA_v1.md` 完全对齐（RPG-001~018）
-
-**详细报告**：参见 `docs/ALIGNMENT_REPORT.md`（如有）
+[![GitHub](https://img.shields.io/badge/GitHub-story--to--game--rpg--roadmap-blue)](https://github.com/yysam123456-source/story-to-game-rpg-roadmap)
 
 ---
 
-## 后续开发规划
+## 项目简介
 
-当前规划目标是将项目从“高质量互动文学播放器”逐步升级为“类型小说轻 RPG 文游生成器”。
+Story-to-Game 是一个**零门槛**的 AI 互动叙事创作平台：
 
-核心方向：
+1. **粘贴小说文本**（片段或全文）
+2. **选择类型**（修仙 / 恐怖 / 悬疑 / 末世 / 宫斗 / 通用）
+3. **自定义游戏规则**（节奏密度、数值影响、隐藏内容、NPC 关系、时间压力等）
+4. **AI 自动生成**符合 Schema v1.1 的分支剧情 JSON 剧本
+5. **即时在浏览器中游玩** —— 状态栏、条件选项、成就系统、NPC 关系、时间压力全部可用
 
-- RPG 数值可视化：展示境界、灵力、理智、资源、关系等状态。
-- 选择反馈增强：玩家选择后能看到数值、flag、道具变化。
-- 场景交互系统：支持调查、搜索、修炼、交谈、使用道具。
-- 背包与资源系统：支持道具、资源消耗和条件判断。
-- 类型模板：优先支持修仙、无限恐怖，再扩展悬疑、末世、宫斗/权谋。
-- 微信小程序并行集成：HTML 继续负责开源和独立部署，小程序负责移动端传播和未来商业化。
-- Skill 升级：让 AI 根据小说类型自动生成对应玩法循环和 JSON 结构。
-- 校验器与调试器增强：检查 RPG 字段、交互逻辑和类型模板完整性。
+**核心转变**：从"下载 HTML → 手写 JSON → 本地运行"的开发者工具，进化为"粘贴小说 → AI 生成 → 即时游玩"的在线平台。
 
-详细文档：
+---
 
-- `docs/v2-ROADMAP.md`：季度迭代路线图（Q3 MVP → Q4 核心互动 → Q1 类型扩展 → Q2 平台化）。
-- `docs/v2-IMPLEMENTATION.md`：阶段划分与交付标准。
-- `docs/v2-PRD.md`：产品需求文档 v3.0（RPG 状态、变化反馈、选择重量、渐进探索、里程碑、结局系统）。
-- `docs/RPG_JSON_SCHEMA_PROPOSAL.md`：RPG 化 JSON 扩展草案。
-- `docs/SCHEMA_v1.md`：已锁定的 JSON Schema 规范 v1.0（Phase 1 交付物）。
-- `docs/GENRE_TEMPLATES.md`：类型小说玩法模板（修仙/无限恐怖/悬疑/末世/宫斗）。
-- `docs/WECHAT_MINIPROGRAM_INTEGRATION.md`：微信小程序并行集成方案。
-- `docs/GITHUB_ISSUE_BACKLOG.md`：开发清单。
+## 功能亮点
 
-## 仓库结构补充
+| 功能 | 说明 |
+|------|------|
+| **AI 剧本生成** | 粘贴小说文本，SSE 流式生成 40-80 节点、3-5 结局的完整分支剧情 |
+| **自定义规则** | 10 项创作者规则：节奏密度、选项风格、数值影响、隐藏内容、结局倾向、人称、对白密度、信息不对称、时间压力、NPC 关系 |
+| **类型模板** | 6 种类型专属状态系统与主题（修仙·境界修为 / 恐怖·理智生存 / 悬疑·线索推理 / 末世·资源人性 / 宫斗·宠爱权谋 / 通用） |
+| **RPG 引擎** | 条件选项（6 种条件类型）、数值变化反馈、NPC 好感度、时间压力倒计时、自动成就检测 |
+| **场景系统** | 场景切换动画、5 种题材专属场景图、节点级背景覆盖 |
+| **存档系统** | 多档位存档、游玩时长追踪、关键信息摘要 |
+| **成就系统** | 自动解锁（条件达成）+ 手动触发，含稀有度分级 |
+| **背包系统** | 分类筛选、数量堆叠、物品获取/消耗反馈 |
+| **视觉设计** | Glassmorphism 暗色系 + 5 种题材实时切换 + 粒子特效（可关闭） |
+| **iframe 播放器** | 原生 JS 引擎 100% 功能保留，iframe 嵌入 Next.js 页面 |
 
-```text
-docs/
-├── v2-ROADMAP.md              # 季度迭代路线图
-├── v2-IMPLEMENTATION.md       # 阶段划分与交付标准
-├── v2-PRD.md                  # 产品需求文档 v3.0
-├── SCHEMA_v1.md              # 已锁定的 JSON Schema
-├── RPG_JSON_SCHEMA_PROPOSAL.md
-├── GENRE_TEMPLATES.md
-├── WECHAT_MINIPROGRAM_INTEGRATION.md
-└── GITHUB_ISSUE_BACKLOG.md    # 开发清单
+---
 
-story-to-game-source/
-├── SKILL.md
-├── references/
-└── scripts/
+## 技术架构
 
-rpg-game-ui-v2/                    # UI 原型（5 种题材主题、VFX、状态栏、交互系统）
-├── index.html
-├── UI-DESIGN-SPEC.md
-├── css/
-│   ├── base.css
-│   ├── tokens.css                 # Design Tokens
-│   ├── themes/                    # 5 种题材主题
-│   └── vfx/                       # 视觉特效
-├── js/
-│   ├── state.js                   # 游戏状态管理
-│   ├── theme.js                   # 主题切换引擎
-│   ├── ui.js                      # UI 控制器
-│   ├── vfx.js                     # 视觉特效引擎
-│   └── ...                        # 其他模块
-└── pages/
-    └── game-main.html
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    前端层（Next.js 14 App Router）            │
+│  ├─ 首页 /                    — 产品介绍 + CTA               │
+│  ├─ 即时体验 /instant         — 粘贴 → 生成 → 游玩           │
+│  ├─ 作品库 /library           — 卡片列表 + 分类筛选           │
+│  └─ 播放器 /play/[id]         — iframe 嵌入原生引擎          │
+├─────────────────────────────────────────────────────────────┤
+│                    API 层（Next.js Route Handlers）          │
+│  ├─ POST /api/generate        — SSE 流式 AI 生成             │
+│  ├─ POST /api/works           — 保存作品                     │
+│  ├─ GET  /api/works           — 作品列表                     │
+│  └─ GET  /api/works/[id]      — 获取单个作品 JSON            │
+├─────────────────────────────────────────────────────────────┤
+│                    AI 层（多提供商）                          │
+│  ├─ 硅基流动 / DeepSeek / 百炼 / OpenAI / OpenRouter         │
+│  └─ 环境变量配置切换，OpenAI 兼容 API 格式                   │
+├─────────────────────────────────────────────────────────────┤
+│                    存储层（抽象适配）                          │
+│  ├─ Vercel Blob（国际部署）                                  │
+│  ├─ 本地文件系统（开发环境）                                  │
+│  └─ 阿里云 OSS / 腾讯云 COS（国内部署预留）                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-开发原则：
+**技术栈**：Next.js 14 App Router + TypeScript + Tailwind CSS + Shadcn/ui，部署支持 Vercel / 国内云双轨。
 
-- 旧 JSON 必须保持兼容。
-- 新 RPG 字段默认可选。
-- 数值服务叙事，不让数值压过文学表达。
-- HTML 播放器和微信小程序共享同一套 JSON 剧本协议。
-- 每个阶段都需要示例 JSON 和 `validate.py` 校验。
+### 播放器引擎（iframe 方案）
 
-一套从「小说/剧本转互动文游」到「运行互动文游」的全流程工具，包含两大核心组件：
-✅ 分支剧情游戏启动器（HTML单文件）：直接加载JSON剧本，沉浸式游玩纯文字分支剧情
-✅ Story-to-Game AI技能：将任意体量的小说/剧本/故事大纲，转化为符合启动器规范的分支剧情JSON
+```
+public/player/
+  js/
+    rpg-core.js          # 核心状态机 + 条件引擎 + 变更引擎
+    rpg-story-loader.js  # JSON 加载 + 节点导航 + 延迟变化 + 时间压力
+    rpg-status-bar.js    # 状态栏渲染（primaryStats）
+    rpg-choice.js        # 选项渲染 + 条件置灰 + 权重标签
+    ui.js                # UI 控制器 + 菜单 + 背包 + 设置 + NPC 关系
+    theme.js             # 主题切换 + 场景图加载
+    vfx.js               # 粒子特效 + 环境效果
+    state.js             # 游戏状态管理
+    save-system.js       # 存档系统
+    achievement-system.js # 成就系统
+    audio-system.js      # 音效 + BGM
+  css/
+    main.css              # 主样式
+    components/           # 组件样式
+      rpg-extensions.css  # RPG 面板 + 时间压力 + NPC 关系
+  pages/
+    game-main.html        # 播放器入口（iframe 加载）
+```
 
-作者
-@山音 山之音STUDIO创始人｜编剧、导演、作家
-初心榜十大年度AI人物｜非凡大赏AI CREATOR 100年度人物
-曾担任北影节AI单元、百度AI电影季等大赛评委；作品在戛纳、釜山、北影、First、HiShorts等数十个电影节展入围获奖。
-联系方式小红书@山音  li-yinqian@outlook.com
+**关键决策**：播放器采用 **iframe 嵌入原生 JS 引擎**（方案 A），而非 React 重写。保留 100% 原有功能，通过 `postMessage` 与父页面通信。
 
-## 核心功能
-### 🎮 分支剧情游戏启动器（HTML）
-单文件无依赖，直接在浏览器运行，核心能力：
-- 极简书架式界面：导入/管理JSON剧本、切换显示模式、载入示例作品
-- 沉浸式游玩体验：支持点击/回车推进剧情、选项交互、回退/存档/读档
-- 场景/章节系统：大场景卡片、章节检查点、场景/章节动画切换
-- 变量与分支：支持val主状态、自定义变量、flag标记、条件选项/自动路由
-- 结局&成就：记录解锁结局/成就、结局特效/收束语、成就动画
-- 多维度自定义：明暗模式、字号调整、动效强度、自动播放速度
-
-### 🤖 Story-to-Game AI技能
-不是简单的格式转换，而是「原作理解→风格保真→分支设计→质量验证」的全链路叙事改编系统，核心能力：
-- 适配多体量输入：短篇小说/中篇/长篇/剧本/故事大纲（按体量自动规划节点数/游玩时长）
-- 全维度风格保留：提取原作叙述温度、对白规则、节奏型、视角转换策略，防止风格漂移
-- 结构化分支设计：态度/路径/命运分支按比例分配、过渡节点补全、分支内容与主线同等饱满
-- 完善的状态系统：戏剧化主状态值、多类型结局矩阵、结局触发兜底（无死胡同）
-- 自动化验证：节点可达性、引用完整性、支线深度、结局完整性等13项校验
-
-## 快速开始
-### 1. 运行互动文游启动器
-1. 下载 `剧情游戏启动器_开发者调试版.html` 文件
-2. 直接用 Chrome/Edge 浏览器打开（无需部署服务器）
-3. 点击「插入JSON剧本」，选择生成好的文游JSON文件，即可开始游玩
-
-### 2. 使用AI技能生成文游JSON
-1. 直接将本项目中的 **SKILL.md 文件** 或 **完整story-to-game压缩包** 拖拽至支持文件读取的AI工具
-2. 向AI输入你的小说/剧本/故事大纲原文
-3. 确认AI给出的改编方向后，等待自动生成符合启动器规范的JSON文件
-4. 用启动器导入JSON，验证游玩效果
-
-## 推荐AI工具
-- 基础推荐：ChatGPT / Claude（支持直接上传文件，操作简单）
-- **长篇优选（强烈推荐）**：Codex / Claude Code（超长上下文支持，更稳定处理中长篇小说/剧本）
+---
 
 ## 目录结构
+
+```
 story-to-game-rpg-roadmap/
-├── docs/                          # 设计与规划文档
-├── story-to-game-source/          # 解包后的 Skill 源码
-│   ├── SKILL.md
-│   ├── references/
-│   │   ├── json-format-spec.md    # JSON 格式规范（含 RPG 扩展）
-│   │   └── step4-system.md         # 系统设计方法论
-│   └── scripts/
-│       └── validate.py             # 校验器（RPG-001 到 RPG-018）
-├── 剧情游戏启动器_开发者调试版.html
-├── 测试案例-成人日.json
-├── CHANGELOG.md
-└── README.md
+├── web/                          # Next.js 全栈项目
+│   ├── app/                      # App Router 页面
+│   │   ├── page.tsx              # 首页
+│   │   ├── layout.tsx            # 根布局
+│   │   ├── instant/page.tsx      # 即时体验页（含规则配置）
+│   │   ├── library/page.tsx      # 作品库
+│   │   ├── play/[id]/page.tsx    # 播放器页（iframe 嵌入）
+│   │   └── api/                  # API 路由
+│   │       ├── generate/route.ts # SSE 流式生成
+│   │       ├── works/route.ts    # 作品列表/保存
+│   │       └── works/[id]/route.ts # 获取单个作品
+│   ├── lib/                      # 服务端逻辑
+│   │   ├── ai-client.ts          # AI 多提供商客户端
+│   │   └── storage.ts            # 存储抽象层
+│   ├── types/index.ts            # TypeScript 类型定义（Schema v1.1）
+│   ├── public/player/            # 原生 JS 播放器（iframe 加载）
+│   ├── DEPLOY.md                 # 部署指南
+│   └── README.md                 # 前端开发指南
+│
+├── docs/                         # 项目文档
+│   ├── SCHEMA_v1.1.md            # JSON Schema v1.1（当前版本）
+│   ├── SCHEMA_v1.md              # JSON Schema v1.0（兼容）
+│   ├── v2-ROADMAP.md             # 平台化路线图
+│   ├── v2-IMPLEMENTATION.md      # 全栈实施方案
+│   ├── v2-PRD.md                 # 产品需求文档
+│   ├── DEPLOY.md                 # 部署方案汇总
+│   └── PRODUCT-REFORM-PLAN.md    # 产品改革方案
+│
+├── story-to-game-source/         # AI 生成提示工程
+│   ├── SKILL.md                  # AI Skill 主文档（含9步工作流 + 7大可玩性方向）
+│   └── references/               # 各步骤参考文档
+│
+├── rpg-game-ui-v2/               # 原生播放器原型（已迁移至 web/public/player/）
+│
+├── README.md                     # 本文件（项目总览）
+├── CHANGELOG.md                  # 变更日志
+└── validate.py                   # JSON 剧本校验器（18条规则）
+```
 
+---
 
-## 设计理念
-1. 保留原作气质：分支的核心是「加深对原作的理解」，而非替代原作
-2. 选择必有回响：每一个选择都有即时/持续/结局三层影响，偏离原作时创作全新内容
-3. 支线同等饱满：任何分支线的内容深度与主线一致，不敷衍玩家
-4. 过渡决定沉浸：自动补全事件间的跳跃，保证剧情衔接自然
-5. 反剧透贯穿：改编确认阶段仅展示基础方向，保留游玩惊喜
+## 快速开始
 
-## 浏览器兼容
-推荐使用 Chrome / Edge（支持 File System Access API，可直接读取本地文件夹作为资料库）；
-其他浏览器可通过「插入JSON」方式导入剧本，核心功能不受影响。
+### 开发环境
 
-## 注意事项
-- AI技能生成的JSON需通过 `validate.py` 验证后再导入启动器，避免节点断链/死胡同
-- 启动器的存档/成就记录存储在浏览器本地，清除缓存会丢失（建议手动存档关键节点）
-- 结局设计需遵循「兜底规则」：确保任意选择路径都能抵达某一结局
+```bash
+# 1. 克隆仓库
+git clone https://github.com/yysam123456-source/story-to-game-rpg-roadmap.git
+cd story-to-game-rpg-roadmap/web
+
+# 2. 安装依赖（国内镜像）
+npm install --registry=https://registry.npmmirror.com
+
+# 3. 配置环境变量
+cp .env.example .env.local
+# 编辑 .env.local，填写 AI API Key 和可选的 Vercel Blob Token
+
+# 4. 启动开发服务器
+npm run dev
+# 访问 http://localhost:3000
+```
+
+### 环境变量
+
+```bash
+# AI 提供商（5选1，通过 PROVIDER 切换）
+PROVIDER=openai              # openai / siliconflow / deepseek / bailian / openrouter
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+# 可选：Vercel Blob（不配置则回退本地文件）
+BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+```
+
+### 部署
+
+详见 `web/DEPLOY.md`，支持三种方案：
+- **Vercel**（国际）— 一键部署，Vercel Blob 存储
+- **腾讯云 CloudBase**（国内免费）— 静态托管 + 云函数
+- **VPS**（国内）— Docker 部署，对象存储
+
+---
+
+## JSON Schema v1.1 核心字段
+
+```json
+{
+  "meta": {
+    "title": "作品标题",
+    "genre": "xianxia",
+    "rpg": {
+      "enabled": true,
+      "primaryStats": [
+        { "key": "qi", "label": "灵力", "type": "bar", "max": 100 }
+      ]
+    },
+    "rules": {
+      "pacing": "relaxed",
+      "statImpact": "medium",
+      "npcRelations": true,
+      "timePressure": false
+    }
+  },
+  "startNodeId": "node_start",
+  "variables": { "qi": 30 },
+  "npcRelations": [
+    { "id": "master", "name": "师父", "initialAffinity": 10 }
+  ],
+  "timePressure": {
+    "enabled": true,
+    "countdown": 120,
+    "timeoutNode": "ending_timeout"
+  },
+  "achievements": {
+    "first_step": {
+      "title": "初出茅庐",
+      "description": "完成第一次选择",
+      "autoUnlock": { "var": "progress", "op": ">=", "value": 10 }
+    }
+  },
+  "nodes": { ... }
+}
+```
+
+完整 Schema 定义参见 `docs/SCHEMA_v1.1.md`。
+
+---
+
+## 核心原则
+
+1. **文学优先**：每一个选择必须从当前场景自然长出，每一个后果必须被世界认真承接
+2. **轻 RPG 服务叙事**：数值变化先有文本回响，再展示数值，不压过文学体验
+3. **JSON 可校验**：所有 JSON 必须通过 validate.py 的 18 条 RPG 校验规则
+4. **向后兼容**：新增字段均为可选，旧 JSON 不受影响（`meta.rpg.enabled=false` 维持 v1.x 行为）
+5. **类型深度**：5 种题材各有专属模板、状态系统、主题色和 VFX
+6. **选择有重量**：choice.weight 四级系统（critical / branch / minor / cosmetic）+ delayedChanges 三层后果
+7. **成长有仪式**：milestones 三级庆祝 + endings 多类型结局
+
+---
+
+## 路线图
+
+| 季度 | 目标 | 状态 |
+|------|------|------|
+| **Q3 2026**（7-9 月）| MVP 核心验证：AI 自动生成 + 在线即时游玩 | 进行中 |
+| Q4 2026（10-12 月）| 分发与完善：微信小程序 + 完整九步工作流 + 社区功能 | 待开始 |
+| Q1 2027（1-3 月）| 生态扩展：5 种类型模板全部上线 + 数据驱动推荐 | 待开始 |
+| Q2 2027（4-6 月）| 规模化：商业化 + 全球分发 + 自动化审核 | 待开始 |
+
+详细路线图参见 `docs/v2-ROADMAP.md`。
+
+---
+
+## 变更日志
+
+参见 [CHANGELOG.md](CHANGELOG.md)。
+
+---
 
 ## 许可证
-本项目采用 MIT 许可证 - 详见 [LICENSE]文件
+
+MIT License — 见 [LICENSE](LICENSE) 文件。
