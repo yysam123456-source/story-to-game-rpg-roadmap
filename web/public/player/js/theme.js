@@ -239,6 +239,7 @@ window.ThemeEngine = class ThemeEngine {
     const config = window.GENRE_CONFIGS[genre];
     if (!config) return;
 
+    const area = document.getElementById('interactions-area');
     const grid = document.getElementById('interactions-grid');
     if (!grid) return;
 
@@ -248,6 +249,9 @@ window.ThemeEngine = class ThemeEngine {
         <span class="btn-label">${inter.label}</span>
       </button>
     `).join('');
+
+    // Show the interactions area in legacy demo mode
+    if (area) area.style.display = '';
   }
 
   /* ── Chapter Nav ────────────────────── */

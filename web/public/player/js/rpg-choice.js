@@ -25,7 +25,13 @@ window.RPGChoiceRenderer = class RPGChoiceRenderer {
     // Sort by weight priority
     const sorted = this.rpg ? this.rpg.sortChoicesByWeight(choices) : choices;
 
-    container.innerHTML = sorted.map((choice, idx) => this._renderChoiceButton(choice, idx)).join('');
+    container.innerHTML = sorted.map((choice, idx) => {
+      // Use the original index from the unsorted choices array
+      // so that rpg-story-loader._bindChoiceEvents can correctly
+      // look up the choice by data-choice-index in the original array.
+      const originalIdx = choices.indexOf(choice);
+      return this._renderChoiceButton(choice, originalIdx);
+    }).join('');
 
     // Bind hover for weightHint
     this._bindWeightHints(container);

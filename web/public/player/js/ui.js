@@ -190,6 +190,9 @@ window.UIController = class UIController {
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('.choice-btn');
       if (!btn || btn.disabled) return;
+      // In RPG story mode, rpg-story-loader._bindChoiceEvents handles
+      // choice processing. We only handle legacy (non-story) mode here.
+      if (window.rpgStoryLoader && window.rpgStoryLoader.isStoryMode) return;
       const index = parseInt(btn.dataset.choiceIndex, 10);
       if (!isNaN(index)) this._makeChoice(index);
     });

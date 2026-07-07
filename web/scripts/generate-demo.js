@@ -1,0 +1,1463 @@
+#!/usr/bin/env node
+/**
+ * generate-demo.js — 生成旧格式（播放器原生格式）Demo JSON
+ * 修仙题材「青炉夜火」：38 个节点，5 个章节，4 个结局，3 个 NPC，5 个成就
+ * 
+ * 旧格式特征：
+ *   - nodes 是数组（非字典）
+ *   - 使用 text（非 segments）
+ *   - 使用 chapter（非 chapterTitle）
+ *   - 选项使用 next（非 targetNodeId）
+ *   - changes 是扁平对象 { cultivation: 5, show: true, feedback: {...}, flags: [...] }
+ *   - condition 使用 { var, op, value }
+ *   - endings 是数组
+ *   - npcRelations 是扁平数组
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+// ── Meta ──
+const meta = {
+  title: "青炉夜火",
+  author: "AI 生成 Demo",
+  version: "1.1.0",
+  description: "下品灵根少年林渊，以杂学入宗门，踏上逆天修仙之路。铁片藏剑意，废丹启古阵，一炉烟火半卷仙缘。",
+  genre: "xianxia",
+  rpg: {
+    enabled: true,
+    mode: "standard",
+    conditionDisplay: "hide",
+    primaryStats: [
+      { key: "realm", label: "境界", type: "text" },
+      { key: "cultivation", label: "修为", type: "number", tone: "positive" },
+      { key: "spiritual", label: "灵力", type: "bar", max: 100, tone: "positive" },
+      { key: "mind", label: "心境", type: "bar", max: 100, tone: "positive" },
+      { key: "reputation", label: "声望", type: "number", tone: "positive" },
+      { key: "hp", label: "气血", type: "bar", max: 100, tone: "danger" }
+    ],
+    hiddenStats: ["karma"]
+  }
+};
+
+// ── 初始状态 ──
+const initialState = {
+  realm: 0,
+  cultivation: 10,
+  spiritual: 50,
+  mind: 30,
+  reputation: 5,
+  hp: 100,
+  karma: 0,
+  swordIntent: 0,
+  alchemyLevel: 0,
+  elderFavor: 0,
+  rivalHostility: 0
+};
+
+// ── 38 个节点（旧格式数组） ──
+const nodes = [
+  // ──── 第一章 · 青炉峰下 ────
+  {
+    id: "node_start",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "青炉峰下，你——林渊——站在石阶前，仰头望着云雾缭绕的山门。这是你第三次参加青炉宗的入门考核。",
+      "「灵根测试，开始。」长老的声音从殿内传来。",
+      "你将手掌按在测灵石上。石面泛起微弱的青光——木灵根，下品。人群中传来窃笑声。下品灵根在修仙界几乎等同于凡人，终生难以突破炼气三层。",
+      "「下一位。」长老面无表情。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_zhaye_show",
+        text: "取出焦黑铁片，请求以杂学入宗",
+        next: "node_01杂学入宗",
+        weight: 2,
+        changes: {
+          reputation: 3,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_zhaye_leave",
+        text: "沉默退下，准备离开",
+        next: "node_01离去"
+      },
+      {
+        id: "ch_zhaye_bargain",
+        text: "恳求长老再给一次机会",
+        next: "node_01恳求",
+        changes: {
+          mind: -5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_01杂学入宗",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "你没有退下。你从怀中取出一块焦黑的铁片——那是你在山中采药时，从一道雷击的古树下拾得的。",
+      "「弟子斗胆，请求以'杂学'入宗。」你朗声道。",
+      "殿内一静。杂学弟子不修法力，专研丹药、符箓、阵法，地位远低于内门。但青炉宗百年前确有一位以杂学证道的祖师。",
+      "长老眯起眼：「你可知杂学之路，千年无人走通？」",
+      "「弟子知晓。」你握紧铁片，「但弟子也知，三日前的雷劫，并非天象。」",
+      "长老瞳孔骤缩。三日前那场覆盖整座青炉峰的雷劫确实古怪。宗门高层秘而不宣，这少年是如何……",
+      "「你看到了什么？」长老的声音低了下来。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_renlei_zhen",
+        text: "如实说出：雷中有人",
+        next: "node_02入宗成功",
+        changes: {
+          mind: 5,
+          swordIntent: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["joined_sect", "told_truth"]
+        }
+      },
+      {
+        id: "ch_renlei_hide",
+        text: "隐瞒部分真相，只说看到了异光",
+        next: "node_02入宗成功2",
+        changes: {
+          mind: 2,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["joined_sect", "hid_truth"]
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_01离去",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "你沉默地转身，向山下走去。身后传来其他考生继续测试的声音。",
+      "走到半山腰时，你忽然停下脚步。手中铁片不知何时变得滚烫——铁片上的剑痕在夕阳下闪烁着金色光芒。",
+      "你从未见过这种光芒。一种直觉告诉你：这块铁片与三日前的雷劫有关。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_turn_back",
+        text: "转身返回，用铁片作为筹码请求入宗",
+        next: "node_01杂学入宗",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_leave_forever",
+        text: "带着铁片离开，自行修炼",
+        next: "ending_ordinary"
+      }
+    ]
+  },
+
+  {
+    id: "node_01恳求",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "你跪在殿前恳求，声音在寂静的山门回荡。",
+      "长老摇头：「修仙之道，资质为先。下品灵根，强求无益。你若执意留在此山，可做杂役弟子。」",
+      "杂役弟子——比杂学弟子地位更低，几乎等同于仆役。你的自尊心无法接受。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_accept_servant",
+        text: "接受杂役弟子身份，先留下来再说",
+        next: "node_02入宗成功",
+        changes: {
+          mind: -10,
+          cultivation: 2,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["joined_sect", "humble_origin"]
+        }
+      },
+      {
+        id: "ch_refuse",
+        text: "取出铁片，请求以杂学入宗",
+        next: "node_01杂学入宗",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_02入宗成功",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "殿内死寂。",
+      "长老盯着你看了很久，终于缓缓点头：「……你的胆识，不输上品灵根。」",
+      "你被分配到丹药阁，负责照看最基础的「清心丹」炉火。同门嘲笑你下品灵根做了杂学弟子，说你就一辈子和废丹打交道。",
+      "但你不在乎。每晚你都会取出那块铁片，对着月光端详。铁片上的剑痕在月光下发出极淡的金色纹路，像是某种你看不懂的文字。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_study_pill",
+        text: "白天认真研习炼丹术，晚上研究铁片",
+        next: "node_03丹药阁",
+        changes: {
+          cultivation: 5,
+          alchemyLevel: 1,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_explore",
+        text: "趁夜色探索丹药阁，寻找有用的丹方",
+        next: "node_03夜探丹阁",
+        changes: {
+          mind: 5,
+          karma: -3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_02入宗成功2",
+    chapter: "第一章 · 青炉峰下",
+    type: "narrative",
+    text: [
+      "长老目光深邃：「……异光？也罢，你既有所见，便先留下观察。」",
+      "你被分配到丹药阁。长老多看了你一眼，目光意味不明——你不确定他是否看穿了你的隐瞒。",
+      "在丹药阁的日子平淡而忙碌。你照看炉火，学习最基础的炼丹知识。铁片一直贴身收藏，你隐约觉得现在不是展示它的时机。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_study_hard",
+        text: "踏实学习，等待时机",
+        next: "node_03丹药阁",
+        changes: {
+          cultivation: 3,
+          alchemyLevel: 1,
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_secret_study",
+        text: "暗中研究铁片，不再等",
+        next: "node_03夜探丹阁",
+        changes: {
+          swordIntent: 2,
+          karma: -3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  // ──── 第二章 · 废丹启阵 ────
+  {
+    id: "node_03丹药阁",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "一个月后的深夜，你在丹药阁值夜。炉火幽蓝，清心丹的药材在鼎中翻滚。",
+      "苏云师姐突然推门进来：「林渊师弟，今晚的清心丹你盯着些，火候过了就成废丹了。」",
+      "你点头应承。苏云师姐虽然只是内门弟子，但对你这个杂学弟子一向和善。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_chat_suyun",
+        text: "和苏云师姐聊天，询问关于雷劫的事",
+        next: "node_04苏云",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: 10 }]
+      },
+      {
+        id: "ch_focus_pill",
+        text: "专心炼丹，趁机尝试改进配方",
+        next: "node_04炼丹",
+        changes: {
+          alchemyLevel: 1,
+          cultivation: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_03夜探丹阁",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "月光从窗棂洒入丹药阁。你取出铁片，借着月光研究上面的纹路。忽然——",
+      "一滴废丹残渣从药架上滑落，恰好滴在铁片上。",
+      "铁片上的金色纹路瞬间亮了起来！纹路飞速流转，组成了一个完整的古阵图。",
+      "你瞪大眼睛。这不是纹路——这是一座阵法的图纸！"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_memorize",
+        text: "立刻用纸笔将阵法图案临摹下来",
+        next: "node_04阵法",
+        changes: {
+          swordIntent: 5,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["discovered_secret"]
+        }
+      },
+      {
+        id: "ch_ignore",
+        text: "太危险了，先收起铁片明天再说",
+        next: "node_03丹药阁",
+        changes: {
+          mind: 2,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_04苏云",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "苏云师姐犹豫了一下，压低声音：「那晚的雷劫……陈长老的反应很奇怪。他连夜去了后山禁地，第二天回来时面色很差。」",
+      "她看着你的眼睛：「林渊师弟，你是杂学弟子，有些事情别太好奇。宗门里……不是所有秘密都该被揭开。」",
+      "你心中一动，但面上不动声色。苏云师姐似乎知道些什么。",
+      "你注意到炉火旁的废丹渣——不经意间，一滴残渣从你指间滑落到了贴身收藏的铁片上……"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_thank_suyun",
+        text: "感谢师姐提醒，守好炉火",
+        next: "node_04铁片亮起",
+        changes: {
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: 5 }]
+      },
+      {
+        id: "ch_press_suyun",
+        text: "追问师姐关于陈长老的细节",
+        next: "node_04苏云追问",
+        changes: {
+          mind: -3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: -5 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_04苏云追问",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "苏云师姐脸色微变：「林渊师弟，我说过了——」",
+      "「苏云师姐，」你打断她，「我只是想知道，我能不能相信陈长老。」",
+      "她沉默了很长时间。最终她只说了一句：「陈长老是个好人。但好人也会犯错。」说完便匆匆离开了。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_think_alone",
+        text: "独自思考苏云的话",
+        next: "node_04铁片亮起",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_04铁片亮起",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "苏云离开后，你照看炉火。不经意间，一滴废丹渣从指间滑落到了贴身收藏的铁片上——",
+      "铁片上的金色纹路瞬间亮了起来！",
+      "纹路飞速流转，组成了一个你从未见过的古阵图案。你瞳孔骤缩——这不是纹路，这是一座阵法的图纸！",
+      "而且……阵法的核心处，有一把剑的图案。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_memorize2",
+        text: "用纸笔临摹下完整的阵法图案",
+        next: "node_05阵法觉醒",
+        changes: {
+          swordIntent: 8,
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["discovered_secret"]
+        }
+      },
+      {
+        id: "ch_try_activate",
+        text: "尝试用灵力激活阵法",
+        next: "node_05灵力激活",
+        changes: {
+          spiritual: -15,
+          swordIntent: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["discovered_secret"]
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_04炼丹",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "你专注于丹炉。清心丹的配方简单，但火候极为讲究——多一分则药性挥发，少一分则凝丹不牢。",
+      "你尝试将废丹残渣重新投入炉中回收灵气。这个方法不见于任何丹方，是你自己琢磨出来的。",
+      "出乎意料，残渣中的灵气被重新提取了一小部分。苏云师姐路过时看到了，惊讶地挑了挑眉：「林渊师弟，你倒是有点天赋。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_share_recipe",
+        text: "把废丹回收的方法告诉苏云师姐",
+        next: "node_04铁片亮起",
+        changes: {
+          reputation: 5,
+          alchemyLevel: 1,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: 10 }]
+      },
+      {
+        id: "ch_keep_secret",
+        text: "这是你的独家方法，不告诉别人",
+        next: "node_04铁片亮起",
+        changes: {
+          alchemyLevel: 1,
+          mind: 2,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_04阵法",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "你用炭笔将铁片上的阵法图案一笔一画临摹在纸上。阵法极其复杂，但你莫名地能理解其中一部分——仿佛铁片在引导你。",
+      "阵法核心处有一把剑的图案。你隐约觉得，这不是普通的阵法——它更像是一把剑的封印。",
+      "忽然，门外传来脚步声。你迅速将纸藏好，假装在照看炉火。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_hide",
+        text: "假装什么都不知道",
+        next: "node_05陈长老来访",
+        changes: {
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_confront",
+        text: "准备好，如果是陈长老就主动展示",
+        next: "node_05陈长老来访",
+        changes: {
+          mind: 3,
+          reputation: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_05阵法觉醒",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "你将阵法临摹完毕。最后一笔落下时，铁片猛然发出一声清越的剑鸣！",
+      "你的脑海中闪过一个画面——一位白衣剑仙，在雷劫中挥剑斩天。画面转瞬即逝，但那种直冲云霄的剑意却在你心中留下了深刻的烙印。",
+      "你的修为隐隐有了突破的迹象。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_breakthrough",
+        text: "趁势突破，冲击炼气一层",
+        next: "node_06突破",
+        changes: {
+          cultivation: 10,
+          swordIntent: 5,
+          spiritual: -10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_stable",
+        text: "压制突破冲动，先稳固境界",
+        next: "node_05陈长老来访",
+        changes: {
+          mind: 5,
+          cultivation: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_05灵力激活",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "你将灵力注入铁片。阵法纹路亮起金光，灵力像溪流一样涌入了图案的沟壑。",
+      "但你的灵力太弱了——下品灵根的灵力储备仅够点亮阵法的一小部分。不过这一小部分已经足够你看出：这是一座「解封」阵法。",
+      "阵法的目的，是解开铁片中封印的某种东西。",
+      "灵力耗尽，你感到一阵头晕。铁片上的光芒缓缓熄灭。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_rest_and_plan",
+        text: "休息恢复灵力，制定更长远的计划",
+        next: "node_05陈长老来访",
+        changes: {
+          spiritual: 5,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["discovered_secret"]
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_05陈长老来访",
+    chapter: "第二章 · 废丹启阵",
+    type: "narrative",
+    text: [
+      "门被推开。走进来的不是苏云师姐，而是陈长老——那个在你入宗时沉默点头的老者。",
+      "他的目光扫过丹药阁，最终落在你身上：「林渊，你今晚值夜？」",
+      "「是。」你恭敬回答。",
+      "陈长老走到炉前，看了看炉中的清心丹，微微皱眉：「火候偏大了。」他顿了顿，「跟我来后山一趟。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_follow_elder",
+        text: "跟随陈长老去后山",
+        next: "node_06后山禁地",
+        changes: {
+          cultivation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 15 }]
+      },
+      {
+        id: "ch_refuse_elder",
+        text: "委婉拒绝，说炉火还需要照看",
+        next: "node_06拒绝长老",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: -5 }]
+      }
+    ]
+  },
+
+  // ──── 第三章 · 后山禁地 ────
+  {
+    id: "node_06突破",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "你盘膝而坐，引导体内微薄的灵力运转。剑意共鸣留下的那股力量如同催化剂，让你的灵力运转速度暴增。",
+      "轰！一道气浪从你体内涌出。丹炉被震得嗡嗡作响。",
+      "你睁开眼——炼气一层！下品灵根的你在入宗一个月后，竟然突破了！",
+      "这份速度在内门弟子中也算罕见。但你还不能让太多人知道。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_hide_breakthrough",
+        text: "隐藏修为突破的事实",
+        next: "node_05陈长老来访",
+        changes: {
+          mind: 5,
+          realm: 1,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_show_off",
+        text: "在明天的晨练中展示实力",
+        next: "node_07赵天阳",
+        changes: {
+          realm: 1,
+          reputation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_06后山禁地",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "你跟随陈长老穿过层层结界，来到后山深处。月光下，一棵被雷劈焦的古树矗立在悬崖边——就是你拾得铁片的那棵树！",
+      "「这棵树，」陈长老背对着你，声音低沉，「三百年前，青炉宗的祖师以无上剑意在此处封印了一柄仙剑。」",
+      "你握紧了怀中的铁片。",
+      "陈长老转过身，目光灼灼：「铁片在你身上。」这不是疑问，是陈述。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_honest_elder",
+        text: "坦诚相告，取出铁片",
+        next: "node_07长老托付",
+        changes: {
+          mind: 5,
+          swordIntent: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 20 }]
+      },
+      {
+        id: "ch_wary_elder",
+        text: "反问长老为什么知道",
+        next: "node_07长老解释",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 5 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_06拒绝长老",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "「炉火还需要照看……」你试图推脱。",
+      "陈长老深深看了你一眼：「丹炉的火我已封住，四个时辰内不会灭。」",
+      "他的语气不容置疑，但又隐含着某种恳求。你从未在一位长老身上感受到这种情绪。",
+      "最终你跟着他出了丹药阁，向夜色中的后山走去。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_follow_anyway",
+        text: "跟随前往后山",
+        next: "node_06后山禁地",
+        changes: {
+          mind: 2,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_07长老托付",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "你取出铁片。月光下，金色纹路再次亮起，与古树上的焦痕遥相呼应。",
+      "陈长老的目光变得柔和：「三百年前，祖师封印仙剑时留下预言：雷劫降世之日，持剑者自来。三日前那场雷劫……」",
+      "他叹了口气：「我年轻时也曾试图解封，但失败了。仙剑的封印只认有缘人。」",
+      "「孩子，」他第一次用这个称呼，「你需要变得更强。内门考核在即，通过考核，我才能正式教你。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_accept_mission",
+        text: "接受长老的期望，全力准备内门考核",
+        next: "node_07考核准备",
+        changes: {
+          cultivation: 10,
+          mind: 5,
+          swordIntent: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 10 }]
+      },
+      {
+        id: "ch_doubt",
+        text: "表示需要时间考虑",
+        next: "node_07考核准备",
+        changes: {
+          mind: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_07长老解释",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "「因为三百年前的封印阵法，」陈长老缓缓说道，「它有一个特性——封印物会选择持有者。三日前雷劫降临，封印物应该已经脱离古树。」",
+      "「你入宗时说'雷中有人'，我猜你是那晚的目击者。以杂学入宗的人，本就不会引起注意。」",
+      "他的语气平淡，但你能听出其中的遗憾：「我在你这年纪时，也曾是被封印物选中的人。但我当时选择了另一条路。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_ask_what",
+        text: "问他当年选择了什么路",
+        next: "node_07长老托付",
+        changes: {
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 10 }]
+      },
+      {
+        id: "ch_take_out",
+        text: "取出铁片，不再隐瞒",
+        next: "node_07长老托付",
+        changes: {
+          swordIntent: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 15 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_07赵天阳",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "次日清晨，你在练功场展示新得的修为。一道凌厉的掌风劈出，将木桩击出裂纹。",
+      "「哟，杂学弟子居然突破了？」一个轻佻的声音传来。",
+      "赵天阳——内门首席弟子，炼气三层——双手抱胸，居高临下地看着你。他身后跟着几个内门弟子，脸上挂着戏谑的笑容。",
+      "「林渊是吧？听说你是下品灵根？」赵天阳走到你面前，「下品灵根能突破炼气一层，算你运气好。但内门考核可不是运气能通过的。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_calm",
+        text: "平静回应：多谢师兄指教",
+        next: "node_07考核准备",
+        changes: {
+          mind: 5,
+          reputation: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_challenge",
+        text: "直接说：考核场上见真章",
+        next: "node_07考核准备",
+        changes: {
+          mind: 3,
+          rivalHostility: 10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_07考核准备",
+    chapter: "第三章 · 后山禁地",
+    type: "narrative",
+    text: [
+      "内门考核将在三天后举行。你需要在这三天内尽可能提升实力。",
+      "你可以选择：",
+      "1. 继续修炼，尝试冲击炼气二层",
+      "2. 深入研究铁片上的阵法，增强剑意感知",
+      "3. 向苏云师姐请教内门考核的规则和技巧"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_cultivate",
+        text: "闭关修炼三天，冲击炼气二层",
+        next: "node_08修炼路线",
+        changes: {
+          cultivation: 15,
+          spiritual: -10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_sword_study",
+        text: "研究铁片阵法，提升剑意",
+        next: "node_08剑意路线",
+        changes: {
+          swordIntent: 10,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_ask_suyun",
+        text: "向苏云师姐请教考核技巧",
+        next: "node_08苏云指导",
+        changes: {
+          mind: 8,
+          alchemyLevel: 1,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: 15 }]
+      }
+    ]
+  },
+
+  // ──── 第四章 · 内门考核 ────
+  {
+    id: "node_08修炼路线",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "三天闭关。你将全部精力集中在修炼上，反复运转灵力冲击瓶颈。",
+      "铁片在丹田附近微微发烫，剑意如有无地辅助你的灵力运转。第二天的深夜，你感到体内灵力暴涨——",
+      "炼气二层！",
+      "你的实力已经接近内门弟子的平均水平。但赵天阳是炼气三层，仍有优势。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_ready_exam",
+        text: "准备充分，参加考核",
+        next: "node_09考核开始"
+      }
+    ]
+  },
+
+  {
+    id: "node_08剑意路线",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "三天里，你反复研究铁片上的阵法。废丹残渣是最好的催化剂——每次滴在铁片上，你都能多理解一层阵法含义。",
+      "第三天夜里，你终于理解了阵法核心的那个剑形图案的含义：那不是封印——那是一柄剑的「种子」。",
+      "铁片不是封印了仙剑，而是仙剑留下的传承。只要你的剑意足够强，就能将种子唤醒，种入你的神魂之中。",
+      "你的剑意感知大幅提升，铁片上的纹路已经能被你随时激活。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_ready_exam2",
+        text: "带着新力量参加考核",
+        next: "node_09考核开始",
+        changes: {
+          cultivation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_08苏云指导",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "苏云师姐告诉你：内门考核分两部分——笔试考炼丹理论，实战考与内门弟子的对练。",
+      "「笔试你不用担心，」她笑道，「你在丹药阁的表现我都看在眼里。实战才是关键。」",
+      "她教你了几招实用的灵力运用技巧，并告诉你赵天阳的弱点：「他速度快但耐力差，灵力消耗到三成以下就会慌张。」",
+      "「还有，」她认真地看着你，「实战时不要只想着赢。让考官看到你的潜力，比打败赵天阳更重要。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_take_advice",
+        text: "记下赵天阳的弱点，制定战术",
+        next: "node_09考核开始",
+        changes: {
+          mind: 5,
+          cultivation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_09考核开始",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "考核日。青炉宗演武场，上百弟子围观。陈长老坐在考官席上，面无表情。",
+      "你的对手——赵天阳站在对面，嘴角挂着一丝不屑的笑：「杂学弟子也敢来考核？别浪费我时间。」",
+      "苏云师姐在台下向你投来鼓励的目光。",
+      "考官一声令下，考核开始！"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_defensive",
+        text: "防守为主，消耗赵天阳的灵力",
+        next: "node_10消耗战术",
+        condition: { var: "mind", op: ">=", value: 40 },
+        changes: {
+          hp: -10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_sword_intent",
+        text: "释放剑意，以剑道压制",
+        next: "node_10剑意压制",
+        condition: { var: "swordIntent", op: ">=", value: 15 },
+        changes: {
+          spiritual: -10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_alchemy_trick",
+        text: "用炼丹知识制造烟雾弹偷袭",
+        next: "node_10丹药奇招",
+        condition: { var: "alchemyLevel", op: ">=", value: 2 },
+        changes: {
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      },
+      {
+        id: "ch_direct_fight",
+        text: "正面硬刚，以力破巧",
+        next: "node_10正面硬刚",
+        changes: {
+          hp: -20,
+          spiritual: -10,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_10消耗战术",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "你刻意放慢节奏，只用最低限度的灵力防守。赵天阳果然急了——他不断发起猛攻，灵力消耗飞快。",
+      "苏云师姐说的没错，赵天阳耐力很差。当他的灵力消耗到三成以下时，出招开始凌乱。",
+      "你抓住一个破绽，一掌击中他的肩膀。赵天阳踉跄后退，满脸不可置信。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_finish_fight",
+        text: "乘胜追击，彻底击败赵天阳",
+        next: "node_11击败赵天阳",
+        changes: {
+          hp: -15,
+          reputation: 15,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["defeated_rival"]
+        }
+      },
+      {
+        id: "ch_show_mercy",
+        text: "收手，表示点到为止",
+        next: "node_11点到为止",
+        changes: {
+          reputation: 10,
+          mind: 5,
+          karma: 3,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "su_yun", delta: 10 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_10剑意压制",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "你深吸一口气，引导铁片中的剑意涌出。一股无形的气势笼罩了整个演武场。",
+      "赵天阳的笑容凝固了。他感受到一种来自灵魂深处的压迫感——这是剑修独有的「剑势」，只有剑道通神者才能施展。",
+      "「这是……」陈长老霍然站起，眼中闪过难以置信的光芒。",
+      "你一步一步走向赵天阳。每一步，剑势都重了一分。赵天阳的双腿开始发抖。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_pressure_win",
+        text: "以剑势逼退赵天阳，不战而胜",
+        next: "node_11不战而胜",
+        changes: {
+          swordIntent: 10,
+          spiritual: -5,
+          reputation: 20,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["defeated_rival"]
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 20 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_10丹药奇招",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "赵天阳冲过来时，你从袖中甩出三颗你特制的「迷烟丹」——利用废丹残渣改良的低阶丹药，被碰撞后会释放浓烟。",
+      "砰！砰！砰！三颗丹药在赵天阳面前炸开，演武场顿时烟雾弥漫。",
+      "赵天阳咳呛着后退：「卑鄙——」",
+      "你在烟雾中精准出手，一掌拍在赵天阳胸口。观众席上一片哗然。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_apologize",
+        text: "向赵天阳道歉，说只是策略",
+        next: "node_11以巧取胜",
+        changes: {
+          reputation: 10,
+          karma: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["defeated_rival"]
+        }
+      },
+      {
+        id: "ch_mock",
+        text: "讽刺赵天阳：实力不够就别嘴硬",
+        next: "node_11以巧取胜",
+        changes: {
+          reputation: 5,
+          karma: -5,
+          rivalHostility: 15,
+          show: true,
+          feedback: { style: "toast", duration: 2500 },
+          flags: ["defeated_rival"]
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_10正面硬刚",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "你没有技巧，只有蛮力。赵天阳的攻击如暴风骤雨，你硬接了三掌。",
+      "第四掌，你挡不住了——赵天阳的灵力碾压你。你被击飞出去，重重摔在地上。",
+      "但你没有倒下。你爬起来，抹掉嘴角的血。",
+      "「再来。」你低声说。",
+      "第五掌。第六掌。第七掌。你一次次被击倒，又一次次站起来。陈长老的拳头在袖中握紧。",
+      "最终，你再也站不起来了。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_not_give_up",
+        text: "即使倒下也不认输",
+        next: "node_11虽败犹荣"
+      }
+    ]
+  },
+
+  {
+    id: "node_11击败赵天阳",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "赵天阳倒在地上，满脸不可思议。演武场一片寂静。",
+      "然后，掌声如雷。",
+      "陈长老站起来，走到你面前：「林渊，内门考核——通过。」",
+      "你成为了青炉宗百年来第一个以杂学弟子身份通过考核进入内门的人。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_celebrate",
+        text: "感谢所有帮助过你的人",
+        next: "node_12内门弟子",
+        changes: {
+          realm: 1,
+          reputation: 10,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_11点到为止",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "你收回拳头。赵天阳愣了一下，然后脸色涨红。",
+      "陈长老的声音从考官席传来：「以退为进，以柔克刚。林渊，你的心性远超你的修为。」",
+      "「内门考核——通过。」",
+      "苏云师姐在台下微微点头，眼中带着笑意。赵天阳虽然不满，但也无法反驳考官的判定。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_inner_disciple",
+        text: "正式成为内门弟子",
+        next: "node_12内门弟子",
+        changes: {
+          realm: 1,
+          reputation: 10,
+          karma: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_11不战而胜",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "赵天阳被剑势逼退三步，然后「扑通」一声跪倒在地。不是被击倒——是被剑意压迫得无法站立。",
+      "全场死寂。然后爆发出震耳欲聋的惊叹声。",
+      "陈长老几乎是跳起来走到你面前的：「你……你是怎么做到的？」",
+      "「内门考核，」他深吸一口气，声音有些颤抖，「通过。满分。」",
+      "满分——这在青炉宗近五十年的考核中从未出现过。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_humble_response",
+        text: "谦虚回应，说只是运气",
+        next: "node_12内门弟子",
+        changes: {
+          realm: 1,
+          swordIntent: 5,
+          reputation: 15,
+          mind: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 15 }]
+      }
+    ]
+  },
+
+  {
+    id: "node_11以巧取胜",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "苏云师姐在台下偷偷竖起了大拇指。陈长老虽然面无表情，但你注意到他的嘴角微微上扬。",
+      "「杂学之道，在于借万物之力。林渊，你做得很好。」陈长老宣布，「内门考核——通过。」",
+      "赵天阳愤愤离去。但你知道，这只是开始——他在内门的地位和人脉，随时可能给你带来麻烦。"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_cautious",
+        text: "小心行事，在内门站稳脚跟",
+        next: "node_12内门弟子",
+        changes: {
+          realm: 1,
+          mind: 5,
+          reputation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  {
+    id: "node_11虽败犹荣",
+    chapter: "第四章 · 内门考核",
+    type: "narrative",
+    text: [
+      "你躺在地上，仰望天空。体内灵力几近枯竭，但你的眼神没有一丝放弃。",
+      "「不……还不行……」你挣扎着想要站起来，但身体已经不听使唤。",
+      "陈长老走过来。他看着你的眼神，沉默了很久。",
+      "然后他转向其他考官：「林渊，内门考核——通过。」",
+      "全场哗然。赵天阳愤怒地质问为什么，但陈长老只说了一句：「他输了比试，但赢了心性。修仙之路，心性为先。」"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_grateful",
+        text: "感恩陈长老的认可，努力变强",
+        next: "node_12内门弟子",
+        changes: {
+          realm: 1,
+          mind: 10,
+          cultivation: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        },
+        affinityChanges: [{ npcId: "elder_chen", delta: 25 }]
+      }
+    ]
+  },
+
+  // ──── 第五章 · 前路漫漫 ────
+  {
+    id: "node_12内门弟子",
+    chapter: "第五章 · 前路漫漫",
+    type: "narrative",
+    text: [
+      "你正式成为青炉宗内门弟子。陈长老将你收为亲传弟子，亲自指导你的修炼。",
+      "在陈长老的指导下，你的进步速度远超同辈。你一边修炼，一边继续研究铁片上的剑阵。",
+      "铁片中的剑意种子在你心中生根发芽。你知道，终有一天，你会完全解封这柄仙剑——",
+      "但现在，你只需要一步一步走下去。",
+      "修仙之路，始于足下。",
+      "——青炉夜火 · 序章 完——"
+    ].join("\n\n"),
+    choices: [
+      {
+        id: "ch_continue",
+        text: "继续你的修仙之旅……",
+        next: "ending_ordinary",
+        changes: {
+          cultivation: 20,
+          swordIntent: 5,
+          show: true,
+          feedback: { style: "toast", duration: 2500 }
+        }
+      }
+    ]
+  },
+
+  // ──── 结局节点 ────
+  {
+    id: "ending_ordinary",
+    chapter: "尾声",
+    type: "ending",
+    text: [
+      "你带着铁片离开了青炉峰。铁片偶尔会发出微弱的金色光芒，但你始终无法理解它的含义。",
+      "多年后，你在一个小村庄安了家，成为一名采药人。偶尔会在月光下取出铁片端详，想起那个关于修仙的梦。",
+      "铁片上的剑痕依然明亮，但你已经不再期待什么了。",
+      "也许在另一个平行世界里，你做出了不同的选择。",
+      "——结局：平凡一生——"
+    ].join("\n\n"),
+    choices: []
+  }
+];
+
+// ── 里程碑 ──
+const milestones = [
+  {
+    id: "ms_enter_sect",
+    name: "踏入仙门",
+    desc: "成功拜入青炉宗",
+    condition: { flag: "joined_sect" }
+  },
+  {
+    id: "ms_alchemy_start",
+    name: "丹道启蒙",
+    desc: "开始学习炼丹",
+    condition: { variable: "alchemyLevel", operator: ">=", value: 1 }
+  },
+  {
+    id: "ms_inner_disciple",
+    name: "内门弟子",
+    desc: "通过考核成为内门弟子",
+    condition: { variable: "realm", operator: ">=", value: 1 }
+  }
+];
+
+// ── 结局 ──
+const endings = [
+  {
+    id: "ending_sword_path",
+    name: "剑道通天",
+    desc: "觉醒铁片中封印的上古剑意，以剑道证得大道",
+    type: "true",
+    condition: { variable: "swordIntent", operator: ">=", value: 30 }
+  },
+  {
+    id: "ending_alchemy_path",
+    name: "丹道宗师",
+    desc: "以杂学之身，在丹道上超越所有内门弟子，成为青炉宗新一代丹道宗师",
+    type: "true",
+    condition: { variable: "alchemyLevel", operator: ">=", value: 3 }
+  },
+  {
+    id: "ending_karma",
+    name: "因果循环",
+    desc: "因果纠缠太深，被迫离开宗门，独自踏上赎罪之路",
+    type: "dark",
+    condition: { variable: "karma", operator: "<=", value: -10 }
+  },
+  {
+    id: "ending_ordinary",
+    name: "平凡一生",
+    desc: "虽未证得大道，但在青炉宗平静地度过了一生",
+    type: "neutral",
+    condition: { variable: "realm", operator: "==", value: 0 }
+  }
+];
+
+// ── NPC 关系 ──
+const npcRelations = [
+  {
+    id: "elder_chen",
+    name: "陈长老",
+    initialAffinity: 30,
+    description: "青炉宗炼丹长老，沉默寡言但惜才"
+  },
+  {
+    id: "su_yun",
+    name: "苏云师姐",
+    initialAffinity: 20,
+    description: "内门弟子，丹药阁负责人，温和善良"
+  },
+  {
+    id: "zhao_tianyang",
+    name: "赵天阳",
+    initialAffinity: -10,
+    description: "内门天才弟子，傲慢自大，看不起杂学弟子"
+  }
+];
+
+// ── 成就 ──
+const achievements = {
+  ach_enter_sect: {
+    id: "ach_enter_sect",
+    title: "踏入仙门",
+    description: "以杂学弟子身份加入青炉宗",
+    category: "story",
+    rarity: "common",
+    autoUnlock: { condition: { flag: "joined_sect" }, check: "onFlagAdd" }
+  },
+  ach_first_pill: {
+    id: "ach_first_pill",
+    title: "丹道初成",
+    description: "成功炼制第一颗清心丹",
+    category: "skill",
+    rarity: "common",
+    autoUnlock: { condition: { variable: "alchemyLevel", operator: ">=", value: 1 }, check: "onStatChange" }
+  },
+  ach_sword_awaken: {
+    id: "ach_sword_awaken",
+    title: "剑意初醒",
+    description: "铁片中的剑意首次共鸣",
+    category: "story",
+    rarity: "rare",
+    autoUnlock: { condition: { variable: "swordIntent", operator: ">=", value: 10 }, check: "onStatChange" }
+  },
+  ach_secret_discovered: {
+    id: "ach_secret_discovered",
+    title: "禁地探秘",
+    description: "发现青炉峰后山的秘密",
+    category: "exploration",
+    rarity: "rare",
+    autoUnlock: { condition: { flag: "discovered_secret" }, check: "onFlagAdd" }
+  },
+  ach_rival_defeated: {
+    id: "ach_rival_defeated",
+    title: "以弱胜强",
+    description: "在内门考核中击败赵天阳",
+    category: "combat",
+    rarity: "legendary",
+    autoUnlock: { condition: { flag: "defeated_rival" }, check: "onFlagAdd" }
+  }
+};
+
+// ── 组装完整 Story 对象 ──
+const story = {
+  meta,
+  startNodeId: "node_start",
+  initialState,
+  nodes,
+  milestones,
+  endings,
+  npcRelations,
+  achievements
+};
+
+// ── 验证：所有 choices 的 next 都指向存在的节点 id ──
+const nodeIdSet = new Set(nodes.map(n => n.id));
+let validationErrors = [];
+
+for (const node of nodes) {
+  for (const choice of node.choices) {
+    if (!nodeIdSet.has(choice.next)) {
+      validationErrors.push(`节点 "${node.id}" 的选项 "${choice.id}" 指向了不存在的节点 "${choice.next}"`);
+    }
+  }
+}
+
+if (validationErrors.length > 0) {
+  console.error("验证失败！以下引用的节点不存在：");
+  for (const err of validationErrors) {
+    console.error("  - " + err);
+  }
+  process.exit(1);
+}
+
+// ── 写入文件 ──
+const outDir = path.join(__dirname, '..', 'data', 'works');
+fs.mkdirSync(outDir, { recursive: true });
+const outFile = path.join(outDir, 'demo_qinglu_yehuo.json');
+fs.writeFileSync(outFile, JSON.stringify(story, null, 2), 'utf-8');
+
+console.log(`Demo JSON 已生成：${outFile}`);
+console.log(`节点数量：${nodes.length}`);
+console.log(`结局数量：${endings.length}`);
+console.log(`NPC 数量：${npcRelations.length}`);
+console.log(`成就数量：${Object.keys(achievements).length}`);
+console.log(`所有 choices.next 引用验证通过`);

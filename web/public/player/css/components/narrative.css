@@ -4,6 +4,8 @@
    ================================================ */
 
 #narrative-area {
+  width: 100%;
+  max-width: 100%;
   margin-bottom: var(--space-5);
 }
 
@@ -21,7 +23,16 @@
   width: 18px;
   height: 18px;
   color: var(--c-brand);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
   flex-shrink: 0;
+}
+
+.chapter-icon use {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
 .chapter-indicator .chapter-text {

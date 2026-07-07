@@ -61,24 +61,42 @@ window.RPGStoryLoader = class RPGStoryLoader {
       return { success: false, error: '无效的剧本文件：缺少 meta 字段' };
     }
 
+    // ── Schema v1.1 兼容层 ──
+    // 如果 nodes 是字典格式，转换为播放器使用的数组格式
+    if (storyJson.nodes && !Array.isArray(storyJson.nodes)) {
+      storyJson = this._normalizeV11(storyJson);
+    }
+
     this.story = storyJson;
     this.isStoryMode = true;
 
     // Initialize RPG core (may or may not be enabled)
     const rpgEnabled = this.rpg.loadStory(storyJson);
 
-    // Apply initial state
-    if (storyJson.initialState) {
-      for (const [key, val] of Object.entries(storyJson.initialState)) {
-        this.state.stats[key] = val;
+    // Reset inventory to empty when loading a story script
+    // (unless the story provides initial inventory)
+    if (!storyJson.initialInventory) {
+      this.state.inventory = {};
+    } else {
+      this.state.inventory = JSON.parse(JSON.stringify(storyJson.initialInventory));
+    }
+    this._updateInventoryBadge();
+
+    // Initialize flags (these are not affected by switchGenre reset)
+    if (storyJson.flags && Array.isArray(storyJson.flags)) {
+      for (const flag of storyJson.flags) {
+        this.rpg.setFlag(flag);
       }
     }
 
-    // Initialize NPC affinities
+    // Initialize NPC affinities (npcRelations is already a flat array after _normalizeV11)
     if (storyJson.npcRelations) {
       this.state.npcAffinities = {};
-      for (const npc of storyJson.npcRelations) {
-        this.state.npcAffinities[npc.id] = npc.initialAffinity || 0;
+      const npcList = Array.isArray(storyJson.npcRelations) ? storyJson.npcRelations : [];
+      for (const npc of npcList) {
+        if (npc && npc.id) {
+          this.state.npcAffinities[npc.id] = npc.initialAffinity || npc.defaultAffinity || 0;
+        }
       }
     }
 
@@ -93,11 +111,27 @@ window.RPGStoryLoader = class RPGStoryLoader {
       if (this.theme) this.theme.switchGenre(storyJson.meta.genre);
     }
 
+    // Apply initial state AFTER switchGenre (which resets stats from data.js)
+    this.state.stats = {};
+    const storyVars = storyJson.initialState || storyJson.variables || {};
+    for (const [key, val] of Object.entries(storyVars)) {
+      this.state.stats[key] = val;
+    }
+
+    // Re-apply inventory (switchGenre may have reset it)
+    this.state.inventory = {};
+
     // Show mode indicator
     this._showModeIndicator(storyJson.meta, rpgEnabled);
 
-    // Find start node
-    const startNode = this.story.nodes.find(n => n.id === 'start') || this.story.nodes[0];
+    // Find start node (v1.1 startNodeId or legacy 'start' id)
+    const startId = storyJson.startNodeId || 'start';
+    const startNode = this.story.nodes.find(n => n.id === startId) || this.story.nodes[0];
+
+    // Hide legacy interaction area (not used in story mode)
+    const interactionsArea = document.getElementById('interactions-area');
+    if (interactionsArea) interactionsArea.style.display = 'none';
+
     if (startNode) {
       this.navigateTo(startNode.id);
     }
@@ -198,6 +232,14 @@ window.RPGStoryLoader = class RPGStoryLoader {
   _handleStoryChoice(index, choices) {
     const choice = choices[index];
     if (!choice) return;
+
+    // Immediately disable ALL choice buttons to prevent double-clicks
+    const container = document.getElementById('choices-area');
+    if (container) {
+      container.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.disabled = true;
+      });
+    }
 
     // Play SFX
     if (window.audioSystem) window.audioSystem.playSFX('choice_made');
@@ -495,6 +537,14 @@ window.RPGStoryLoader = class RPGStoryLoader {
    * 7. Current Node Access
    * ================================================================ */
 
+  _updateInventoryBadge() {
+    const badge = document.getElementById('inv-badge');
+    if (!badge) return;
+    const count = this.state ? this.state.getTotalItemCount() : 0;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
   get currentNode() {
     if (!this.story || !this.currentNodeId) return null;
     return this.story.nodes.find(n => n.id === this.currentNodeId) || null;
@@ -678,7 +728,141 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
   _getNPCLabel(npcId) {
     if (!this.story || !this.story.npcRelations) return npcId;
-    const npc = this.story.npcRelations.find(n => n.id === npcId);
-    return npc ? npc.name : npcId;
+    const npcList = this.story.npcRelations.npcs || this.story.npcRelations;
+    if (Array.isArray(npcList)) {
+      const npc = npcList.find(n => n.id === npcId);
+      return npc ? npc.name : npcId;
+    }
+    return npcId;
+  }
+
+  /* ================================================================
+   * 12. Schema v1.1 Normalization
+   * ================================================================ */
+
+  _normalizeV11(json) {
+    // Convert v1.1 dict-nodes to legacy array-nodes
+    const nodesDict = json.nodes || {};
+    const nodesArray = [];
+
+    for (const [id, node] of Object.entries(nodesDict)) {
+      const normalized = {
+        id: node.id || id,
+        chapter: node.chapterTitle || '',
+        text: Array.isArray(node.segments) ? node.segments.join('\n\n') : (node.text || ''),
+        type: node.isEnding ? 'ending' : 'narrative',
+        candidateEndings: node.isEnding ? Object.keys(json.endings || {}) : undefined,
+      };
+
+      // Convert choices
+      if (node.choices && node.choices.length > 0) {
+        normalized.choices = node.choices.map(ch => {
+          const result = {
+            id: ch.id,
+            text: ch.text,
+            next: ch.targetNodeId || ch.next,
+          };
+
+          // Convert condition (v1.1 variable/operator/value → var/op/value)
+          if (ch.condition) {
+            if (ch.condition.variable) {
+              result.condition = { var: ch.condition.variable, op: ch.condition.operator, value: ch.condition.value };
+            } else if (ch.condition.flag) {
+              result.condition = { flag: ch.condition.flag };
+            } else if (ch.condition.all || ch.condition.any) {
+              result.condition = ch.condition;
+            }
+            if (ch.conditionDisplay) {
+              result.conditionDisplay = ch.conditionDisplay;
+            }
+          }
+
+          // Convert changes — v1.1 array format → flat object format
+          // v1.1: [{ variable, value, addFlag, addFlags }]
+          // applyChanges expects: { key: delta, show: true, feedback: {...}, flags: [...], inventory: [...] }
+          if (ch.changes && ch.changes.length > 0) {
+            result.changes = {};
+            const flags = [];
+            for (const c of ch.changes) {
+              if (c.variable && c.value !== undefined) {
+                result.changes[c.variable] = c.value;
+              }
+              if (c.addFlag) flags.push(c.addFlag);
+              if (c.addFlags) flags.push(...c.addFlags);
+            }
+            if (flags.length > 0) {
+              result.changes.flags = flags;
+            }
+            // Default: show feedback for visible changes
+            const hasChanges = Object.keys(result.changes).some(k => k !== 'flags');
+            if (hasChanges) {
+              result.changes.show = true;
+              result.changes.feedback = { style: 'toast', duration: 2500 };
+            }
+          }
+
+          // weight
+          if (ch.weight) result.weight = ch.weight;
+
+          // weightHint
+          if (ch.weightHint) result.weightHint = ch.weightHint;
+
+          // affinityChanges
+          if (ch.affinityChanges) {
+            result.affinityChanges = ch.affinityChanges;
+          }
+
+          return result;
+        });
+      } else {
+        normalized.choices = [];
+      }
+
+      nodesArray.push(normalized);
+    }
+
+    // Convert endings: dict → array (preserve id field)
+    const endings = json.endings
+      ? Object.entries(json.endings).map(([id, e]) => ({
+          id: e.id || id,
+          name: e.title || e.name || id,
+          desc: e.description || e.desc || '',
+          type: e.type || 'neutral',
+          closing: e.description || '',
+          condition: e.condition,
+        }))
+      : [];
+
+    // Convert npcRelations: nested → flat array with initialAffinity
+    let npcRelations = [];
+    if (json.npcRelations) {
+      if (Array.isArray(json.npcRelations)) {
+        npcRelations = json.npcRelations;
+      } else if (json.npcRelations.npcs && Array.isArray(json.npcRelations.npcs)) {
+        npcRelations = json.npcRelations.npcs.map(npc => ({
+          id: npc.id,
+          name: npc.name,
+          initialAffinity: npc.defaultAffinity || npc.initialAffinity || 0,
+          categories: npc.categories,
+          avatar: npc.avatar,
+          description: npc.description,
+        }));
+      }
+    }
+
+    // Convert milestones
+    const milestones = json.milestones || [];
+
+    return {
+      meta: json.meta,
+      initialState: json.variables || json.initialState || {},
+      nodes: nodesArray,
+      milestones,
+      endings,
+      npcRelations,
+      timePressure: json.timePressure,
+      achievements: json.achievements,
+      startNodeId: json.startNodeId,
+    };
   }
 };
