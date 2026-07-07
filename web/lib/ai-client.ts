@@ -249,3 +249,340 @@ export function getAIConfig() {
     hasKey: !!API_KEY,
   };
 }
+
+// ================================================================
+// Pipeline v2: 分阶段专用生成方法
+// ================================================================
+
+import type { StoryOutline, StateDesign, ChapterResult, CreatorRules } from '@/types';
+
+/**
+ * 阶段 2: 生成剧情大纲
+ * 输入：各章摘要列表，输出：完整大纲 JSON
+ */
+export async function generateOutline(
+  chapterSummaries: string[],
+  genre: string,
+  title?: string,
+  enableRPG?: boolean,
+  rules?: CreatorRules,
+  onChunk?: (chunk: string) => void
+): Promise<StoryOutline> {
+  const systemPrompt = `你是一个专业的互动叙事游戏架构师。你的任务是根据小说各章摘要，设计完整的分支剧情大纲。
+
+输出必须为合法 JSON，格式如下：
+{
+  "title": "作品标题",
+  "genre": "类型",
+  "summary": "整体剧情概述（200字以内）",
+  "totalNodesEstimate": 60,
+  "endings": [
+    { "title": "结局名", "condition": "达成条件描述", "type": "true|dark|romance|neutral" }
+  ],
+  "milestones": [
+    { "title": "里程碑名", "condition": "触发条件描述" }
+  ],
+  "chapterPlans": [
+    {
+      "chapterIndex": 0,
+      "title": "章标题",
+      "nodeCountEstimate": 8,
+      "keyEvents": ["关键事件1", "关键事件2"],
+      "branchPoints": ["分支点描述"]
+    }
+  ]
+}
+
+要求：
+- endings 至少 3 个，最多 5 个
+- milestones 至少 3 个
+- chapterPlans 必须覆盖所有输入的章节
+- 每个 branchPoints 描述一个玩家可能做出重大选择的节点`;
+
+  const userPrompt = `请为以下${genre}题材小说设计互动叙事大纲：
+${title ? `\n作品标题：${title}` : ''}
+${enableRPG ? '\n需要设计 RPG 数值系统' : ''}
+${rules?.npcRelations ? '\n需要设计 NPC 关系网络' : ''}
+${rules?.timePressure ? '\n需要设计时间压力机制' : ''}
+
+各章摘要：
+${chapterSummaries.map((s, i) => `${i + 1}. ${s}`).join('\n')}
+
+请直接输出 JSON。`;
+
+  const response = await fetch(`${API_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      stream: true,
+      temperature: 0.7,
+      max_tokens: 4000,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Outline generation failed: ${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullContent = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content || '';
+          if (content) {
+            fullContent += content;
+            onChunk?.(content);
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
+
+  const cleaned = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(cleaned) as StoryOutline;
+}
+
+/**
+ * 阶段 3: 生成状态系统设计
+ * 输入：大纲，输出：variables + primaryStats + npcRelations + achievements
+ */
+export async function generateStateDesign(
+  outline: StoryOutline,
+  genre: string,
+  enableRPG?: boolean,
+  rules?: CreatorRules
+): Promise<StateDesign> {
+  const systemPrompt = `你是一个专业的游戏数值设计师。根据剧情大纲，设计 RPG 状态系统。
+
+输出必须为合法 JSON：
+{
+  "variables": { "变量名": 初始值 },
+  "primaryStats": [
+    { "key": "变量名", "label": "显示名", "type": "text|number|bar", "max": 100, "tone": "positive|danger|neutral" }
+  ],
+  "npcRelations": {
+    "npcs": [
+      { "id": "唯一标识", "name": "角色名", "defaultAffinity": 0, "description": "角色描述" }
+    ]
+  },
+  "timePressure": {
+    "enabled": false,
+    "mode": "turn",
+    "turnsPerCycle": 10,
+    "globalDecay": [{ "variable": "变量名", "delta": -1 }]
+  },
+  "achievements": {
+    "achievement_id": {
+      "id": "achievement_id",
+      "title": "成就名",
+      "description": "描述",
+      "category": "general",
+      "rarity": "common"
+    }
+  }
+}`;
+
+  const userPrompt = `请为「${outline.title}」设计${genre}类型的状态系统。
+${enableRPG ? '' : '本作为纯文学模式，无需复杂数值，只需基础 variables。'}
+${rules?.npcRelations ? '需要设计 NPC 关系网络。' : ''}
+${rules?.timePressure ? '需要设计时间压力机制。' : ''}
+
+剧情概述：${outline.summary}
+结局设计：${outline.endings.map(e => e.title).join('、')}
+
+请直接输出 JSON。`;
+
+  const response = await fetch(`${API_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.7,
+      max_tokens: 3000,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`State design failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const content = data.choices?.[0]?.message?.content || '';
+  const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(cleaned) as StateDesign;
+}
+
+/**
+ * 阶段 4: 逐章生成节点
+ * 输入：单章内容 + 全局上下文，输出：该章的 nodes
+ */
+export async function generateChapter(
+  params: {
+    chapterIndex: number;
+    totalChapters: number;
+    title: string;
+    content: string;
+    prevHint: string;
+    nextHint: string;
+    outline: StoryOutline;
+    stateDesign: StateDesign;
+    currentVariables: Record<string, number | string | boolean>;
+    currentFlags: string[];
+  },
+  genre: string,
+  enableRPG?: boolean,
+  rules?: CreatorRules,
+  onProgress?: (tokens: number) => void
+): Promise<ChapterResult> {
+  const systemPrompt = `你是一个专业的互动叙事游戏编剧。根据提供的章节内容和全局上下文，生成本章的交互节点。
+
+输出必须为合法 JSON，格式如下：
+{
+  "nodes": {
+    "node_001": {
+      "id": "node_001",
+      "chapterTitle": "章节标题",
+      "title": "场景标题",
+      "segments": ["叙述文本段落..."],
+      "choices": [
+        {
+          "id": "choice_001",
+          "text": "选项文字",
+          "targetNodeId": "node_002",
+          "changes": { "variable": "varname", "value": 10, "show": true }
+        }
+      ]
+    }
+  },
+  "variablesDelta": { "变量名": 变化值 },
+  "flagsAdded": ["flag_name"],
+  "npcAffinitiesDelta": { "npcId": 变化值 }
+}
+
+要求：
+- 每章生成 5-15 个节点
+- 节点 ID 格式：node_章节索引_序号（如 node_0_001）
+- segments 是字符串数组，每个元素是一段叙述
+- choices 必须自然、有叙事意义
+- changes 中的变量必须存在于全局变量列表中
+- 本章最后一个节点的 choices 应指向"node_next"（留给下一章衔接）`;
+
+  const userPrompt = `请生成本章的交互节点。
+
+【全局信息】
+类型：${genre}
+作品：${params.outline.title}
+本章位置：第 ${params.chapterIndex + 1}/${params.totalChapters} 章
+本章大纲：${params.outline.chapterPlans[params.chapterIndex]?.keyEvents.join('、') || ''}
+
+【状态上下文】
+当前变量状态：${JSON.stringify(params.currentVariables)}
+已触发标记：${params.currentFlags.join(', ') || '无'}
+
+【衔接信息】
+${params.prevHint}
+${params.nextHint}
+
+【本章内容】
+${params.content.slice(0, 4000)}
+
+${enableRPG ? '请设计选项的数值变化。' : ''}
+${rules?.pacing === 'compact' ? '节奏紧凑：每2-3句正文给一个选择。' : rules?.pacing === 'relaxed' ? '节奏舒缓：充分叙述后再给选择。' : ''}
+
+请直接输出 JSON。`;
+
+  const response = await fetch(`${API_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      stream: true,
+      temperature: 0.75,
+      max_tokens: 6000,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Chapter generation failed: ${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error('No response body');
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullContent = '';
+  let tokenCount = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = line.slice(6);
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const content = parsed.choices?.[0]?.delta?.content || '';
+          if (content) {
+            fullContent += content;
+            tokenCount += content.length;
+            onProgress?.(tokenCount);
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
+
+  const cleaned = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  const result = JSON.parse(cleaned) as Omit<ChapterResult, 'chapterIndex' | 'title'>;
+
+  return {
+    chapterIndex: params.chapterIndex,
+    title: params.title,
+    nodes: result.nodes || {},
+    variablesDelta: result.variablesDelta || {},
+    flagsAdded: result.flagsAdded || [],
+    npcAffinitiesDelta: result.npcAffinitiesDelta,
+  };
+}

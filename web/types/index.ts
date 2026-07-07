@@ -272,3 +272,133 @@ export interface GenerateProgress {
   message: string;
   status: 'running' | 'completed' | 'error';
 }
+
+// ── Generation Pipeline (v2) ───────────────
+
+export type JobStage =
+  | 'PENDING'
+  | 'ANALYZING'
+  | 'SPLITTING'
+  | 'OUTLINING'
+  | 'STATE_DESIGNING'
+  | 'CHAPTER_GENERATING'
+  | 'ASSEMBLING'
+  | 'VALIDATING'
+  | 'COMPLETED'
+  | 'FAILED';
+
+export interface JobStatus {
+  id: string;
+  stage: JobStage;
+  progress: number; // 0-100
+  currentStep: string;
+  totalChapters: number;
+  completedChapters: number;
+  estimatedRemainingSeconds: number;
+  error?: string;
+  failedStage?: JobStage;
+  recoverable: boolean;
+  result?: {
+    workId: string;
+    title: string;
+    nodeCount: number;
+    endingCount: number;
+  };
+  chapterStatuses: Array<{
+    index: number;
+    title: string;
+    status: 'pending' | 'running' | 'completed' | 'failed';
+    nodeCount?: number;
+  }>;
+  [key: string]: unknown;
+}
+
+export type ProgressEventType =
+  | 'analyze_start'
+  | 'analyze_complete'
+  | 'split_complete'
+  | 'outline_start'
+  | 'outline_chunk'
+  | 'outline_complete'
+  | 'state_design_start'
+  | 'state_design_complete'
+  | 'chapter_start'
+  | 'chapter_progress'
+  | 'chapter_complete'
+  | 'assemble_start'
+  | 'assemble_complete'
+  | 'validate_result'
+  | 'complete'
+  | 'error';
+
+export interface PipelineProgressEvent {
+  type: ProgressEventType;
+  jobId: string;
+  stage: JobStage;
+  progress: number;
+  message: string;
+  detail?: Record<string, unknown>;
+  timestamp: number;
+}
+
+export interface ChapterAnalysis {
+  index: number;
+  title: string;
+  wordCount: number;
+  preview: string;
+  contextHint: string;
+}
+
+export interface TextAnalysisResult {
+  totalChapters: number;
+  totalWords: number;
+  chapters: ChapterAnalysis[];
+}
+
+export interface StoryOutline {
+  title: string;
+  genre: string;
+  summary: string;
+  totalNodesEstimate: number;
+  endings: Array<{
+    title: string;
+    condition: string;
+    type: string;
+  }>;
+  milestones: Array<{
+    title: string;
+    condition: string;
+  }>;
+  chapterPlans: Array<{
+    chapterIndex: number;
+    title: string;
+    nodeCountEstimate: number;
+    keyEvents: string[];
+    branchPoints: string[];
+  }>;
+}
+
+export interface StateDesign {
+  variables: Record<string, number | string | boolean>;
+  primaryStats: RPGStat[];
+  npcRelations?: NPCRelations;
+  timePressure?: TimePressure;
+  achievements: Record<string, Achievement>;
+}
+
+export interface ChapterResult {
+  chapterIndex: number;
+  title: string;
+  nodes: Record<string, StoryNode>;
+  variablesDelta: Record<string, number | string | boolean>;
+  flagsAdded: string[];
+  npcAffinitiesDelta?: Record<string, number>;
+}
+
+export interface PipelineInput {
+  text: string;
+  genre: string;
+  title?: string;
+  enableRPG: boolean;
+  rules?: CreatorRules;
+}
