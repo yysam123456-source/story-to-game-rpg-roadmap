@@ -366,6 +366,71 @@ window.UIController = class UIController {
     }, 2500);
   }
 
+  /* ── Delayed Change Notification ───── */
+  showDelayedChangeNotification(reasons, changeList) {
+    const container = document.getElementById('notifications');
+    if (!container) return;
+
+    // Limit max
+    while (container.children.length >= this.MAX_NOTIFICATIONS) {
+      container.firstElementChild.remove();
+    }
+
+    const el = document.createElement('div');
+    el.setAttribute('role', 'status');
+    el.className = 'delayed-change-notification';
+
+    // Build reason text
+    const reasonText = reasons.length > 0
+      ? reasons.join('；')
+      : '过往的因果在此刻浮现……';
+
+    // Build change items
+    const changeItems = changeList.map(c => {
+      const tone = c.tone || (c.delta !== undefined && c.delta < 0 ? 'negative' : 'positive');
+      const valueText = c.delta !== undefined
+        ? `${c.delta > 0 ? '+' : ''}${c.delta}`
+        : (c.value !== undefined ? `→ ${c.value}` : '');
+      return `<span class="delayed-change-item ${tone}">${c.label} ${valueText}</span>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="delayed-change-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span class="delayed-change-title">因果显现</span>
+      </div>
+      <div class="delayed-change-reason">${reasonText}</div>
+      ${changeItems ? `<div class="delayed-change-items">${changeItems}</div>` : ''}
+    `;
+
+    container.appendChild(el);
+
+    // Flash stat bars
+    this._flashStatBars();
+
+    // Play special SFX
+    if (window.audioSystem) window.audioSystem.playSFX('notification');
+
+    // Auto-dismiss (longer for delayed changes)
+    setTimeout(() => {
+      el.classList.add('exiting');
+      el.addEventListener('transitionend', () => { if (el.parentNode) el.remove(); });
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 500);
+    }, 4000);
+  }
+
+  /* ── Flash Stat Bars ───────────────── */
+  _flashStatBars() {
+    const statItems = document.querySelectorAll('.stat-item');
+    statItems.forEach(item => {
+      item.classList.add('flash-change');
+      setTimeout(() => item.classList.remove('flash-change'), 1500);
+    });
+  }
+
   /* ── Keyboard Navigation ────────────── */
   _bindKeyboardNav() {
     document.addEventListener('keydown', (e) => {

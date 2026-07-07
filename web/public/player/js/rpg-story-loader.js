@@ -348,13 +348,12 @@ window.RPGStoryLoader = class RPGStoryLoader {
   _applyDelayedChangesForNode(nodeId) {
     if (!this._delayedChangesQueue) return;
     const remaining = [];
+    const triggered = [];
     for (const dc of this._delayedChangesQueue) {
       if (dc.triggerNode === nodeId || dc.triggerNode === 'next') {
+        triggered.push(dc);
         if (dc.changes) {
           this.rpg.applyChanges(dc.changes, this.state);
-          if (window.uiController) {
-            window.uiController.showNotification('延迟后果触发', 0, 'info');
-          }
         }
         if (dc.setFlag) {
           this.rpg.setFlag(dc.setFlag);
@@ -364,6 +363,30 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
     this._delayedChangesQueue = remaining;
+
+    // Visual feedback for triggered delayed changes
+    if (triggered.length > 0 && window.uiController) {
+      const reasons = triggered.map(dc => dc.reason).filter(Boolean);
+      const changeList = [];
+      for (const dc of triggered) {
+        if (dc.changes) {
+          if (dc.changes.set) {
+            for (const [key, val] of Object.entries(dc.changes.set)) {
+              changeList.push({ label: key, value: val });
+            }
+          }
+          if (dc.changes.val !== undefined) {
+            changeList.push({ label: '主状态', delta: dc.changes.val });
+          }
+          if (dc.changes.feedback) {
+            for (const fb of dc.changes.feedback) {
+              changeList.push({ label: fb.label, delta: fb.delta, tone: fb.tone });
+            }
+          }
+        }
+      }
+      window.uiController.showDelayedChangeNotification(reasons, changeList);
+    }
   }
 
   /* ================================================================

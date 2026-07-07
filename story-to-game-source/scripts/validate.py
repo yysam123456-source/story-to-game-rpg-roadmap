@@ -411,6 +411,112 @@ def validate(path):
             if hvar not in all_vars:
                 errors.append(f"RPG-018: meta.rpg.hiddenStats 引用了 '{hvar}'，但该变量未在 variables 中定义")
 
+    # === 31. meta.rules 枚举校验（RPG-019 ~ RPG-025） ===
+    rules = data.get("meta", {}).get("rules", {})
+    if rules:
+        VALID_PACING = {"compact", "balanced", "relaxed"}
+        VALID_CHOICE_STYLE = {"direct", "inner_monologue", "action"}
+        VALID_STAT_IMPACT = {"light", "medium", "heavy"}
+        VALID_HIDDEN_RATIO = {"low", "medium", "high"}
+        VALID_ENDING_BIAS = {"heavy", "balanced", "dark", "random"}
+        VALID_PERSON = {"first", "second"}
+        VALID_DIALOGUE_DENSITY = {"low", "medium", "high"}
+
+        if "pacing" in rules and rules["pacing"] not in VALID_PACING:
+            errors.append(f"RPG-019: meta.rules.pacing '{rules['pacing']}' 无效，应为 {VALID_PACING}")
+        if "choiceStyle" in rules and rules["choiceStyle"] not in VALID_CHOICE_STYLE:
+            errors.append(f"RPG-020: meta.rules.choiceStyle '{rules['choiceStyle']}' 无效，应为 {VALID_CHOICE_STYLE}")
+        if "statImpact" in rules and rules["statImpact"] not in VALID_STAT_IMPACT:
+            errors.append(f"RPG-021: meta.rules.statImpact '{rules['statImpact']}' 无效，应为 {VALID_STAT_IMPACT}")
+        if "hiddenContentRatio" in rules and rules["hiddenContentRatio"] not in VALID_HIDDEN_RATIO:
+            errors.append(f"RPG-022: meta.rules.hiddenContentRatio '{rules['hiddenContentRatio']}' 无效，应为 {VALID_HIDDEN_RATIO}")
+        if "endingBias" in rules and rules["endingBias"] not in VALID_ENDING_BIAS:
+            errors.append(f"RPG-023: meta.rules.endingBias '{rules['endingBias']}' 无效，应为 {VALID_ENDING_BIAS}")
+        if "narrativePerson" in rules and rules["narrativePerson"] not in VALID_PERSON:
+            errors.append(f"RPG-024: meta.rules.narrativePerson '{rules['narrativePerson']}' 无效，应为 {VALID_PERSON}")
+        if "dialogueDensity" in rules and rules["dialogueDensity"] not in VALID_DIALOGUE_DENSITY:
+            errors.append(f"RPG-025: meta.rules.dialogueDensity '{rules['dialogueDensity']}' 无效，应为 {VALID_DIALOGUE_DENSITY}")
+
+    # === 32. npcRelations 校验（RPG-026 ~ RPG-028） ===
+    npcs = data.get("npcRelations", [])
+    npc_ids = set()
+    if npcs:
+        # RPG-026: npcRelations[].id 全局唯一性
+        for npc in npcs:
+            nid = npc.get("id", "")
+            if nid in npc_ids:
+                errors.append(f"RPG-026: npcRelations 中存在重复 id '{nid}'")
+            npc_ids.add(nid)
+            if not npc.get("name"):
+                warnings.append(f"RPG-026: npcRelations[{nid}] 缺少 name 字段")
+
+        # RPG-027: affinityChanges 中 npcId 引用检查
+        for nnode, node in nodes.items():
+            for c in node.get("choices", []):
+                changes = c.get("changes", {})
+                for ac in changes.get("affinityChanges", []):
+                    npc_ref = ac.get("npcId", "")
+                    if npc_ref and npc_ref not in npc_ids:
+                        errors.append(f"RPG-027: 节点 '{nnode}' choice.changes.affinityChanges 引用了未定义的 npcId '{npc_ref}'")
+
+        # RPG-028: condition.affinity.npcId 引用检查
+        def extract_affinity_refs(condition, prefix=""):
+            refs = []
+            if isinstance(condition, dict):
+                if "affinity" in condition:
+                    refs.append(condition["affinity"].get("npc", ""))
+                for key in ("all", "any"):
+                    if key in condition:
+                        for sub in condition[key]:
+                            refs.extend(extract_affinity_refs(sub, prefix))
+            return refs
+
+        for src_type, src_id, cond in all_conditions:
+            if isinstance(cond, dict):
+                for npc_ref in extract_affinity_refs(cond):
+                    if npc_ref and npc_ref not in npc_ids:
+                        errors.append(f"RPG-028: {src_type}[{src_id}] condition.affinity 引用了未定义的 npcId '{npc_ref}'")
+
+    # === 33. timePressure 校验（RPG-029 ~ RPG-030） ===
+    tp = data.get("timePressure", {})
+    if tp and tp.get("enabled"):
+        # RPG-029: timeoutNode 存在性检查
+        tn = tp.get("timeoutNode", "")
+        if tn and tn not in nodes:
+            errors.append(f"RPG-029: timePressure.timeoutNode '{tn}' 不存在于 nodes 中")
+
+        # RPG-030: globalDecay 变量引用检查
+        decay = tp.get("globalDecay", {})
+        if decay:
+            for var_ref in decay.get("variables", {}).keys():
+                if var_ref not in all_vars:
+                    warnings.append(f"RPG-030: timePressure.globalDecay 引用了变量 '{var_ref}'，但该变量未在 variables 中定义")
+            if npcs:
+                for npc_ref in decay.get("affinity", {}).keys():
+                    if npc_ref not in npc_ids:
+                        warnings.append(f"RPG-030: timePressure.globalDecay.affinity 引用了未定义的 npcId '{npc_ref}'")
+
+        # 补充：countdown 类型检查
+        cd = tp.get("countdown")
+        if cd is not None and (not isinstance(cd, (int, float)) or cd <= 0):
+            errors.append(f"RPG-029: timePressure.countdown 必须为大于 0 的数字，当前值: {cd}")
+
+    # === 34. achievements.autoUnlock 条件格式校验（RPG-031） ===
+    if "achievements" in data:
+        for aid, adef in data["achievements"].items():
+            auto = adef.get("autoUnlock")
+            if auto:
+                if isinstance(auto, dict):
+                    if not any(k in auto for k in ("all", "any", "not", "var", "flag", "item", "interaction", "affinity")):
+                        errors.append(f"RPG-031: achievement[{aid}] autoUnlock 条件格式异常，无法解析")
+                    # 检查 autoUnlock 中的 affinity 引用
+                    for npc_ref in extract_affinity_refs(auto):
+                        if npcs and npc_ref and npc_ref not in npc_ids:
+                            errors.append(f"RPG-031: achievement[{aid}] autoUnlock 引用了未定义的 npcId '{npc_ref}'")
+                elif isinstance(auto, str):
+                    if not any(auto.startswith(prefix) for prefix in ('val', 'trust', 'route', 'hasFlag', '!hasFlag', 'default')):
+                        warnings.append(f"RPG-031: achievement[{aid}] autoUnlock 字符串格式可能异常")
+
     # === RPG Checks End ===
 
     # === 报告 ===
