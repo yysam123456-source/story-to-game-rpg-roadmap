@@ -120,6 +120,7 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
     // Re-apply inventory (switchGenre may have reset it)
     this.state.inventory = {};
+    this._updateInventoryBadge();
 
     // Show mode indicator
     this._showModeIndicator(storyJson.meta, rpgEnabled);
