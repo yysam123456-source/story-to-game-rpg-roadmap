@@ -120,7 +120,7 @@ export class TextSplitter {
       }
     }
 
-    if (current.length > 100) {
+    if (current.length > 0) {
       chunks.push({
         index: idx,
         title: `第${idx + 1}部分`,
