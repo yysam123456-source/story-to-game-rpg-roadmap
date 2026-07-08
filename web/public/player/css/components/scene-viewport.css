@@ -7,12 +7,12 @@
   position: relative;
   width: 100%;
   aspect-ratio: 21 / 9;
-  max-height: 35vh;
+  max-height: 20vh;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--c-bg-surface);
   border: 1px solid var(--c-border-brand);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-3);
   box-shadow: var(--shadow-glow);
   transition: border-color var(--duration-slow) var(--ease-in-out);
 }
@@ -117,8 +117,8 @@
 @media (max-width: 768px) {
   #scene-viewport {
     aspect-ratio: 21 / 9;
-    max-height: 30vh;
+    max-height: 18vh;
     border-radius: var(--radius-md);
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
   }
 }

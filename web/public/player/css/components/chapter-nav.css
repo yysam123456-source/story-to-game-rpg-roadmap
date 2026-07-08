@@ -8,8 +8,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-3) 0;
-  margin-bottom: var(--space-4);
+  padding: var(--space-1) 0;
+  margin-bottom: var(--space-2);
 }
 
 /* Individual chapter pill */
@@ -121,9 +121,8 @@
   opacity: 1;
 }
 
-/* Current chapter always shows label */
+/* Current chapter tooltip — same as others (hover only) */
 .chapter-dot.current::after {
-  opacity: 1;
   color: var(--c-text-primary);
   border-color: var(--c-border-brand);
 }

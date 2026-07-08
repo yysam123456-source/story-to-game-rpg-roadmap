@@ -57,6 +57,8 @@
 .menu-panel {
   width: 400px;
   max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur-heavy));
   -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
