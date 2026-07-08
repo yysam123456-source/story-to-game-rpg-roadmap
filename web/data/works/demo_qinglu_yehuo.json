@@ -13,40 +13,46 @@
         {
           "key": "realm",
           "label": "境界",
-          "type": "text"
+          "type": "text",
+          "icon": "icon-crown"
         },
         {
           "key": "cultivation",
           "label": "修为",
           "type": "number",
-          "tone": "positive"
+          "tone": "positive",
+          "icon": "icon-fire"
         },
         {
           "key": "spiritual",
           "label": "灵力",
           "type": "bar",
           "max": 100,
-          "tone": "positive"
+          "tone": "positive",
+          "icon": "icon-bolt"
         },
         {
           "key": "mind",
           "label": "心境",
           "type": "bar",
           "max": 100,
-          "tone": "positive"
+          "tone": "positive",
+          "icon": "icon-brain"
         },
         {
           "key": "reputation",
           "label": "声望",
           "type": "number",
-          "tone": "positive"
+          "tone": "positive",
+          "icon": "icon-star"
         },
         {
           "key": "hp",
           "label": "气血",
           "type": "bar",
           "max": 100,
-          "tone": "danger"
+          "tone": "danger",
+          "icon": "icon-heart"
         }
       ],
       "hiddenStats": [

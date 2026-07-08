@@ -46,17 +46,19 @@
 /* Narrative text container */
 #narrative-text {
   font-family: var(--font-display);
-  font-size: var(--text-base);
-  line-height: var(--leading-narrative);
+  font-size: var(--text-lg);
+  line-height: 2.0;
   color: var(--c-text-primary);
-  padding: var(--space-5);
+  padding: var(--space-6) var(--space-8);
   margin-bottom: var(--space-6);
   background: var(--c-bg-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--c-border-subtle);
+  border-left: 2px solid var(--c-brand);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
   white-space: pre-wrap;
   word-wrap: break-word;
-  min-height: 120px;
+  min-height: 200px;
   position: relative;
   animation: fadeIn var(--duration-slow) var(--ease-out-expo);
 }
@@ -89,7 +91,7 @@
 #choices-area {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
   animation: fadeSlideUp var(--duration-normal) var(--ease-out-expo);
 }
 
@@ -215,7 +217,8 @@
 @media (max-width: 768px) {
   #narrative-text {
     padding: var(--space-4);
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
+    min-height: 150px;
   }
   .choice-btn {
     padding: var(--space-3) var(--space-4);
@@ -223,6 +226,6 @@
     font-size: var(--text-sm);
   }
   #choices-area {
-    gap: 10px;
+    gap: var(--space-3);
   }
 }

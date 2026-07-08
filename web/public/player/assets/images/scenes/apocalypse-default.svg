@@ -1,20 +1,148 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2a1a0a"/>
-      <stop offset="1" stop-color="#1a1005"/>
+    <!-- Sky gradient - dark brown-yellow -->
+    <linearGradient id="sky-apocalypse" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1508"/>
+      <stop offset="0.4" stop-color="#0f0c05"/>
+      <stop offset="1" stop-color="#0a0806"/>
     </linearGradient>
+    <!-- Hazy sunset -->
+    <radialGradient id="sunset-glow" cx="0.3" cy="0.35" r="0.35">
+      <stop offset="0" stop-color="rgba(180,100,30,0.35)"/>
+      <stop offset="0.4" stop-color="rgba(150,70,20,0.15)"/>
+      <stop offset="1" stop-color="transparent"/>
+    </radialGradient>
+    <!-- Sun body -->
+    <radialGradient id="sun-body" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="rgba(200,120,40,0.7)"/>
+      <stop offset="0.5" stop-color="rgba(180,90,30,0.4)"/>
+      <stop offset="1" stop-color="rgba(150,70,20,0.1)"/>
+    </radialGradient>
+    <!-- Dust particles -->
+    <radialGradient id="dust" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="rgba(160,120,60,0.5)"/>
+      <stop offset="1" stop-color="transparent"/>
+    </radialGradient>
+    <!-- Blur filters -->
+    <filter id="apocalypse-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+    <filter id="dust-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <!-- Vignette -->
+    <radialGradient id="vignette-apocalypse" cx="0.5" cy="0.5" r="0.65">
+      <stop offset="0" stop-color="transparent"/>
+      <stop offset="1" stop-color="rgba(0,0,0,0.4)"/>
+    </radialGradient>
   </defs>
-  <rect width="800" height="400" fill="url(#bg)"/>
-  <!-- Ruined buildings -->
-  <rect x="50" y="200" width="100" height="200" fill="rgba(60,40,20,0.3)" rx="2"/>
-  <rect x="200" y="250" width="120" height="150" fill="rgba(50,35,15,0.3)" rx="2"/>
-  <rect x="500" y="220" width="80" height="180" fill="rgba(55,38,18,0.3)" rx="2"/>
-  <rect x="650" y="180" width="130" height="220" fill="rgba(60,40,20,0.3)" rx="2"/>
-  <!-- Rubble -->
-  <ellipse cx="400" cy="380" rx="450" ry="30" fill="rgba(80,50,20,0.15)"/>
-  <!-- Smoke -->
-  <circle cx="300" cy="150" r="50" fill="rgba(100,80,50,0.05)"/>
-  <circle cx="500" cy="120" r="70" fill="rgba(100,80,50,0.04)"/>
-  <text x="400" y="380" text-anchor="middle" fill="rgba(180,120,60,0.3)" font-size="14" font-family="system-ui">末日 · 废墟</text>
+
+  <!-- Sky -->
+  <rect width="1200" height="600" fill="url(#sky-apocalypse)"/>
+
+  <!-- Hazy sunset glow -->
+  <circle cx="360" cy="210" r="300" fill="url(#sunset-glow)" filter="url(#apocalypse-blur)"/>
+  <!-- Sun disc (hazy, dim) -->
+  <circle cx="360" cy="210" r="50" fill="url(#sun-body)"/>
+
+  <!-- Ruined city skyline - broken buildings with irregular paths -->
+  <g fill="rgba(30,22,12,0.7)">
+    <!-- Ruin 1 - broken top -->
+    <path d="M30 520 L30 320 L50 300 L70 280 L80 310 L80 520Z"/>
+    <!-- Ruin 2 - half collapsed -->
+    <path d="M100 520 L100 350 L130 340 L140 290 L160 310 L160 360 L180 370 L180 520Z"/>
+    <!-- Ruin 3 - tilted -->
+    <path d="M200 520 L200 380 L220 360 L240 250 L260 200 L275 240 L270 380 L280 520Z"/>
+    <!-- Ruin 4 - with hole -->
+    <path d="M300 520 L300 300 L310 280 L350 260 L370 280 L380 300 L380 400 L360 410 L340 400 L340 380 L360 370 L380 400 L380 520Z"/>
+    <!-- Ruin 5 - stump -->
+    <path d="M420 520 L420 400 L450 380 L470 400 L470 520Z"/>
+    <!-- Ruin 6 - tall broken -->
+    <path d="M500 520 L500 280 L520 240 L540 180 L560 160 L570 200 L580 240 L600 220 L610 260 L620 520Z"/>
+    <!-- Ruin 7 -->
+    <path d="M640 520 L640 350 L660 330 L680 310 L700 340 L700 520Z"/>
+    <!-- Ruin 8 - destroyed -->
+    <path d="M720 520 L720 400 L740 370 L760 350 L770 320 L780 350 L790 380 L810 400 L810 520Z"/>
+    <!-- Ruin 9 - leaning tower -->
+    <path d="M840 520 L860 380 L880 300 L890 250 L900 230 L910 260 L920 310 L930 520Z"/>
+    <!-- Ruin 10 - rubble -->
+    <path d="M960 520 L960 420 L990 390 L1010 410 L1020 520Z"/>
+    <!-- Ruin 11 -->
+    <path d="M1050 520 L1050 340 L1070 310 L1100 280 L1120 300 L1140 330 L1160 520Z"/>
+    <!-- Ruin 12 - edge -->
+    <path d="M1160 520 L1170 380 L1180 360 L1200 370 L1200 520Z"/>
+  </g>
+
+  <!-- Abandoned vehicle silhouettes -->
+  <g fill="rgba(25,18,10,0.65)">
+    <!-- Vehicle 1 (car) -->
+    <path d="M150 490 L150 475 L165 468 L195 468 L210 475 L210 490Z"/>
+    <circle cx="165" cy="492" r="7" fill="rgba(20,15,8,0.7)"/>
+    <circle cx="195" cy="492" r="7" fill="rgba(20,15,8,0.7)"/>
+    <!-- Vehicle 2 (bus/truck) -->
+    <path d="M700 490 L700 460 L715 455 L780 455 L795 460 L795 490Z"/>
+    <rect x="715" y="462" width="60" height="18" rx="1" fill="rgba(40,30,15,0.3)"/>
+    <circle cx="720" cy="492" r="8" fill="rgba(20,15,8,0.7)"/>
+    <circle cx="775" cy="492" r="8" fill="rgba(20,15,8,0.7)"/>
+    <!-- Vehicle 3 (smaller car) -->
+    <path d="M1020 495 L1020 480 L1032 475 L1058 475 L1070 480 L1070 495Z"/>
+    <circle cx="1035" cy="497" r="6" fill="rgba(20,15,8,0.7)"/>
+    <circle cx="1055" cy="497" r="6" fill="rgba(20,15,8,0.7)"/>
+  </g>
+
+  <!-- Floating dust particles -->
+  <g>
+    <circle cx="200" cy="250" r="3" fill="url(#dust)">
+      <animate attributeName="cx" values="200;230;200" dur="12s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="250;240;250" dur="8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="200" r="2.5" fill="url(#dust)">
+      <animate attributeName="cx" values="500;530;500" dur="15s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="200;185;200" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="10s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="750" cy="280" r="2" fill="url(#dust)">
+      <animate attributeName="cx" values="750;770;750" dur="11s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="280;265;280" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.25;0.55;0.25" dur="9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1000" cy="230" r="3.5" fill="url(#dust)">
+      <animate attributeName="cx" values="1000;1030;1000" dur="13s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="230;215;230" dur="7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.6;0.3" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="350" r="2.2" fill="url(#dust)">
+      <animate attributeName="cx" values="350;375;350" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="350;340;350" dur="11s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.4;0.2" dur="11s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="900" cy="320" r="2.8" fill="url(#dust)">
+      <animate attributeName="cx" values="900;925;900" dur="14s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="320;305;320" dur="8.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.25;0.5;0.25" dur="8.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Ground crack lines -->
+  <g stroke="rgba(50,35,15,0.4)" stroke-width="1.5" fill="none" stroke-linecap="round">
+    <path d="M100 520 L140 515 L180 525 L220 518"/>
+    <path d="M400 520 L430 512 L470 522 L510 516 L540 520"/>
+    <path d="M600 520 L640 514 L680 523 L720 517"/>
+    <path d="M800 520 L830 513 L870 521 L910 515"/>
+    <path d="M1000 520 L1030 514 L1070 522 L1100 517 L1140 520"/>
+    <!-- Branch cracks -->
+    <path d="M140 515 L150 530 L160 545"/>
+    <path d="M430 512 L425 530 L435 545"/>
+    <path d="M830 513 L840 528 L835 543"/>
+  </g>
+
+  <!-- Ground surface -->
+  <rect x="0" y="520" width="1200" height="80" fill="rgba(15,10,5,0.5)"/>
+
+  <!-- Vignette overlay -->
+  <rect width="1200" height="600" fill="url(#vignette-apocalypse)"/>
+
+  <!-- Watermark text -->
+  <text x="600" y="590" text-anchor="middle" fill="rgba(180,120,40,0.25)" font-size="16" font-family="system-ui, serif" letter-spacing="8">末日 · 废土</text>
 </svg>

@@ -32,7 +32,7 @@ window.RPGStatusBar = class RPGStatusBar {
     if (!this.rpg || !this.rpg.isEnabled()) return;
 
     const stats = this.rpg.getVisibleStats();
-    const miniStats = stats.slice(0, 3);
+    const miniStats = stats.slice(0, 5);
 
     // Mini stats (always visible)
     const miniContainer = document.getElementById('status-mini');
