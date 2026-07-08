@@ -9,7 +9,7 @@
   margin-bottom: var(--space-5);
 }
 
-/* Chapter indicator — compact inline style */
+/* Chapter selector pill — clickable */
 .chapter-indicator {
   display: inline-flex;
   align-items: center;
@@ -19,6 +19,21 @@
   border-radius: var(--radius-pill);
   background: var(--c-bg-elevated);
   border: 1px solid var(--c-border-subtle);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out-expo);
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.chapter-indicator:hover {
+  background: var(--c-bg-surface);
+  border-color: var(--c-border-brand);
+  box-shadow: 0 0 8px var(--c-brand-glow);
+}
+
+.chapter-indicator:active {
+  transform: scale(0.97);
 }
 
 .chapter-indicator .chapter-icon {
@@ -43,6 +58,97 @@
   font-weight: var(--weight-semibold);
   color: var(--c-brand);
   letter-spacing: var(--letter-wide);
+}
+
+.chapter-indicator .chapter-chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--c-brand);
+  margin-left: var(--space-1);
+  transition: transform var(--duration-fast) var(--ease-out-expo);
+}
+
+.chapter-indicator[aria-expanded="true"] .chapter-chevron {
+  transform: rotate(180deg);
+}
+
+/* Chapter dropdown menu */
+.chapter-dropdown {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-3);
+  background: var(--c-bg-elevated);
+  border: 1px solid var(--c-border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  min-width: 180px;
+  animation: fadeSlideDown var(--duration-fast) var(--ease-out-expo);
+}
+
+.chapter-dropdown.hidden {
+  display: none;
+}
+
+.chapter-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--c-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  text-align: left;
+}
+
+.chapter-dropdown-item:hover {
+  background: var(--c-bg-surface);
+  color: var(--c-text-primary);
+}
+
+.chapter-dropdown-item.current {
+  color: var(--c-brand);
+  font-weight: var(--weight-semibold);
+  background: var(--c-brand-glow);
+}
+
+.chapter-dropdown-item.completed {
+  color: var(--c-text-primary);
+}
+
+.chapter-dropdown-item .chapter-dot-mini {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  background: var(--c-border-default);
+  flex-shrink: 0;
+}
+
+.chapter-dropdown-item.current .chapter-dot-mini {
+  background: var(--c-brand);
+  box-shadow: 0 0 4px var(--c-brand-glow);
+}
+
+.chapter-dropdown-item.completed .chapter-dot-mini {
+  background: var(--c-brand);
+  opacity: 0.6;
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Narrative text container */

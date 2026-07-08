@@ -36,7 +36,7 @@ window.ThemeEngine = class ThemeEngine {
     this._updateSceneViewport(genre);
     this._loadDemoStory(genre);
     this._renderInteractions(genre);
-    this._renderChapterNav(genre);
+    this._renderChapterSelector();
     this._renderInventory(genre);
 
     // 4. Trigger VFX
@@ -254,23 +254,76 @@ window.ThemeEngine = class ThemeEngine {
     if (area) area.style.display = '';
   }
 
-  /* ── Chapter Nav ────────────────────── */
-  _renderChapterNav(genre) {
-    const nav = document.getElementById('chapter-nav');
-    if (!nav || !window.state) return;
+  /* ── Chapter Selector Pill + Dropdown ─ */
+  _renderChapterSelector() {
+    const pill = document.getElementById('chapter-selector');
+    const text = document.getElementById('chapter-indicator-text');
+    if (!pill || !text || !window.state) return;
 
     const current = window.state.chapter;
-    const total = window.state.chapters.length;
+    const label = window.state.getChapterLabel();
+    text.textContent = label;
 
-    let html = '';
-    for (let i = 0; i < total; i++) {
-      if (i > 0) {
-        html += `<div class="chapter-connector ${i <= current ? 'completed' : ''}"></div>`;
+    // Bind click to toggle dropdown
+    pill.onclick = () => this._toggleChapterDropdown();
+  }
+
+  _toggleChapterDropdown() {
+    const dropdown = document.getElementById('chapter-dropdown');
+    const pill = document.getElementById('chapter-selector');
+    if (!dropdown || !pill) return;
+
+    const isHidden = dropdown.classList.contains('hidden');
+
+    if (isHidden) {
+      // Build dropdown items
+      const current = window.state ? window.state.chapter : 0;
+      const chapters = window.state ? window.state.chapters : [];
+      let html = '';
+      for (let i = 0; i < chapters.length; i++) {
+        const cls = i < current ? 'completed' : i === current ? 'current' : '';
+        html += `<button class="chapter-dropdown-item ${cls}" data-index="${i}" role="menuitem">`;
+        html += `<span class="chapter-dot-mini"></span>`;
+        html += `<span>${chapters[i]}</span>`;
+        html += `</button>`;
       }
-      const cls = i < current ? 'completed' : i === current ? 'current' : 'upcoming';
-      html += `<button class="chapter-dot ${cls}" data-label="${window.state.chapters[i]}" aria-label="${window.state.chapters[i]}">${i + 1}</button>`;
+      dropdown.innerHTML = html;
+
+      // Bind item clicks
+      dropdown.querySelectorAll('.chapter-dropdown-item').forEach(item => {
+        item.onclick = (e) => {
+          e.stopPropagation();
+          const idx = parseInt(item.dataset.index, 10);
+          this._selectChapter(idx);
+        };
+      });
+
+      dropdown.classList.remove('hidden');
+      pill.setAttribute('aria-expanded', 'true');
+
+      // Close on outside click
+      setTimeout(() => {
+        document.addEventListener('click', this._closeChapterDropdown, { once: true });
+      }, 10);
+    } else {
+      this._closeChapterDropdown();
     }
-    nav.innerHTML = html;
+  }
+
+  _closeChapterDropdown = () => {
+    const dropdown = document.getElementById('chapter-dropdown');
+    const pill = document.getElementById('chapter-selector');
+    if (dropdown) dropdown.classList.add('hidden');
+    if (pill) pill.setAttribute('aria-expanded', 'false');
+  }
+
+  _selectChapter(index) {
+    if (!window.state) return;
+    window.state.setChapter(index);
+    this._renderChapterSelector();
+    this._closeChapterDropdown();
+    // Trigger chapter transition VFX
+    this.triggerChapterTransition(window.state.genre, window.state.getChapterLabel());
   }
 
   /* ── Inventory ──────────────────────── */

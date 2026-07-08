@@ -327,14 +327,15 @@
 
     <!-- Narrative Area -->
     <section id="narrative-area" aria-label="叙事区域">
-      <!-- Chapter Nav -->
-      <div id="chapter-nav" aria-label="章节进度"></div>
-
-      <!-- Chapter Indicator -->
-      <div class="chapter-indicator">
+      <!-- Chapter Selector Pill -->
+      <button id="chapter-selector" class="chapter-indicator" aria-haspopup="true" aria-expanded="false" aria-label="切换章节">
         <svg class="chapter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-book"/></svg>
         <span id="chapter-indicator-text" class="chapter-text">等待加载...</span>
-      </div>
+        <svg class="chapter-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Chapter Dropdown -->
+      <div id="chapter-dropdown" class="chapter-dropdown hidden" role="menu" aria-label="章节列表"></div>
 
       <!-- Narrative Text -->
       <div id="narrative-text" role="article">正在加载故事...</div>
@@ -428,17 +429,6 @@
     </div>
 
   </main>
-
-  <!-- Inventory Toggle -->
-  <button id="inventory-toggle" aria-label="打开背包">
-    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-box"/></svg>
-    <span id="inv-badge" class="inv-badge" style="display:none">0</span>
-  </button>
-
-  <!-- NPC Relations Toggle -->
-  <button id="npc-relations-toggle" aria-label="角色关系">
-    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-users"/></svg>
-  </button>
 
   <!-- Inventory Backdrop -->
   <div id="inventory-backdrop"></div>
