@@ -463,11 +463,11 @@
 }
 
 .npc-affinity-fill.positive {
-  background: linear-gradient(90deg, #22c55e, #4ade80);
+  background: linear-gradient(90deg, var(--c-state-success), var(--c-state-success));
 }
 
 .npc-affinity-fill.negative {
-  background: linear-gradient(90deg, #dc2626, #f87171);
+  background: linear-gradient(90deg, var(--c-state-error), var(--c-state-error));
 }
 
 .npc-affinity-value {

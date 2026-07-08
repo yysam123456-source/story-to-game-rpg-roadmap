@@ -9,7 +9,7 @@
   --c-brand-dark: #455A64;
   --c-brand-glow: rgba(96, 125, 139, 0.2);
   --c-brand-glow-strong: rgba(96, 125, 139, 0.4);
-  --c-danger: #F44336;
+  --c-danger: var(--c-state-error);
 
   --c-bg-base: #060610;
   --c-bg-surface: #0c0c1c;

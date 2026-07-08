@@ -141,12 +141,18 @@ button, [role="button"], a, input[type="checkbox"], input[type="range"] {
 
 /* ── Layout container ──────────────────────── */
 #game-root {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: var(--space-6);
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* ── Narrative paragraph spacing ──────────── */
+#narrative-text p {
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-narrative);
 }
 
 /* ── Responsive ────────────────────────────── */

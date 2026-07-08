@@ -38,8 +38,8 @@
   inset: 0;
   z-index: var(--z-overlay);
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,14 +55,14 @@
 
 /* Menu panel — centered card */
 .menu-panel {
-  width: 360px;
+  width: 400px;
   max-width: 90vw;
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur-heavy));
   -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--glass-shadow-lg);
+  box-shadow: var(--glass-shadow-lg), 0 0 60px var(--c-brand-glow);
   padding: var(--space-8);
   transform: scale(0.95) translateY(12px);
   transition: transform var(--duration-slow) var(--ease-out-back);
@@ -183,7 +183,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  margin-top: var(--space-5);
 }
 
 .genre-pill {

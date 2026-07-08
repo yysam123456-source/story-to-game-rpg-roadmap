@@ -28,6 +28,8 @@
   --glass-border: rgba(201, 168, 108, 0.1);
   --glass-border-hover: rgba(201, 168, 108, 0.22);
 
+  --c-danger: var(--c-state-error);
+
   --shadow-glow: 0 0 30px rgba(201, 168, 108, 0.15);
 
   /* Genre-specific colours for stat bars */

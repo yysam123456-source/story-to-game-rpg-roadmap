@@ -28,14 +28,16 @@
   --glass-border: rgba(255, 215, 0, 0.1);
   --glass-border-hover: rgba(255, 215, 0, 0.22);
 
+  --c-danger: var(--c-state-error);
+
   --shadow-glow: 0 0 30px rgba(255, 215, 0, 0.15);
 
-  --stat-color-1: #E91E63;
-  --stat-color-2: #9C27B0;
-  --stat-color-3: #FFD700;
-  --stat-color-4: #FFD700;
-  --stat-color-5: #FFD700;
-  --stat-color-6: #E91E63;
+  --stat-color-1: #FFD700;
+  --stat-color-2: #FF6B6B;
+  --stat-color-3: #4FC3F7;
+  --stat-color-4: #81C784;
+  --stat-color-5: #CE93D8;
+  --stat-color-6: #FFB74D;
 
   --atmo-glow-1: radial-gradient(ellipse 600px 400px at 25% 20%, rgba(255, 215, 0, 0.06) 0%, transparent 100%);
   --atmo-glow-2: radial-gradient(ellipse 500px 400px at 75% 60%, rgba(233, 30, 99, 0.04) 0%, transparent 100%);

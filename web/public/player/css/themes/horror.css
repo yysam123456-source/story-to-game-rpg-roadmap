@@ -9,7 +9,7 @@
   --c-brand-dark: #C62828;
   --c-brand-glow: rgba(244, 67, 54, 0.2);
   --c-brand-glow-strong: rgba(244, 67, 54, 0.4);
-  --c-danger: #FF0000;
+  --c-danger: var(--c-state-error);
 
   --c-bg-base: #0a0204;
   --c-bg-surface: #140608;
@@ -93,4 +93,12 @@
   25% { filter: blur(1.5px) contrast(1.2) hue-rotate(5deg); }
   50% { filter: blur(1px) contrast(1.1); }
   75% { filter: blur(2px) contrast(1.15) hue-rotate(-5deg); }
+}
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .low-sanity #narrative-text,
+  .low-sanity .narrative-content {
+    filter: none !important;
+  }
 }

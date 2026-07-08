@@ -268,7 +268,7 @@ window.ThemeEngine = class ThemeEngine {
         html += `<div class="chapter-connector ${i <= current ? 'completed' : ''}"></div>`;
       }
       const cls = i < current ? 'completed' : i === current ? 'current' : 'upcoming';
-      html += `<button class="chapter-dot ${cls}" data-label="${window.state.chapters[i]}" aria-label="${window.state.chapters[i]}"></button>`;
+      html += `<button class="chapter-dot ${cls}" data-label="${window.state.chapters[i]}" aria-label="${window.state.chapters[i]}">${i + 1}</button>`;
     }
     nav.innerHTML = html;
   }

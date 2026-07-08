@@ -28,6 +28,8 @@
   --glass-border: rgba(141, 110, 99, 0.1);
   --glass-border-hover: rgba(141, 110, 99, 0.22);
 
+  --c-danger: var(--c-state-error);
+
   --shadow-glow: 0 0 30px rgba(141, 110, 99, 0.12);
 
   --stat-color-1: #FF9800;

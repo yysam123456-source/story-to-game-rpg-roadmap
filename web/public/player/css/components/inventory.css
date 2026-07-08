@@ -68,6 +68,7 @@
   backdrop-filter: blur(var(--glass-blur-heavy));
   -webkit-backdrop-filter: blur(var(--glass-blur-heavy));
   border-left: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow-lg);
   transform: translateX(100%);
   transition: transform var(--duration-slow) var(--ease-out-expo);
