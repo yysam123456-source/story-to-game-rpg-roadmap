@@ -82,3 +82,9 @@
   0% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-shake {
+    animation: none !important;
+  }
+}
