@@ -214,13 +214,11 @@ window.ThemeEngine = class ThemeEngine {
 
     container.innerHTML = choices.map((choice, idx) => {
       let disabled = false;
-      let reason = '';
 
       if (choice.condition && window.state) {
         const { key, min } = choice.condition;
         if (window.state.get(key) < min) {
           disabled = true;
-          reason = `（需要 ${window.state.getStatLabel(key)} >= ${min}）`;
         }
       }
 
@@ -229,7 +227,7 @@ window.ThemeEngine = class ThemeEngine {
                 data-choice-index="${idx}"
                 ${disabled ? 'disabled' : ''}
                 aria-label="${choice.text}">
-          ${choice.text}${reason ? `<span class="choice-reason">${reason}</span>` : ''}
+          ${choice.text}
         </button>`;
     }).join('');
   }
@@ -279,18 +277,22 @@ window.ThemeEngine = class ThemeEngine {
       // Build dropdown items
       const current = window.state ? window.state.chapter : 0;
       const chapters = window.state ? window.state.chapters : [];
+      const maxUnlocked = window.state ? window.state.maxUnlockedChapter : 0;
       let html = '';
       for (let i = 0; i < chapters.length; i++) {
-        const cls = i < current ? 'completed' : i === current ? 'current' : '';
-        html += `<button class="chapter-dropdown-item ${cls}" data-index="${i}" role="menuitem">`;
+        const isUnlocked = i <= maxUnlocked;
+        const cls = i < current ? 'completed' : i === current ? 'current' : isUnlocked ? '' : 'locked';
+        const disabled = !isUnlocked ? 'disabled' : '';
+        html += `<button class="chapter-dropdown-item ${cls}" data-index="${i}" role="menuitem" ${disabled}>`;
         html += `<span class="chapter-dot-mini"></span>`;
         html += `<span>${chapters[i]}</span>`;
+        if (!isUnlocked) html += `<span class="chapter-lock-hint">未解锁</span>`;
         html += `</button>`;
       }
       dropdown.innerHTML = html;
 
-      // Bind item clicks
-      dropdown.querySelectorAll('.chapter-dropdown-item').forEach(item => {
+      // Bind item clicks (only unlocked items)
+      dropdown.querySelectorAll('.chapter-dropdown-item:not(.locked)').forEach(item => {
         item.onclick = (e) => {
           e.stopPropagation();
           const idx = parseInt(item.dataset.index, 10);

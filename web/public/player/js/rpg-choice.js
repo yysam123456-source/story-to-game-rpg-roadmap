@@ -62,15 +62,9 @@ window.RPGChoiceRenderer = class RPGChoiceRenderer {
       hintText = '此选择将改变剧情走向';
     }
 
-    // Condition reason
-    let reasonText = '';
-    if (isDisabled && evalResult.reason) {
-      reasonText = `（${evalResult.reason}）`;
-    }
-
-    // Change preview (if changes.show is true)
+    // Change preview — only shown when explicitly enabled (changes.show === true)
     let changePreview = '';
-    if (choice.changes && choice.changes.show !== false) {
+    if (choice.changes && choice.changes.show === true) {
       const preview = this._buildChangePreview(choice.changes);
       if (preview) changePreview = `<span class="choice-change-preview">${preview}</span>`;
     }
@@ -86,11 +80,10 @@ window.RPGChoiceRenderer = class RPGChoiceRenderer {
               ${weightAttr}
               ${hintAttr}
               ${disabledAttr}
-              aria-label="${choice.text}${reasonText ? ' ' + reasonText : ''}">
+              aria-label="${choice.text}">
         <span class="choice-weight-indicator" aria-hidden="true"></span>
         <span class="choice-text">${choice.text}</span>
         ${changePreview}
-        ${reasonText ? `<span class="choice-reason">${reasonText}</span>` : ''}
         ${weightLabel && !isDisabled ? `<span class="choice-weight-tag">${weightLabel}</span>` : ''}
       </button>`;
   }

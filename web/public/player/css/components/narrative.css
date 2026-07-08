@@ -140,6 +140,30 @@
   opacity: 0.6;
 }
 
+/* Locked chapter — disabled, greyed out */
+.chapter-dropdown-item.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--c-text-muted);
+}
+
+.chapter-dropdown-item.locked:hover {
+  background: transparent;
+  color: var(--c-text-muted);
+}
+
+.chapter-dropdown-item.locked .chapter-dot-mini {
+  background: var(--c-border-default);
+  opacity: 0.4;
+}
+
+.chapter-dropdown-item .chapter-lock-hint {
+  margin-left: auto;
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+  opacity: 0.7;
+}
+
 @keyframes fadeSlideDown {
   from {
     opacity: 0;

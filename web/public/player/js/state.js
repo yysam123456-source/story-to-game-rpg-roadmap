@@ -12,6 +12,7 @@ window.GameState = class GameState {
     this.inventory = JSON.parse(JSON.stringify(window.INITIAL_INVENTORY[genre]));
     this.chapter = 0;
     this.chapters = ['第一章', '第二章', '第三章', '第四章', '第五章'];
+    this.maxUnlockedChapter = 0;  // 玩家只能切换到 <= 此值的章节
     this._listeners = [];
   }
 
@@ -58,10 +59,22 @@ window.GameState = class GameState {
 
   /* ── Chapter ────────────────────────── */
   setChapter(index) {
-    if (index >= 0 && index < this.chapters.length) {
+    // 只能切换到已解锁的章节（当前及之前完成的章节）
+    if (index >= 0 && index <= this.maxUnlockedChapter && index < this.chapters.length) {
       this.chapter = index;
       this._emit('chapter-change', { chapter: index });
     }
+  }
+
+  unlockNextChapter() {
+    if (this.maxUnlockedChapter < this.chapters.length - 1) {
+      this.maxUnlockedChapter += 1;
+      this._emit('chapter-unlock', { chapter: this.maxUnlockedChapter });
+    }
+  }
+
+  isChapterUnlocked(index) {
+    return index >= 0 && index <= this.maxUnlockedChapter;
   }
 
   getChapterLabel() {
@@ -74,6 +87,7 @@ window.GameState = class GameState {
     this.stats = { ...window.INITIAL_STATS[genre] };
     this.inventory = JSON.parse(JSON.stringify(window.INITIAL_INVENTORY[genre]));
     this.chapter = 0;
+    this.maxUnlockedChapter = 0;
     this._emit('reset', { genre });
   }
 
