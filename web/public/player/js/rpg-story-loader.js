@@ -280,7 +280,8 @@ window.RPGStoryLoader = class RPGStoryLoader {
     // Apply changes
     if (choice.changes && this.rpg.isEnabled()) {
       const results = this.rpg.applyChanges(choice.changes, this.state);
-      if (window.rpgChoiceRenderer && choice.changes.show !== false) {
+      // Always show change feedback on selection (preview on button is controlled by changes.show)
+      if (window.rpgChoiceRenderer) {
         window.rpgChoiceRenderer.showChangeFeedback(results, choice.changes.feedback);
       }
 
