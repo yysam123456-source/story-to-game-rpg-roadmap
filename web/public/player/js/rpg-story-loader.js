@@ -122,6 +122,21 @@ window.RPGStoryLoader = class RPGStoryLoader {
     this.state.inventory = {};
     this._updateInventoryBadge();
 
+    // Build chapter list from story nodes (ordered by first appearance)
+    const chapterSet = new Set();
+    const chapterList = [];
+    for (const n of storyJson.nodes) {
+      if (n.chapter && !chapterSet.has(n.chapter)) {
+        chapterSet.add(n.chapter);
+        chapterList.push(n.chapter);
+      }
+    }
+    if (chapterList.length > 0 && window.state) {
+      window.state.chapters = chapterList;
+      window.state.chapter = 0;
+      window.state.maxUnlockedChapter = 0;
+    }
+
     // Show mode indicator
     this._showModeIndicator(storyJson.meta, rpgEnabled);
 
@@ -184,6 +199,18 @@ window.RPGStoryLoader = class RPGStoryLoader {
     // Update chapter indicator
     const chapterEl = document.getElementById('chapter-indicator-text');
     if (chapterEl && node.chapter) chapterEl.textContent = node.chapter;
+
+    // Track chapter progress for story mode
+    if (node.chapter && window.state && window.state.chapters) {
+      const idx = window.state.chapters.indexOf(node.chapter);
+      if (idx >= 0) {
+        window.state.chapter = idx;
+        if (idx > window.state.maxUnlockedChapter) {
+          window.state.maxUnlockedChapter = idx;
+        }
+        if (this.theme) this.theme._renderChapterSelector();
+      }
+    }
 
     // Update narrative text
     const narrativeEl = document.getElementById('narrative-text');
