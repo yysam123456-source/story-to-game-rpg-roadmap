@@ -703,14 +703,37 @@ window.UIController = class UIController {
     }
 
     // Font size slider
-    const fontSlider = document.getElementById('font-size-slider');
-    const fontValue = document.getElementById('font-size-value');
+    // Reader font size (only affects #narrative-text)
+    const fontSlider = document.getElementById('reader-font-size-slider');
+    const fontValue = document.getElementById('reader-font-size-value');
+    const narrative = document.getElementById('narrative-text');
     if (fontSlider) {
       fontSlider.addEventListener('input', () => {
         const size = parseInt(fontSlider.value, 10);
-        this.settings.fontSize = size;
-        document.documentElement.style.setProperty('--text-base', size + 'px');
+        this.settings.readerFontSize = size;
+        if (narrative) narrative.style.setProperty('--reader-font-size', size + 'px');
         if (fontValue) fontValue.textContent = size + 'px';
+      });
+    }
+    // Reader font family (only affects #narrative-text)
+    const fontSelect = document.getElementById('reader-font-family-select');
+    if (fontSelect) {
+      fontSelect.addEventListener('change', () => {
+        const family = fontSelect.value;
+        this.settings.readerFontFamily = family;
+        if (narrative) narrative.style.setProperty('--reader-font-family', family || 'var(--font-display)');
+      });
+    }
+    // Reader line height (only affects #narrative-text)
+    const lhSlider = document.getElementById('reader-line-height-slider');
+    const lhValue = document.getElementById('reader-line-height-value');
+    if (lhSlider) {
+      lhSlider.addEventListener('input', () => {
+        const val = parseInt(lhSlider.value, 10);
+        const lh = (val / 10).toFixed(1);
+        this.settings.readerLineHeight = lh;
+        if (narrative) narrative.style.setProperty('--reader-line-height', lh);
+        if (lhValue) lhValue.textContent = lh;
       });
     }
   }

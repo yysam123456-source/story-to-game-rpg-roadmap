@@ -244,10 +244,26 @@
           <input type="range" min="0" max="100" value="60" class="menu-slider" id="sfx-volume-slider" aria-label="音效音量">
         </div>
         <div class="menu-divider"></div>
+        <div style="font-size:var(--text-xs);font-weight:var(--weight-semibold);color:var(--c-text-muted);text-transform:uppercase;letter-spacing:var(--letter-wider);margin-bottom:var(--space-3)">阅读设置</div>
         <div class="menu-slider-row">
           <span class="slider-label">字体大小</span>
-          <input type="range" min="12" max="22" value="14" class="menu-slider" id="font-size-slider" aria-label="字体大小">
-          <span class="slider-value" id="font-size-value">14px</span>
+          <input type="range" min="14" max="24" value="18" class="menu-slider" id="reader-font-size-slider" aria-label="字体大小">
+          <span class="slider-value" id="reader-font-size-value">18px</span>
+        </div>
+        <div class="menu-select-row">
+          <span class="slider-label">字体类型</span>
+          <select class="menu-select" id="reader-font-family-select" aria-label="字体类型">
+            <option value="">默认</option>
+            <option value="'Noto Serif SC', serif">宋体</option>
+            <option value="'LXGW WenKai', sans-serif">霞鹜文楷</option>
+            <option value="'Inter', 'PingFang SC', sans-serif">黑体</option>
+            <option value="'STKaiti', 'KaiTi', serif">楷体</option>
+          </select>
+        </div>
+        <div class="menu-slider-row">
+          <span class="slider-label">行间距</span>
+          <input type="range" min="15" max="30" value="20" class="menu-slider" id="reader-line-height-slider" aria-label="行间距">
+          <span class="slider-value" id="reader-line-height-value">2.0</span>
         </div>
         <div class="menu-divider"></div>
         <button class="menu-item" onclick="document.body.classList.toggle('colorblind-mode')" aria-label="色盲模式">
@@ -429,6 +445,17 @@
     </div>
 
   </main>
+
+  <!-- Inventory Toggle -->
+  <button id="inventory-toggle" aria-label="打开背包">
+    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-box"/></svg>
+    <span id="inv-badge" class="inv-badge" style="display:none">0</span>
+  </button>
+
+  <!-- NPC Relations Toggle -->
+  <button id="npc-relations-toggle" aria-label="角色关系">
+    <svg class="inv-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-users"/></svg>
+  </button>
 
   <!-- Inventory Backdrop -->
   <div id="inventory-backdrop"></div>

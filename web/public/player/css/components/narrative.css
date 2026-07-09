@@ -177,9 +177,9 @@
 
 /* Narrative text container */
 #narrative-text {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  line-height: 2.0;
+  font-family: var(--reader-font-family, var(--font-display));
+  font-size: var(--reader-font-size, var(--text-lg));
+  line-height: var(--reader-line-height, 2.0);
   color: var(--c-text-primary);
   padding: var(--space-6) var(--space-8);
   margin-bottom: var(--space-4);
