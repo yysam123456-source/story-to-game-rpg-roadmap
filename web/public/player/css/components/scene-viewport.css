@@ -96,6 +96,23 @@
   font-weight: var(--weight-semibold);
 }
 
+/* Scene title overlay */
+.scene-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: calc(var(--z-base) + 2);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--c-text-primary);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  text-align: center;
+  pointer-events: none;
+  animation: fadeIn var(--duration-slow) var(--ease-out-expo);
+}
+
 /* Genre tag */
 .genre-tag {
   position: absolute;

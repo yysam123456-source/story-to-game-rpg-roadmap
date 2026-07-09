@@ -212,14 +212,34 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
 
-    // Update narrative text
+    // Handle scene transition
+    if (node.scene) {
+      this._handleSceneTransition(node.scene);
+    }
+
+    // Render scene title if present
+    if (node.title) {
+      this._renderSceneTitle(node.title);
+    }
+
+    // Update narrative text: segments or plain text
     const narrativeEl = document.getElementById('narrative-text');
     if (narrativeEl) {
       narrativeEl.style.opacity = '0';
       setTimeout(() => {
-        narrativeEl.textContent = node.text || '';
+        if (node.segments && node.segments.length > 0) {
+          narrativeEl.innerHTML = this._renderSegments(node.segments);
+        } else {
+          narrativeEl.innerHTML = '';
+          narrativeEl.textContent = node.text || '';
+        }
         narrativeEl.style.opacity = '1';
       }, 150);
+    }
+
+    // Render interactions if present
+    if (node.interactions && node.interactions.length > 0) {
+      this._renderInteractions(node.interactions);
     }
 
     // Render choices via RPGChoiceRenderer or fallback
@@ -238,6 +258,67 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
     // Bind choice click events for story mode
     this._bindChoiceEvents(node.choices || []);
+  }
+
+  /* ── Segments rendering ─────────────── */
+  _renderSegments(segments) {
+    return segments.map((seg, i) => {
+      const delay = i * 80; // staggered reveal
+      const effectClass = seg.effect ? `effect-${seg.effect}` : '';
+      if (seg.speaker) {
+        return `<div class="dialogue-line ${effectClass}" style="animation-delay:${delay}ms">
+          <span class="speaker-name">${seg.speaker}</span>
+          <span class="dialogue-text">${seg.text}</span>
+        </div>`;
+      } else {
+        return `<p class="narrative-paragraph ${effectClass}" style="animation-delay:${delay}ms">${seg.text}</p>`;
+      }
+    }).join('');
+  }
+
+  /* ── Scene transition ───────────────── */
+  _handleSceneTransition(scene) {
+    // Update scene image
+    const sceneImg = document.getElementById('scene-image');
+    const placeholder = document.querySelector('.scene-placeholder');
+    if (sceneImg && scene.background) {
+      sceneImg.src = scene.background;
+      sceneImg.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    }
+    // Update genre tag if scene specifies genre
+    const genreTag = document.getElementById('genre-tag');
+    if (genreTag && scene.genre) {
+      genreTag.textContent = scene.genre;
+    }
+    // Trigger transition animation if scene name changed
+    if (scene.name && this.theme && this._lastSceneName !== scene.name) {
+      this._lastSceneName = scene.name;
+      this.theme.triggerChapterTransition(this.state.genre, scene.name);
+    }
+  }
+
+  /* ── Scene title ────────────────────── */
+  _renderSceneTitle(title) {
+    const titleEl = document.getElementById('scene-title');
+    if (titleEl) {
+      titleEl.textContent = title;
+      titleEl.style.display = 'block';
+    }
+  }
+
+  /* ── Interactions rendering ─────────── */
+  _renderInteractions(interactions) {
+    const area = document.getElementById('interactions-area');
+    const grid = document.getElementById('interactions-grid');
+    if (!grid) return;
+    grid.innerHTML = interactions.map(inter => `
+      <button class="interaction-btn" data-interaction-type="${inter.type}" aria-label="${inter.label}">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-${inter.icon || 'box'}"/></svg>
+        <span class="btn-label">${inter.label}</span>
+      </button>
+    `).join('');
+    if (area) area.style.display = '';
   }
 
   _bindChoiceEvents(choices) {

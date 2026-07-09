@@ -201,6 +201,17 @@
   to { opacity: 1; }
 }
 
+/* Narrative paragraphs (for segmented rendering) */
+.narrative-paragraph {
+  margin: 0 0 var(--space-4) 0;
+  line-height: inherit;
+  animation: fadeSlideUp var(--duration-normal) var(--ease-out-expo) both;
+}
+
+.narrative-paragraph:last-child {
+  margin-bottom: 0;
+}
+
 /* Dialogue lines — coloured left border */
 .dialogue-line {
   margin: var(--space-3) 0;
@@ -211,6 +222,7 @@
   background: rgba(255, 255, 255, 0.02);
   font-style: italic;
   color: var(--c-text-secondary);
+  animation: fadeSlideUp var(--duration-normal) var(--ease-out-expo) both;
 }
 
 .dialogue-line .speaker-name {
@@ -218,6 +230,35 @@
   font-weight: var(--weight-semibold);
   color: var(--c-brand);
   margin-right: var(--space-2);
+}
+
+/* Segment effects */
+.effect-whispers {
+  opacity: 0.7;
+  font-size: 0.95em;
+}
+
+.effect-flicker {
+  animation: textFlicker 0.3s ease-in-out 3;
+}
+
+@keyframes textFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.effect-fade-in {
+  animation: fadeIn var(--duration-slow) var(--ease-out-expo) both;
+}
+
+.effect-shudder {
+  animation: textShudder 0.5s ease-in-out;
+}
+
+@keyframes textShudder {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
 }
 
 /* Choices area */
