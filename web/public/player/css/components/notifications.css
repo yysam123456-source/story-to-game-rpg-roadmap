@@ -100,12 +100,22 @@
 
 .stat-change-card.positive .stat-change-delta {
   color: var(--c-state-success);
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
+  text-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
+  font-size: var(--text-lg);
+  animation: deltaPop 0.4s var(--ease-out-expo);
 }
 
 .stat-change-card.negative .stat-change-delta {
   color: var(--c-state-error);
-  text-shadow: 0 0 8px rgba(248, 113, 113, 0.3);
+  text-shadow: 0 0 12px rgba(248, 113, 113, 0.5);
+  font-size: var(--text-lg);
+  animation: deltaPop 0.4s var(--ease-out-expo);
+}
+
+@keyframes deltaPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 /* ── Type 2: Text Toast ───────────────────── */

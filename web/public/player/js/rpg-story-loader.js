@@ -70,6 +70,14 @@ window.RPGStoryLoader = class RPGStoryLoader {
     this.story = storyJson;
     this.isStoryMode = true;
 
+    // v2.0: Register story-specific stat labels for custom primaryStats
+    if (storyJson.meta.rpg?.primaryStats && this.state) {
+      this.state._storyStatLabels = {};
+      for (const stat of storyJson.meta.rpg.primaryStats) {
+        this.state._storyStatLabels[stat.key] = stat.label;
+      }
+    }
+
     // Initialize RPG core (may or may not be enabled)
     const rpgEnabled = this.rpg.loadStory(storyJson);
 
@@ -100,15 +108,46 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
 
+    // Initialize portrait system from NPC data
+    if (storyJson.npcRelations && window.portraitSystem) {
+      const npcList = Array.isArray(storyJson.npcRelations)
+        ? storyJson.npcRelations
+        : (storyJson.npcRelations.npcs || []);
+      for (const npc of npcList) {
+        if (npc && npc.id) {
+          window.portraitSystem.registerCharacter(npc.id, {
+            name: npc.name,
+            avatar: npc.avatar,
+            stand: npc.stand,
+            color: npc.color,
+          });
+        }
+      }
+    }
+
+    // v2.0: Initialize new systems
+    if (window.ExplorationRenderer) {
+      window.explorationRenderer = new window.ExplorationRenderer(this.rpg, this.state, window.uiController, this);
+    }
+    if (window.DialogueRenderer) {
+      window.dialogueRenderer = new window.DialogueRenderer(this.rpg, this.state, window.uiController, this);
+    }
+    if (window.CheckDisplay) {
+      window.checkDisplay = new window.CheckDisplay(this.rpg, this.state);
+    }
+    if (window.ItemUseSystem) {
+      window.itemUseSystem = new window.ItemUseSystem(this.rpg, this.state, this);
+    }
+
     // Initialize time pressure
     if (storyJson.timePressure) {
       this._initTimePressure(storyJson.timePressure);
     }
 
-    // Set genre from meta
+    // Set genre from meta — skip demo story loading (we have our own story)
     if (storyJson.meta.genre) {
       this.state.genre = storyJson.meta.genre;
-      if (this.theme) this.theme.switchGenre(storyJson.meta.genre);
+      if (this.theme) this.theme.switchGenre(storyJson.meta.genre, true);
     }
 
     // Apply initial state AFTER switchGenre (which resets stats from data.js)
@@ -123,12 +162,16 @@ window.RPGStoryLoader = class RPGStoryLoader {
     this._updateInventoryBadge();
 
     // Build chapter list from story nodes (ordered by first appearance)
+    // Fallback: if node has no chapter field but title matches "第X章" pattern, use it
     const chapterSet = new Set();
     const chapterList = [];
+    const _chPat = /^第[\d一二三四五六七八九十百千]+章/;
     for (const n of storyJson.nodes) {
-      if (n.chapter && !chapterSet.has(n.chapter)) {
-        chapterSet.add(n.chapter);
-        chapterList.push(n.chapter);
+      let ch = n.chapter;
+      if (!ch && n.title && _chPat.test(n.title)) ch = n.title;
+      if (ch && !chapterSet.has(ch)) {
+        chapterSet.add(ch);
+        chapterList.push(ch);
       }
     }
     if (chapterList.length > 0 && window.state) {
@@ -173,6 +216,7 @@ window.RPGStoryLoader = class RPGStoryLoader {
     }
 
     this.currentNodeId = nodeId;
+    this._applyDelayedChangesForNode(nodeId);
     this._renderNode(node);
 
     // Notify parent (iframe communication)
@@ -196,6 +240,11 @@ window.RPGStoryLoader = class RPGStoryLoader {
   }
 
   _renderNode(node) {
+    // Clear choices area at the start of every node render
+    // (each node type will re-render its own controls as needed)
+    const choicesContainer = document.getElementById('choices-area');
+    if (choicesContainer) choicesContainer.innerHTML = '';
+
     // Update chapter indicator
     const chapterEl = document.getElementById('chapter-indicator-text');
     if (chapterEl && node.chapter) chapterEl.textContent = node.chapter;
@@ -212,9 +261,26 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
 
+    // v2.0: Grant items on node entry
+    if (node.grantItems) {
+      this.rpg.grantItems(node.grantItems, this.state);
+    }
+
     // Handle scene transition
     if (node.scene) {
       this._handleSceneTransition(node.scene);
+    }
+
+    // Check node-level condition guard
+    if (node.condition) {
+      const condResult = this.rpg.evaluateCondition(node.condition, this.state);
+      if (!condResult.result) {
+        // Skip this node, auto-advance
+        if (node.next) {
+          setTimeout(() => this.navigateTo(node.next), 100);
+          return;
+        }
+      }
     }
 
     // Render scene title if present
@@ -227,12 +293,22 @@ window.RPGStoryLoader = class RPGStoryLoader {
     if (narrativeEl) {
       narrativeEl.style.opacity = '0';
       setTimeout(() => {
+        let html = '';
         if (node.segments && node.segments.length > 0) {
-          narrativeEl.innerHTML = this._renderSegments(node.segments);
-        } else {
-          narrativeEl.innerHTML = '';
-          narrativeEl.textContent = node.text || '';
+          html = this._renderSegments(node.segments);
+        } else if (node.text) {
+          html = `<p class="narrative-paragraph">${node.text}</p>`;
         }
+        // v2.0: Render conditional segments together with main segments
+        if (node.conditionalSegments && node.conditionalSegments.length > 0) {
+          for (const cs of node.conditionalSegments) {
+            const condResult = this.rpg.evaluateCondition(cs.condition, this.state);
+            if (condResult.result && cs.segments) {
+              html += this._renderSegments(cs.segments);
+            }
+          }
+        }
+        narrativeEl.innerHTML = html;
         narrativeEl.style.opacity = '1';
       }, 150);
     }
@@ -242,11 +318,69 @@ window.RPGStoryLoader = class RPGStoryLoader {
       this._renderInteractions(node.interactions);
     }
 
+    // v2.0: Render item use bar for current node
+    if (window.itemUseSystem) {
+      window.itemUseSystem.renderItemUseBar(node.id);
+    }
+
+    // v2.0: Node type dispatch
+    const nodeType = node.type || this._inferNodeType(node);
+
+    // Clear v2.0 areas
+    const explorationArea = document.getElementById('exploration-area');
+    const dialogueArea = document.getElementById('dialogue-area');
+    const checkArea = document.getElementById('check-area');
+    const itemUseBar = document.getElementById('item-use-bar');
+    if (explorationArea) explorationArea.innerHTML = '';
+    if (dialogueArea) dialogueArea.innerHTML = '';
+    if (checkArea) checkArea.innerHTML = '';
+    if (itemUseBar) itemUseBar.innerHTML = '';
+
+    if (nodeType === 'exploration' && node.explorables) {
+      // Render exploration elements
+      if (window.explorationRenderer) {
+        window.explorationRenderer.renderExplorables(node.explorables);
+      }
+      // Exploration nodes may also have a "continue" button
+      if (node.next) {
+        this._renderContinueButton(node.next);
+      }
+    } else if (nodeType === 'dialogue' && node.dialogue) {
+      // Render dialogue
+      if (window.dialogueRenderer) {
+        window.dialogueRenderer.renderDialogue(node.dialogue);
+      }
+      // Store the next target for after dialogue ends
+      this._postDialogueNext = node.next || null;
+    } else if (nodeType === 'check' && node.check) {
+      // Render check — show a placeholder immediately so the user knows a check is happening
+      const checkArea = document.getElementById('check-area');
+      if (checkArea) {
+        checkArea.innerHTML = `<div class="check-panel check-rolling"><div class="check-header"><span class="check-skill-name">检定准备中...</span></div></div>`;
+      }
+      this._handleCheckNode(node);
+    } else {
+      // Default: choice/ending/narrative/scene_transition — existing behavior
+      // v2.0: Narrative nodes with next but no choices get a continue button
+      if (nodeType === 'narrative' && node.next && !(node.choices && node.choices.length > 0)) {
+        this._renderContinueButton(node.next);
+      }
+      // v2.0: Ending nodes get a restart button
+      if (nodeType === 'ending') {
+        this._renderEndingControls(node);
+      }
+    }
+
     // Render choices via RPGChoiceRenderer or fallback
-    if (this.rpg.isEnabled() && window.rpgChoiceRenderer) {
-      window.rpgChoiceRenderer.renderChoices(node.choices || []);
-    } else if (this.theme) {
-      this.theme._renderChoices(node.choices || []);
+    // v2.0: Skip for exploration/dialogue/check/ending nodes, and narrative nodes that already have a continue button
+    const hasContinueBtn = document.getElementById('continue-btn');
+    const skipChoiceRender = ['exploration', 'dialogue', 'check', 'ending'].includes(nodeType) || hasContinueBtn;
+    if (!skipChoiceRender) {
+      if (this.rpg.isEnabled() && window.rpgChoiceRenderer) {
+        window.rpgChoiceRenderer.renderChoices(node.choices || []);
+      } else if (this.theme) {
+        this.theme._renderChoices(node.choices || []);
+      }
     }
 
     // Update status bar
@@ -258,22 +392,349 @@ window.RPGStoryLoader = class RPGStoryLoader {
 
     // Bind choice click events for story mode
     this._bindChoiceEvents(node.choices || []);
+
+    // Auto-routes: if no choices or choices are empty, evaluate routes
+    const effectiveChoices = (node.choices || []).filter(c => {
+      if (!c.condition) return true;
+      const evalResult = this.rpg.evaluateCondition(c.condition, this.state);
+      return evalResult.result;
+    });
+    // v2.0: Determine if this node type should auto-advance
+    // exploration/dialogue/check/narrative nodes require player interaction before advancing
+    const nonAutoAdvanceTypes = ['exploration', 'dialogue', 'check', 'narrative'];
+    const shouldAutoAdvance = !nonAutoAdvanceTypes.includes(nodeType);
+
+    if (effectiveChoices.length === 0 && shouldAutoAdvance) {
+      if (node.routes && node.routes.length > 0) {
+        for (const route of node.routes) {
+          if (route.condition === 'default') {
+            setTimeout(() => this.navigateTo(route.next), 1200);
+            return;
+          }
+          if (route.condition) {
+            const evalResult = this.rpg.evaluateCondition(route.condition, this.state);
+            if (evalResult.result) {
+              setTimeout(() => this.navigateTo(route.next), 1200);
+              return;
+            }
+          }
+        }
+      } else if (node.next) {
+        // Direct next-node auto-advance
+        setTimeout(() => this.navigateTo(node.next), 1200);
+      }
+    }
+
   }
 
   /* ── Segments rendering ─────────────── */
   _renderSegments(segments) {
     return segments.map((seg, i) => {
-      const delay = i * 80; // staggered reveal
+      const delay = i * 80;
       const effectClass = seg.effect ? `effect-${seg.effect}` : '';
       if (seg.speaker) {
+        // Try to show portrait for speaker
+        const npcId = this._findNPCBySpeaker(seg.speaker);
+        if (npcId && window.portraitSystem) {
+          window.portraitSystem.showDialogue(npcId, seg.text);
+        }
         return `<div class="dialogue-line ${effectClass}" style="animation-delay:${delay}ms">
           <span class="speaker-name">${seg.speaker}</span>
           <span class="dialogue-text">${seg.text}</span>
         </div>`;
       } else {
+        // Hide stand when no speaker
+        if (i === 0 && window.portraitSystem) {
+          window.portraitSystem.hideStand();
+        }
         return `<p class="narrative-paragraph ${effectClass}" style="animation-delay:${delay}ms">${seg.text}</p>`;
       }
     }).join('');
+  }
+
+  /* ── v2.0: Node type inference ──────── */
+  _inferNodeType(node) {
+    if (node.isEnding || node.candidateEndings) return 'ending';
+    if (node.dialogue) return 'dialogue';
+    if (node.check) return 'check';
+    if (node.explorables && node.explorables.length > 0) return 'exploration';
+    if (node.choices && node.choices.length > 0) return 'choice';
+    return 'narrative';
+  }
+
+  /* ── v2.0: Check node handler ───────── */
+  async _handleCheckNode(node) {
+    try {
+      const checkDef = node.check;
+      const checkDisplay = window.checkDisplay;
+
+      if (!checkDisplay) {
+        this._showCheckFallback(node);
+        return;
+      }
+
+      if (checkDef.passive) {
+        // Passive check — no animation, just show result
+        const result = this.rpg.rollCheck(checkDef, this.state);
+        checkDisplay.showPassiveResult(checkDef, result);
+        const outcome = result.success ? checkDef.onSuccess : checkDef.onFailure;
+        this._applyCheckOutcome(outcome);
+      } else {
+        // Active check — show animation, then result
+        const result = await checkDisplay.performAndDisplay(checkDef);
+        if (result && result.blocked) {
+          this._renderContinueButton(node.next);
+          return;
+        }
+        const outcome = result && result.success ? checkDef.onSuccess : checkDef.onFailure;
+        this._applyCheckOutcome(outcome);
+
+        // Append outcome text to narrative
+        const narrative = document.getElementById('narrative-text');
+        if (narrative && outcome) {
+          const outcomeText = typeof outcome.text === 'string' ? outcome.text : (outcome.text || []).map(s => typeof s === 'string' ? s : s.text).join('');
+          if (outcomeText) {
+            const el = document.createElement('div');
+            el.className = 'check-narrative ' + ((result && result.success) ? 'check-success-text' : 'check-failure-text');
+            el.textContent = outcomeText;
+            narrative.appendChild(el);
+            narrative.scrollTop = narrative.scrollHeight;
+          }
+        }
+      }
+
+      // Show continue button instead of auto-advance, so player can read the result
+      if (node.next) {
+        this._renderContinueButton(node.next);
+      }
+    } catch (err) {
+      console.error('[Check] Error in _handleCheckNode:', err);
+      this._showCheckFallback(node);
+    }
+  }
+
+  _showCheckFallback(node) {
+    const checkArea = document.getElementById('check-area');
+    if (checkArea) {
+      checkArea.innerHTML = `
+        <div class="check-panel check-fallback">
+          <p class="check-fallback-text">检定完成。</p>
+        </div>
+      `;
+    }
+    if (node.next) {
+      this._renderContinueButton(node.next);
+    }
+  }
+
+  _applyCheckOutcome(outcome) {
+    if (!outcome) return;
+    if (outcome.changes) {
+      for (const [key, val] of Object.entries(outcome.changes)) {
+        const old = this.state.get(key);
+        this.state.set(key, old + val);
+      }
+    }
+    if (outcome.affinityChanges) {
+      this.rpg.applyAffinityChanges(outcome.affinityChanges, this.state);
+    }
+    if (outcome.grantItems && this.story) {
+      const storyItems = this.story.items || {};
+      const itemDefs = outcome.grantItems.map(id => storyItems[id]).filter(Boolean);
+      this.rpg.grantItems(itemDefs, this.state);
+    }
+    if (outcome.flag) {
+      this.rpg.setFlag(outcome.flag);
+    }
+    if (outcome.unlock) {
+      this.rpg.setFlag(outcome.unlock);
+    }
+  }
+
+  /* ── v2.0: Continue button ──────────── */
+  _renderContinueButton(nextNodeId) {
+    const container = document.getElementById('choices-area');
+    if (!container) return;
+    container.innerHTML = `
+      <button class="choice-btn" id="continue-btn" data-next="${nextNodeId}">
+        <span class="choice-text">继续前进 →</span>
+      </button>
+    `;
+    const btn = document.getElementById('continue-btn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        this.navigateTo(nextNodeId);
+      });
+    }
+  }
+
+  /* ── v2.0: Ending controls ──────────── */
+  _renderEndingControls(node) {
+    const container = document.getElementById('choices-area');
+    if (!container) return;
+
+    const endingName = node.title || '结局';
+    const hasNext = !!node.next;
+
+    container.innerHTML = `
+      <div class="ending-controls">
+        <p class="ending-hint">— ${endingName} —</p>
+        ${hasNext ? `
+          <button class="choice-btn" id="continue-next-chapter-btn">
+            <span class="choice-text">→ 继续下一章</span>
+          </button>
+        ` : ''}
+        <button class="choice-btn" id="restart-btn">
+          <span class="choice-text">↺ 重新开始</span>
+        </button>
+      </div>
+    `;
+
+    if (hasNext) {
+      const nextBtn = document.getElementById('continue-next-chapter-btn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          // Unlock next chapter
+          if (node.chapter && window.state && window.state.chapters) {
+            const idx = window.state.chapters.indexOf(node.chapter);
+            if (idx >= 0 && idx + 1 < window.state.chapters.length) {
+              window.state.maxUnlockedChapter = Math.max(window.state.maxUnlockedChapter, idx + 1);
+              if (this.theme) this.theme._renderChapterSelector();
+            }
+          }
+          this.navigateTo(node.next);
+        });
+      }
+    }
+
+    const btn = document.getElementById('restart-btn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        if (this.story) {
+          this.restart();
+        }
+      });
+    }
+  }
+
+  /**
+   * Restart the current story from the beginning.
+   * Fully resets all systems and state in-memory (no page reload).
+   */
+  restart() {
+    if (!this.story) return;
+
+    // 1. Clear persisted state
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // 2. Reset RPG flags & interactions
+    if (this.rpg) {
+      this.rpg.flags = new Set();
+      if (this.story.flags && Array.isArray(this.story.flags)) {
+        for (const flag of this.story.flags) {
+          this.rpg.setFlag(flag);
+        }
+      }
+      this.rpg.interactionsDone = new Set();
+    }
+
+    // 3. Reset game state to initial values
+    if (this.state) {
+      this.state.stats = {};
+      const storyVars = this.story.initialState || this.story.variables || {};
+      for (const [key, val] of Object.entries(storyVars)) {
+        this.state.stats[key] = val;
+      }
+
+      // Reset inventory
+      this.state.inventory = {};
+      if (this.story.initialInventory) {
+        this.state.inventory = JSON.parse(JSON.stringify(this.story.initialInventory));
+      }
+      this._updateInventoryBadge();
+
+      // Reset NPC affinities
+      if (this.story.npcRelations) {
+        this.state.npcAffinities = {};
+        const npcList = Array.isArray(this.story.npcRelations) ? this.story.npcRelations : [];
+        for (const npc of npcList) {
+          if (npc && npc.id) {
+            this.state.npcAffinities[npc.id] = npc.initialAffinity || npc.defaultAffinity || 0;
+          }
+        }
+      }
+
+      // Reset chapter progress
+      if (window.state && window.state.chapters) {
+        window.state.chapter = 0;
+        window.state.maxUnlockedChapter = 0;
+        if (this.theme) this.theme._renderChapterSelector();
+      }
+
+      // Re-register story stat labels
+      if (this.story.meta.rpg?.primaryStats) {
+        this.state._storyStatLabels = {};
+        for (const stat of this.story.meta.rpg.primaryStats) {
+          this.state._storyStatLabels[stat.key] = stat.label;
+        }
+      }
+    }
+
+    // 4. Clear all UI areas
+    const narrativeEl = document.getElementById('narrative-text');
+    if (narrativeEl) {
+      narrativeEl.style.opacity = '0';
+      narrativeEl.innerHTML = '';
+    }
+    const explorationArea = document.getElementById('exploration-area');
+    const dialogueArea = document.getElementById('dialogue-area');
+    const checkArea = document.getElementById('check-area');
+    const itemUseBar = document.getElementById('item-use-bar');
+    const choicesContainer = document.getElementById('choices-area');
+    if (explorationArea) explorationArea.innerHTML = '';
+    if (dialogueArea) dialogueArea.innerHTML = '';
+    if (checkArea) checkArea.innerHTML = '';
+    if (itemUseBar) itemUseBar.innerHTML = '';
+    if (choicesContainer) choicesContainer.innerHTML = '';
+
+    // 5. Reset scene
+    const sceneImg = document.getElementById('scene-image');
+    const placeholder = document.querySelector('.scene-placeholder');
+    if (sceneImg) { sceneImg.src = ''; sceneImg.style.display = 'none'; }
+    if (placeholder) placeholder.style.display = '';
+    const titleEl = document.getElementById('scene-title');
+    if (titleEl) { titleEl.textContent = ''; titleEl.style.display = 'none'; }
+    this._lastSceneName = null;
+
+    // 6. Reset internal navigation state
+    this.currentNodeId = null;
+    this._postDialogueNext = null;
+    this._delayedChangesQueue = null;
+    if (this._countdownTimer) {
+      clearInterval(this._countdownTimer);
+      this._countdownTimer = null;
+    }
+    this._countdownValue = 0;
+    this._countdownWarningShown = false;
+
+    // 7. Navigate to start node
+    const startId = this.story.startNodeId || 'start';
+    const startNode = this.story.nodes.find(n => n.id === startId) || this.story.nodes[0];
+    if (startNode) {
+      setTimeout(() => {
+        this.navigateTo(startNode.id);
+      }, 100);
+    }
+  }
+
+  /* ── v2.0: Dialogue end callback ────── */
+  _onDialogueEnd() {
+    if (this._postDialogueNext) {
+      const next = this._postDialogueNext;
+      this._postDialogueNext = null;
+      this.navigateTo(next);
+    }
   }
 
   /* ── Scene transition ───────────────── */
@@ -312,12 +773,30 @@ window.RPGStoryLoader = class RPGStoryLoader {
     const area = document.getElementById('interactions-area');
     const grid = document.getElementById('interactions-grid');
     if (!grid) return;
-    grid.innerHTML = interactions.map(inter => `
-      <button class="interaction-btn" data-interaction-type="${inter.type}" aria-label="${inter.label}">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-${inter.icon || 'box'}"/></svg>
-        <span class="btn-label">${inter.label}</span>
-      </button>
-    `).join('');
+
+    grid.innerHTML = interactions.map((inter, idx) => {
+      // Check once flag — if already done, show as disabled
+      const onceKey = inter.id || inter.type;
+      const isDone = inter.once && this.rpg.interactionsDone.has(onceKey);
+      const disabledClass = isDone ? 'disabled' : '';
+      const depthClass = inter.depth ? `depth-${inter.depth}` : '';
+      const hintAttr = inter.hint ? `title="${inter.hint}"` : '';
+
+      return `
+        <button class="interaction-btn ${disabledClass} ${depthClass}"
+                data-interaction-type="${inter.type}"
+                data-interaction-index="${idx}"
+                data-interaction-id="${inter.id || ''}"
+                ${disabledClass ? 'disabled' : ''}
+                ${hintAttr}
+                aria-label="${inter.label}">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#icon-${inter.icon || 'box'}"/></svg>
+          <span class="btn-label">${inter.label}</span>
+          ${inter.hint ? `<span class="interaction-hint">${inter.hint}</span>` : ''}
+        </button>
+      `;
+    }).join('');
+
     if (area) area.style.display = '';
   }
 
@@ -325,7 +804,8 @@ window.RPGStoryLoader = class RPGStoryLoader {
     const container = document.getElementById('choices-area');
     if (!container) return;
 
-    container.querySelectorAll('.choice-btn').forEach((btn) => {
+    // Exclude continue-btn and restart-btn from choice event binding
+    container.querySelectorAll('.choice-btn:not(#continue-btn):not(#restart-btn)').forEach((btn) => {
       // Remove old listeners by cloning
       const newBtn = btn.cloneNode(true);
       btn.parentNode.replaceChild(newBtn, btn);
@@ -341,6 +821,12 @@ window.RPGStoryLoader = class RPGStoryLoader {
   _handleStoryChoice(index, choices) {
     const choice = choices[index];
     if (!choice) return;
+
+    // Close chapter dropdown if open
+    const dropdown = document.getElementById('chapter-dropdown');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      dropdown.classList.add('hidden');
+    }
 
     // Immediately disable ALL choice buttons to prevent double-clicks
     const container = document.getElementById('choices-area');
@@ -372,6 +858,14 @@ window.RPGStoryLoader = class RPGStoryLoader {
       }
     }
 
+    // Apply affinity changes
+    if (choice.affinityChanges && this.rpg.isEnabled()) {
+      for (const ac of choice.affinityChanges) {
+        const oldVal = this.getNPCAffinity(ac.npcId);
+        this.setNPCAffinity(ac.npcId, oldVal + (ac.delta || 0));
+      }
+    }
+
     // Set flags from choice
     if (choice.setFlag && this.rpg) {
       this.rpg.setFlag(choice.setFlag);
@@ -388,9 +882,10 @@ window.RPGStoryLoader = class RPGStoryLoader {
     }
 
     // Navigate with brief delay for visual feedback
-    if (choice.next) {
+    const targetNode = choice.next || choice.targetNodeId;
+    if (targetNode) {
       setTimeout(() => {
-        this.navigateTo(choice.next);
+        this.navigateTo(targetNode);
       }, 500);
     }
   }
@@ -481,6 +976,25 @@ window.RPGStoryLoader = class RPGStoryLoader {
       for (const ending of storyJson.endings) {
         // Register as locked
         window.endingSystem.register(ending);
+      }
+    }
+
+    // Pre-load achievements
+    if (storyJson.achievements && window.achievementSystem) {
+      const achList = Array.isArray(storyJson.achievements)
+        ? storyJson.achievements
+        : Object.values(storyJson.achievements);
+      for (const ach of achList) {
+        if (!window.achievementSystem.achievements.find(a => a.id === ach.id)) {
+          window.achievementSystem.register({
+            id: ach.id,
+            name: ach.title || ach.name,
+            desc: ach.description || ach.desc,
+            category: ach.category || 'general',
+            rarity: ach.rarity || 'common',
+            maxProgress: ach.maxProgress || 1,
+          });
+        }
       }
     }
   }
@@ -800,6 +1314,15 @@ window.RPGStoryLoader = class RPGStoryLoader {
     }
   }
 
+  _findNPCBySpeaker(speakerName) {
+    if (!this.story || !this.story.npcRelations) return null;
+    const npcList = Array.isArray(this.story.npcRelations)
+      ? this.story.npcRelations
+      : (this.story.npcRelations.npcs || []);
+    const npc = npcList.find(n => n.name === speakerName);
+    return npc ? npc.id : null;
+  }
+
   /* ================================================================
    * 10. Auto-Unlock Achievement Check
    * ================================================================ */
@@ -808,10 +1331,14 @@ window.RPGStoryLoader = class RPGStoryLoader {
     if (!this.story || !this.story.achievements) return;
     if (!window.achievementSystem) return;
 
-    for (const [id, def] of Object.entries(this.story.achievements)) {
+    const achievements = Array.isArray(this.story.achievements)
+      ? this.story.achievements.map(a => [a.id, a])
+      : Object.entries(this.story.achievements);
+
+    for (const [id, def] of achievements) {
       if (window.achievementSystem.unlocked && window.achievementSystem.unlocked.has(id)) continue;
       if (this.rpg.checkAutoUnlock(id, def, this.state)) {
-        window.achievementSystem.register({ id, name: def.title, desc: def.description, category: def.category || 'general', rarity: def.rarity || 'common' });
+        window.achievementSystem.register({ id, name: def.title || def.name, desc: def.description || def.desc, category: def.category || 'general', rarity: def.rarity || 'common' });
         window.achievementSystem.tryUnlock(id);
       }
     }
@@ -859,9 +1386,23 @@ window.RPGStoryLoader = class RPGStoryLoader {
       const normalized = {
         id: node.id || id,
         chapter: node.chapterTitle || '',
-        text: Array.isArray(node.segments) ? node.segments.join('\n\n') : (node.text || ''),
+        text: (!node.segments || !Array.isArray(node.segments)) ? (node.text || '') : undefined,
+        segments: Array.isArray(node.segments) && node.segments.length > 0 ? node.segments : undefined,
+        scene: node.scene || undefined,
+        title: node.title || undefined,
+        ambient: node.ambient || undefined,
+        theme: node.theme || undefined,
+        progress: node.progress || undefined,
+        interactions: node.interactions || undefined,
+        delayedChanges: node.delayedChanges || undefined,
+        countdown: node.countdown || undefined,
+        condition: node.condition || undefined,
         type: node.isEnding ? 'ending' : 'narrative',
-        candidateEndings: node.isEnding ? Object.keys(json.endings || {}) : undefined,
+        candidateEndings: node.isEnding
+          ? (Array.isArray(json.endings)
+              ? json.endings.map(e => e.id)
+              : Object.keys(json.endings || {}))
+          : undefined,
       };
 
       // Convert choices
@@ -887,32 +1428,54 @@ window.RPGStoryLoader = class RPGStoryLoader {
             }
           }
 
-          // Convert changes — v1.1 array format → flat object format
-          // v1.1: [{ variable, value, addFlag, addFlags }]
-          // applyChanges expects: { key: delta, show: true, feedback: {...}, flags: [...], inventory: [...] }
-          if (ch.changes && ch.changes.length > 0) {
-            result.changes = {};
-            const flags = [];
-            for (const c of ch.changes) {
-              if (c.variable && c.value !== undefined) {
-                result.changes[c.variable] = c.value;
+          // Convert changes — supports both v1.1 array format and flat object format
+          // v1.1 array: [{ variable, value, addFlag, addFlags }]
+          // flat object: { key: delta, show: true, feedback: {...}, flags: [...], inventory: [...] }
+          if (ch.changes) {
+            if (Array.isArray(ch.changes) && ch.changes.length > 0) {
+              // Array format — convert to flat object
+              result.changes = {};
+              const flags = [];
+              for (const c of ch.changes) {
+                if (c.variable && c.value !== undefined) {
+                  result.changes[c.variable] = c.value;
+                }
+                if (c.addFlag) flags.push(c.addFlag);
+                if (c.addFlags) flags.push(...c.addFlags);
               }
-              if (c.addFlag) flags.push(c.addFlag);
-              if (c.addFlags) flags.push(...c.addFlags);
-            }
-            if (flags.length > 0) {
-              result.changes.flags = flags;
-            }
-            // Default: show feedback for visible changes
-            const hasChanges = Object.keys(result.changes).some(k => k !== 'flags');
-            if (hasChanges) {
-              result.changes.show = true;
-              result.changes.feedback = { style: 'toast', duration: 2500 };
+              if (flags.length > 0) {
+                result.changes.flags = flags;
+              }
+              // Default: show feedback for visible changes
+              const hasChanges = Object.keys(result.changes).some(k => k !== 'flags');
+              if (hasChanges) {
+                result.changes.show = true;
+                result.changes.feedback = { style: 'toast', duration: 2500 };
+              }
+
+              // Handle SCHEMA v1.1 special change types in array format
+              const specialChanges = ch.changes.filter(c => c.unlockAchievement || c.unlockAchievements || c.importantFlag || c.importantFlags || c.removeFlag || c.valSet);
+              if (specialChanges.length > 0 && result.changes) {
+                for (const sc of specialChanges) {
+                  if (sc.unlockAchievement) result.changes._unlockAchievement = sc.unlockAchievement;
+                  if (sc.unlockAchievements) result.changes._unlockAchievements = sc.unlockAchievements;
+                  if (sc.importantFlag) result.changes._importantFlag = sc.importantFlag;
+                  if (sc.importantFlags) result.changes._importantFlags = sc.importantFlags;
+                  if (sc.removeFlag) result.changes._removeFlag = sc.removeFlag;
+                  if (sc.valSet) result.changes._valSet = sc.valSet;
+                }
+              }
+            } else if (typeof ch.changes === 'object') {
+              // Flat object format — pass through directly
+              result.changes = { ...ch.changes };
             }
           }
 
-          // weight
-          if (ch.weight) result.weight = ch.weight;
+          // weight — support both string (schema v1.1) and numeric (legacy) formats
+          if (ch.weight) {
+            const weightMap = { 1: 'critical', 2: 'branch', 3: 'minor', 4: 'cosmetic' };
+            result.weight = weightMap[ch.weight] || ch.weight;
+          }
 
           // weightHint
           if (ch.weightHint) result.weightHint = ch.weightHint;
@@ -931,17 +1494,31 @@ window.RPGStoryLoader = class RPGStoryLoader {
       nodesArray.push(normalized);
     }
 
-    // Convert endings: dict → array (preserve id field)
-    const endings = json.endings
-      ? Object.entries(json.endings).map(([id, e]) => ({
+    // Convert endings: support both dict and array format
+    let endings = [];
+    if (json.endings) {
+      if (Array.isArray(json.endings)) {
+        endings = json.endings.map(e => ({
+          id: e.id,
+          name: e.title || e.name || e.id,
+          desc: e.description || e.desc || '',
+          type: e.type || e.tone || 'neutral',
+          closing: e.description || '',
+          condition: e.condition,
+          hint: e.hint || null,
+        }));
+      } else {
+        endings = Object.entries(json.endings).map(([id, e]) => ({
           id: e.id || id,
           name: e.title || e.name || id,
           desc: e.description || e.desc || '',
           type: e.type || 'neutral',
           closing: e.description || '',
           condition: e.condition,
-        }))
-      : [];
+          hint: e.hint || null,
+        }));
+      }
+    }
 
     // Convert npcRelations: nested → flat array with initialAffinity
     let npcRelations = [];

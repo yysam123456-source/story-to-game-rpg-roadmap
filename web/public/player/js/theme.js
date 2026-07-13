@@ -12,12 +12,14 @@ window.ThemeEngine = class ThemeEngine {
 
   /**
    * Switch to a genre — master entry point.
+   * @param {string} genre - Genre key
+   * @param {boolean} skipDemo - Skip demo story/interactions loading (used when loading a story script)
    */
-  switchGenre(genre) {
-    if (genre === this.currentGenre) return;
+  switchGenre(genre, skipDemo = false) {
+    if (genre === this.currentGenre && !skipDemo) return;
 
     // 0. Trigger chapter transition animation
-    this.triggerChapterTransition(genre);
+    if (!skipDemo) this.triggerChapterTransition(genre);
 
     const root = document.getElementById('game-root');
     if (!root) return;
@@ -33,11 +35,15 @@ window.ThemeEngine = class ThemeEngine {
 
     // 3. Update all UI sections
     this._updateStatusBar(genre);
-    this._updateSceneViewport(genre);
-    this._loadDemoStory(genre);
-    this._renderInteractions(genre);
+    if (!skipDemo) {
+      this._updateSceneViewport(genre);
+      this._loadDemoStory(genre);
+      this._renderInteractions(genre);
+    }
     this._renderChapterSelector();
-    this._renderInventory(genre);
+    if (!skipDemo) {
+      this._renderInventory(genre);
+    }
 
     // 4. Trigger VFX
     if (window.vfxEngine) {

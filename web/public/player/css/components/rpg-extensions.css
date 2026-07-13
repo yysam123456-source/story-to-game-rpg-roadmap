@@ -511,6 +511,7 @@
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-md);
   transition: all var(--duration-fast);
+  pointer-events: auto;
 }
 
 #npc-relations-toggle:hover {

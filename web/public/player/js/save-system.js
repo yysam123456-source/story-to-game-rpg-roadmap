@@ -84,18 +84,46 @@ class SaveSystem {
     slot.used = true;
     slot.genre = state.genre;
     slot.chapter = state.chapter;
+    slot.maxUnlockedChapter = state.maxUnlockedChapter;
+    slot.chapters = state.chapters ? [...state.chapters] : undefined;
     slot.timestamp = new Date().toLocaleString('zh-CN', {
       month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
     slot.playTime = this._formatPlayTime();
     slot.stats = { ...state.stats };
-    slot.level = state.stats.level || 1;
-    slot.realm = state.stats.realm || '入门';
-    // Generate text summary instead of canvas capture
+    slot.inventory = state.inventory ? JSON.parse(JSON.stringify(state.inventory)) : {};
+
+    // Story mode data
+    if (window.rpgStoryLoader && window.rpgStoryLoader.isStoryMode) {
+      slot.storyMode = true;
+      slot.currentNodeId = window.rpgStoryLoader.currentNodeId;
+      slot.storyTitle = window.rpgStoryLoader.story ? window.rpgStoryLoader.story.meta.title : '';
+      // Save RPG flags and interactions
+      if (window.rpgCore) {
+        slot.rpgData = window.rpgCore.serialize();
+      }
+      // Save NPC affinities
+      slot.npcAffinities = state.npcAffinities ? { ...state.npcAffinities } : {};
+      // Save achievements
+      if (window.achievementSystem) {
+        slot.achievements = [...window.achievementSystem.unlocked];
+      }
+      // Save endings
+      if (window.endingSystem) {
+        slot.endings = [...window.endingSystem.discovered];
+      }
+      // Save exploration/dialogue/check state
+      slot.examinedExplorables = window.explorationRenderer ? [...window.explorationRenderer._examined] : [];
+      slot.completedTopics = window.dialogueRenderer ? [...window.dialogueRenderer._completedTopics] : [];
+      slot.postDialogueNext = window.rpgStoryLoader ? window.rpgStoryLoader._postDialogueNext : null;
+    }
+
+    // Generate text summary
     const statEntries = Object.entries(slot.stats).filter(([k]) => !['chapter', 'level'].includes(k));
     const topStats = statEntries.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 3);
-    slot.summary = topStats.map(([k, v]) => `${window.state ? window.state.getStatLabel(k) : k}: ${v}`).join(' | ');
+    slot.summary = (slot.storyTitle ? slot.storyTitle + ' · ' : '') +
+      (topStats.map(([k, v]) => `${window.state ? window.state.getStatLabel(k) : k}: ${v}`).join(' | '));
 
     this._persist();
     this._render();
@@ -114,11 +142,60 @@ class SaveSystem {
       Object.assign(window.state.stats, slot.stats);
       window.state.genre = slot.genre;
       window.state.chapter = slot.chapter;
+      if (slot.maxUnlockedChapter !== undefined) {
+        window.state.maxUnlockedChapter = slot.maxUnlockedChapter;
+      }
+      if (slot.chapters) {
+        window.state.chapters = [...slot.chapters];
+      }
+      if (slot.inventory) {
+        window.state.inventory = JSON.parse(JSON.stringify(slot.inventory));
+      }
+      if (slot.npcAffinities) {
+        window.state.npcAffinities = { ...slot.npcAffinities };
+      }
     }
+
+    // Restore RPG core state
+    if (slot.rpgData && window.rpgCore) {
+      window.rpgCore.deserialize(slot.rpgData);
+    }
+
+    // Restore achievements
+    if (slot.achievements && window.achievementSystem) {
+      for (const achId of slot.achievements) {
+        window.achievementSystem.unlocked.add(achId);
+      }
+      if (window.achievementSystem._renderList) window.achievementSystem._renderList();
+    }
+
+    // Restore endings
+    if (slot.endings && window.endingSystem) {
+      for (const endingId of slot.endings) {
+        window.endingSystem.discovered.add(endingId);
+      }
+      if (window.endingSystem._renderList) window.endingSystem._renderList();
+      if (window.endingSystem._updateMiniTracker) window.endingSystem._updateMiniTracker();
+    }
+
+    // If in story mode, navigate to saved node
+    if (slot.storyMode && slot.currentNodeId && window.rpgStoryLoader && window.rpgStoryLoader.story) {
+      window.rpgStoryLoader.navigateTo(slot.currentNodeId);
+    }
+
+    // Restore exploration/dialogue/check state
+    if (slot.examinedExplorables && window.explorationRenderer) { slot.examinedExplorables.forEach(id => window.explorationRenderer._examined.add(id)); }
+    if (slot.completedTopics && window.dialogueRenderer) { slot.completedTopics.forEach(id => window.dialogueRenderer._completedTopics.add(id)); }
+    if (slot.postDialogueNext && window.rpgStoryLoader) { window.rpgStoryLoader._postDialogueNext = slot.postDialogueNext; }
 
     // Trigger theme switch
     if (window.themeEngine) {
       window.themeEngine.switchGenre(slot.genre);
+    }
+
+    // Update inventory badge
+    if (window.rpgStoryLoader && window.rpgStoryLoader._updateInventoryBadge) {
+      window.rpgStoryLoader._updateInventoryBadge();
     }
 
     this.close();

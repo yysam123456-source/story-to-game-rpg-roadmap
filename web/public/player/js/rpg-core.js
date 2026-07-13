@@ -121,6 +121,12 @@ window.RPGCore = class RPGCore {
   }
 
   _evalObjectCondition(cond, state) {
+    // { not: { ...condition... } } — 取反
+    if (cond.not !== undefined) {
+      const inner = this._evalObjectCondition(cond.not, state);
+      return { result: !inner.result, reason: inner.result ? '' : (inner.reason || '已满足排除条件') };
+    }
+
     // { all: [conditions] }
     if (cond.all && Array.isArray(cond.all)) {
       for (const sub of cond.all) {
@@ -211,6 +217,15 @@ window.RPGCore = class RPGCore {
       return { result, reason: result ? '' : `需要与 ${npcId} 的好感度 ${op} ${value}` };
     }
 
+    // { skill: "ling_shi", min: 15 }
+    if (cond.skill !== undefined) {
+      const current = state ? state.get(cond.skill) : 0;
+      const min = parseFloat(cond.min);
+      const result = current >= min;
+      const skillLabel = this.getStatLabel(cond.skill);
+      return { result, reason: result ? '' : `需要 ${skillLabel} >= ${min}（当前: ${current}）` };
+    }
+
     return { result: false, reason: '未知的条件类型' };
   }
 
@@ -234,7 +249,7 @@ window.RPGCore = class RPGCore {
 
     const results = [];
     for (const [key, delta] of Object.entries(changes)) {
-      if (key === 'show' || key === 'feedback' || key === 'inventory' || key === 'flags') continue;
+      if (key === 'show' || key === 'feedback' || key === 'inventory' || key === 'flags' || key.startsWith('_')) continue;
 
       const current = state.get(key);
       const newValue = current + delta;
@@ -288,6 +303,52 @@ window.RPGCore = class RPGCore {
       }
     }
 
+    // Handle unlockAchievement (single or array)
+    const achIds = changes._unlockAchievements || (changes._unlockAchievement ? [changes._unlockAchievement] : []);
+    if (achIds.length > 0 && window.achievementSystem) {
+      for (const achId of achIds) {
+        window.achievementSystem.tryUnlock(achId);
+      }
+      results.push({ key: 'achievement', label: '成就解锁', delta: 0, isAchievement: true });
+    }
+
+    // Handle importantFlag / importantFlags
+    const impFlags = changes._importantFlags || (changes._importantFlag ? [changes._importantFlag] : []);
+    if (impFlags.length > 0) {
+      for (const f of impFlags) {
+        if (typeof f === 'object') {
+          this.flags.add(f.flag);
+          results.push({ key: `flag:${f.flag}`, label: f.label || f.flag, delta: 0, isFlag: true, important: true });
+        } else {
+          this.flags.add(f);
+          results.push({ key: `flag:${f}`, label: f, delta: 0, isFlag: true, important: true });
+        }
+      }
+    }
+
+    // Handle removeFlag
+    if (changes._removeFlag) {
+      const flagToRemove = changes._removeFlag;
+      if (this.flags.has(flagToRemove)) {
+        this.flags.delete(flagToRemove);
+        results.push({ key: `unflag:${flagToRemove}`, label: `移除标记: ${flagToRemove}`, delta: 0, isUnflag: true });
+      }
+    }
+
+    // Handle valSet (set variable to absolute value)
+    if (changes._valSet) {
+      for (const [key, val] of Object.entries(changes._valSet)) {
+        const old = state.get(key);
+        state.stats[key] = val;
+        results.push({ key, label: this.getStatLabel(key), delta: val - old, oldValue: old, newValue: val, type: this.getStatType(key) });
+      }
+    }
+
+    // Handle feedback text (show narrative feedback)
+    if (changes.feedback && typeof changes.feedback === 'string') {
+      results.push({ key: '__feedback', label: changes.feedback, delta: 0, isFeedback: true });
+    }
+
     this._changeHistory.push({ timestamp: Date.now(), changes: results });
     return results;
   }
@@ -304,21 +365,34 @@ window.RPGCore = class RPGCore {
     critical: 'choice-weight-critical',
     branch:   'choice-weight-branch',
     minor:    'choice-weight-minor',
-    cosmetic: 'choice-weight-cosmetic'
+    cosmetic: 'choice-weight-cosmetic',
+    1: 'choice-weight-critical',
+    2: 'choice-weight-branch',
+    3: 'choice-weight-minor',
+    4: 'choice-weight-cosmetic'
   };
 
   static WEIGHT_LABELS = {
     critical: '关键',
     branch:   '分支',
     minor:    '次要',
-    cosmetic: '装饰'
+    cosmetic: '装饰',
+    1: '关键',
+    2: '分支',
+    3: '次要',
+    4: '装饰'
   };
 
   static WEIGHT_PRIORITY = {
     critical: 0,
     branch: 1,
-    minor: 2,
-    cosmetic: 3
+    major: 2,
+    minor: 3,
+    cosmetic: 4,
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3
   };
 
   getWeightClass(weight) {
@@ -354,6 +428,114 @@ window.RPGCore = class RPGCore {
     if (data.flags) this.flags = new Set(data.flags);
     if (data.interactionsDone) this.interactionsDone = new Set(data.interactionsDone);
     if (data.hiddenStats) this.hiddenStats = { ...data.hiddenStats };
+  }
+
+  /* ================================================================
+   * 6. Dice Roll / Skill Check
+   * ================================================================ */
+
+  rollCheck(checkDef, state) {
+    // checkDef = { skill: "ling_shi", dc: 15, cost: {...} }
+    // 公式: skillValue + random(1,12) + random(1,12) - dc
+    // 返回 { success: boolean, roll: number, skillValue: number, dc: number, margin: number, text: string }
+
+    const skillValue = state.get(checkDef.skill) || 0;
+    const roll1 = Math.floor(Math.random() * 12) + 1;
+    const roll2 = Math.floor(Math.random() * 12) + 1;
+    const totalRoll = roll1 + roll2;
+    const margin = skillValue + totalRoll - checkDef.dc;
+    const success = margin >= 0;
+
+    // 扣除cost
+    if (checkDef.cost) {
+      for (const [key, val] of Object.entries(checkDef.cost)) {
+        const current = state.get(key);
+        if (current + val < 0) {
+          return { success: false, roll: totalRoll, skillValue, dc: checkDef.dc, margin, text: `资源不足，无法进行检定`, blocked: true };
+        }
+        state.set(key, current + val);
+      }
+    }
+
+    // 获取技能标签
+    const skillLabel = state.getStatLabel ? state.getStatLabel(checkDef.skill) : checkDef.skill;
+    const resultText = success ? '成功' : '失败';
+    const text = `${skillLabel}检定 (${skillValue} + ${roll1}+${roll2} = ${skillValue + totalRoll} vs DC${checkDef.dc}) — ${resultText}！${success ? `差值+${margin}` : `差值${margin}`}`;
+
+    return { success, roll: totalRoll, skillValue, dc: checkDef.dc, margin, text };
+  }
+
+  /* ================================================================
+   * 7. Affinity Changes
+   * ================================================================ */
+
+  applyAffinityChanges(affinityChanges, state) {
+    // affinityChanges = [{ npcId: "du_yan", delta: 5 }]
+    if (!affinityChanges || !state.npcAffinities) return [];
+    const results = [];
+    for (const ac of affinityChanges) {
+      const old = state.npcAffinities[ac.npcId] || 0;
+      state.npcAffinities[ac.npcId] = old + ac.delta;
+      results.push({ npcId: ac.npcId, old, value: old + ac.delta, delta: ac.delta });
+    }
+    return results;
+  }
+
+  /* ================================================================
+   * 8. Item Management
+   * ================================================================ */
+
+  grantItems(items, state) {
+    // items = [{ item: "copper_rust", category: "key_items", qty: 1, desc: "..." }]
+    if (!items) return;
+    for (const item of items) {
+      const cat = item.category || 'misc';
+      if (!state.inventory[cat]) state.inventory[cat] = [];
+      const existing = state.inventory[cat].find(i => i.name === item.item || i.id === item.item);
+      if (existing) {
+        existing.qty = (existing.qty || 1) + (item.qty || 1);
+      } else {
+        state.inventory[cat].push({ id: item.item, name: item.item, desc: item.desc || '', qty: item.qty || 1 });
+      }
+    }
+    state._emit('inventory-change', {});
+  }
+
+  removeItem(itemId, state, qty = 1) {
+    if (!state.inventory) return false;
+    for (const cat of Object.values(state.inventory)) {
+      const idx = cat.findIndex(i => (i.id === itemId || i.name === itemId) && i.qty >= qty);
+      if (idx >= 0) {
+        cat[idx].qty -= qty;
+        if (cat[idx].qty <= 0) cat.splice(idx, 1);
+        state._emit('inventory-change', {});
+        return true;
+      }
+    }
+    return false;
+  }
+
+  findUsableItems(nodeId, state, storyItems) {
+    // 找出当前场景可以使用的物品
+    if (!state.inventory || !storyItems) return [];
+    const usable = [];
+    for (const [itemId, itemDef] of Object.entries(storyItems)) {
+      if (!itemDef.usable) continue;
+      // 检查 usableIn 限制
+      if (itemDef.usableIn !== null && itemDef.usableIn !== undefined) {
+        if (!itemDef.usableIn.includes(nodeId)) continue;
+      }
+      // 检查背包中是否有
+      let hasItem = false;
+      for (const cat of Object.values(state.inventory)) {
+        if (cat.find(i => (i.id === itemId || i.name === itemId))) {
+          hasItem = true;
+          break;
+        }
+      }
+      if (hasItem) usable.push({ itemId, ...itemDef });
+    }
+    return usable;
   }
 
   recordInteraction(type) {

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>RPG Game UI V2 - Game Main</title>
 
   <!-- Fonts: Noto Serif SC (display) + LXGW WenKai (body) -->
@@ -41,6 +44,7 @@
   <link rel="stylesheet" href="../css/components/endings.css">
   <!-- RPG Core Engine Extensions -->
   <link rel="stylesheet" href="../css/components/rpg-extensions.css">
+  <link rel="stylesheet" href="../css/components/exploration-dialogue-check.css">
   <!-- Story Import -->
   <link rel="stylesheet" href="../css/components/story-import.css">
 </head>
@@ -356,6 +360,10 @@
 
       <!-- Narrative Text -->
       <div id="narrative-text" role="article">正在加载故事...</div>
+      <div id="exploration-area"></div>
+      <div id="dialogue-area"></div>
+      <div id="check-area"></div>
+      <div id="item-use-bar"></div>
 
       <!-- Choices -->
       <div id="choices-area" role="group" aria-label="剧情选项"></div>
@@ -522,22 +530,26 @@
   <button id="story-change-btn" class="story-change-btn">更换剧本</button>
 </div>
 
-<!-- Scripts -->
-<script src="../js/portrait.js"></script>
-<script src="../js/save-system.js"></script>
-<script src="../js/achievements.js"></script>
-<script src="../js/endings.js"></script>
-<script src="../js/data.js"></script>
-<script src="../js/state.js"></script>
-<script src="../js/theme.js"></script>
-<script src="../js/vfx.js"></script>
-<script src="../js/audio.js"></script>
-<script src="../js/ui.js"></script>
+<!-- Scripts (v=20260710 cache-bust) -->
+<script src="../js/portrait.js?v=20260710"></script>
+<script src="../js/save-system.js?v=20260710"></script>
+<script src="../js/achievements.js?v=20260710"></script>
+<script src="../js/endings.js?v=20260710"></script>
+<script src="../js/data.js?v=20260710"></script>
+<script src="../js/state.js?v=20260710"></script>
+<script src="../js/theme.js?v=20260710"></script>
+<script src="../js/vfx.js?v=20260710"></script>
+<script src="../js/audio.js?v=20260710"></script>
+<script src="../js/ui.js?v=20260710"></script>
 <!-- RPG Core Engine -->
-<script src="../js/rpg-core.js"></script>
-<script src="../js/rpg-status-bar.js"></script>
-<script src="../js/rpg-choice.js"></script>
-<script src="../js/rpg-story-loader.js"></script>
+<script src="../js/rpg-core.js?v=20260710"></script>
+<script src="../js/rpg-status-bar.js?v=20260710"></script>
+<script src="../js/rpg-choice.js?v=20260710"></script>
+<script src="../js/rpg-story-loader.js?v=20260710"></script>
+<script src="../js/exploration.js?v=20260710"></script>
+<script src="../js/dialogue.js?v=20260710"></script>
+<script src="../js/check-display.js?v=20260710"></script>
+<script src="../js/item-use.js?v=20260710"></script>
 <script>
   // Bootstrap
   document.addEventListener('DOMContentLoaded', function () {
@@ -569,6 +581,20 @@
     window.achievementSystem.init();
     window.endingSystem.init();
 
+    // Ensure all panels are closed on page load
+    (function closeAllPanels() {
+      var inv = document.getElementById('inventory-panel');
+      var invBack = document.getElementById('inventory-backdrop');
+      if (inv) { inv.classList.remove('open'); inv.setAttribute('aria-hidden', 'true'); }
+      if (invBack) invBack.classList.remove('visible');
+      var npc = document.getElementById('npc-relations-panel');
+      var npcBack = document.getElementById('npc-relations-backdrop');
+      if (npc) { npc.classList.remove('open'); npc.setAttribute('aria-hidden', 'true'); }
+      if (npcBack) npcBack.classList.remove('visible');
+      var menuOverlay = document.getElementById('menu-overlay');
+      if (menuOverlay) menuOverlay.classList.remove('open');
+    })();
+
     // Initialize story import UI
     window.RPGStoryLoader.initImportUI(window.rpgStoryLoader);
 
@@ -578,23 +604,32 @@
       window.RPGStoryLoader.showImportOverlay();
     });
 
-    // Auto-load from URL parameter: ?story=work_id
+    // Auto-load from URL parameter: ?story=work_id  or ?demo=work_id
     var urlParams = new URLSearchParams(window.location.search);
-    var storyId = urlParams.get('story');
+    var storyId = urlParams.get('story') || urlParams.get('demo');
     if (storyId) {
       // Hide import UI since we're loading directly
       var importOverlay = document.getElementById('story-import-overlay');
       if (importOverlay) importOverlay.classList.add('hidden');
 
-      // Fetch from platform API
-      fetch('../../api/works/' + storyId + '?format=script')
+      var jsonUrl;
+      if (storyId.indexOf('http') === 0 || storyId.indexOf('/') === 0) {
+        jsonUrl = storyId;
+      } else {
+        var cleanId = storyId.replace(/\.json$/i, '');
+        jsonUrl = '../../data/works/' + cleanId + '.json';
+      }
+
+      fetch(jsonUrl)
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          if (data.success && data.data) {
-            window.rpgStoryLoader.load(data.data);
+          // Support both direct JSON and API wrapper {success, data}
+          var storyData = (data && data.success && data.data) ? data.data : data;
+          if (storyData && storyData.meta) {
+            window.rpgStoryLoader.load(storyData);
           } else {
-            console.error('Failed to load story:', data.error);
-            document.getElementById('narrative-text').textContent = '故事加载失败，请检查故事 ID 是否正确。';
+            console.error('Failed to load story: invalid JSON structure');
+            document.getElementById('narrative-text').textContent = '故事加载失败，JSON 格式不正确。';
             document.getElementById('chapter-indicator-text').textContent = '加载失败';
           }
         })
@@ -604,9 +639,25 @@
           document.getElementById('chapter-indicator-text').textContent = '加载失败';
         });
     } else {
-      // No story ID — show waiting state
-      document.getElementById('narrative-text').textContent = '请从作品库选择一个故事开始游玩。';
-      document.getElementById('chapter-indicator-text').textContent = '等待加载';
+      // No story ID — auto-load default story
+      var defaultStoryId = 'sanguo_guiliu_full';
+      var defaultJsonUrl = '../../data/works/' + defaultStoryId + '.json';
+      fetch(defaultJsonUrl)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var storyData = (data && data.success && data.data) ? data.data : data;
+          if (storyData && storyData.meta) {
+            window.rpgStoryLoader.load(storyData);
+          } else {
+            document.getElementById('narrative-text').textContent = '请从作品库选择一个故事开始游玩。';
+            document.getElementById('chapter-indicator-text').textContent = '等待加载';
+          }
+        })
+        .catch(function(err) {
+          console.error('Error loading default story:', err);
+          document.getElementById('narrative-text').textContent = '请从作品库选择一个故事开始游玩。';
+          document.getElementById('chapter-indicator-text').textContent = '等待加载';
+        });
     }
   });
 </script>

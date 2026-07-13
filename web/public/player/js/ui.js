@@ -9,12 +9,8 @@ window.UIController = class UIController {
   constructor() {
     this.MAX_NOTIFICATIONS = 3;
     this.settings = {
-      particlesEnabled: true,
-      animationEnabled: true,
-      soundEnabled: true,
-      colorblindMode: false,
       fontSize: 14,
-      showPerfMonitor: false
+      animationEnabled: true
     };
   }
 
@@ -444,6 +440,8 @@ window.UIController = class UIController {
         this._closeMenu();
         const inv = document.getElementById('inventory-panel');
         if (inv && inv.classList.contains('open')) this._toggleInventory();
+        const npc = document.getElementById('npc-relations-panel');
+        if (npc && npc.classList.contains('open')) this._toggleNPCRelations();
         return;
       }
 
@@ -615,6 +613,7 @@ window.UIController = class UIController {
       <div class="time-pressure-value">${current}s</div>
     `;
     el.style.display = 'flex';
+    this._timePressureLabel = label;
   }
 
   updateTimePressureUI(current, max) {
@@ -738,52 +737,4 @@ window.UIController = class UIController {
     }
   }
 
-  /* ── Test Functions ────────────────── */
-  _testChapterTransition() {
-    const genre = window.state ? window.state.genre : 'xianxia';
-    const genres = ['xianxia', 'horror', 'mystery', 'apocalypse', 'palace'];
-    const names = ['修仙·水墨晕开', '恐怖·画面撕裂', '悬疑·打字机', '末日·噪点闪烁', '宫斗·帷幕拉开'];
-    const idx = genres.indexOf(genre);
-    const title = names[idx];
-    window.themeEngine.triggerChapterTransition(genre, title);
-    this.showNotification('转场动画已触发：' + title, 0, 'info');
-  }
-
-  _testInteractionFlow() {
-    // Find first available interaction button and simulate click
-    const btn = document.querySelector('.interaction-btn:not(.exploring):not(:disabled)');
-    if (btn) {
-      btn.click();
-      this.showNotification('交互流程已触发', 0, 'info');
-    } else {
-      this.showNotification('没有可用的交互按钮', 0, 'negative');
-    }
-  }
-
-  _testVFX() {
-    if (!window.vfxEngine) {
-      this.showNotification('VFX引擎未初始化', 0, 'negative');
-      return;
-    }
-    const genre = window.state ? window.state.genre : 'xianxia';
-    const vfxMap = {
-      xianxia: 'breakthrough',
-      horror: 'scare',
-      mystery: 'clue',
-      apocalypse: 'warning',
-      palace: 'sparkle'
-    };
-    const effect = vfxMap[genre] || 'breakthrough';
-    window.vfxEngine.triggerOneShot(genre, effect);
-    this.showNotification('VFX特效已触发：' + effect, 0, 'info');
-  }
-
-  _testNotifications() {
-    // Show all notification types
-    this.showNotification('修为 +15', 15, 'positive');
-    setTimeout(() => this.showNotification('气血 -10', -10, 'negative'), 300);
-    setTimeout(() => this.showNotification('新发现！获得碧水剑', 0, 'info'), 600);
-    setTimeout(() => this.showNotification('物品不足', 0, 'negative'), 900);
-    setTimeout(() => this.showNotification('突破！修为精进', 0, 'positive'), 1200);
-  }
 };

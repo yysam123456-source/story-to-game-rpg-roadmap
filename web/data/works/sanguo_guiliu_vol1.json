@@ -83,8 +83,13 @@
           "changes": {
             "ling_shi": 3,
             "shi_shi": 2,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_work",
@@ -92,8 +97,13 @@
           "next": "node_001_work",
           "changes": {
             "hun_li": -3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_scar",
@@ -102,10 +112,54 @@
           "changes": {
             "ling_shi": 2,
             "ji_yi": 2,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "铜灰落进喉咙的时候，陆渊才发觉自己已经死了第二次。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "第一次死得很轻。熬夜审稿，心口一闷，人就栽在键盘上。第二次死得重——睁眼时，鼻子里灌满铜锈的腥甜，身下是冰凉的石板，头顶悬着一盏没有脸的青铜灯。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "三丈外，一列和他一样的活人正弯腰刮墙，每个人脊背上烙着同一个字——渡。"
+        },
+        {
+          "type": "narrative",
+          "text": "左边是个老妇，刮刀在她手里像片叶子。中间是个少年，脊梁挺得笔直，可手抖。右边是个断指的人，刮得比别人都狠。"
+        },
+        {
+          "type": "narrative",
+          "text": "墙上是小篆，密密麻麻写着渡客的死法。陆渊的那行排在最底下，墨还没干："
+        },
+        {
+          "type": "dialogue",
+          "speaker": "墙文",
+          "text": "渡客某甲，今夜，殁于——"
+        },
+        {
+          "type": "narrative",
+          "text": "殁于什么，空着。",
+          "effect": "flicker"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "铜雀台·浅阶"
     },
     {
       "id": "node_001_observe",
@@ -119,8 +173,13 @@
           "next": "node_001_talk",
           "changes": {
             "shi_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_see_gap",
@@ -129,10 +188,45 @@
           "changes": {
             "ling_shi": 5,
             "shi_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "discover_gap"
+          },
+          "weight": 2
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你沉下视线，像审稿时第一眼扫过整页。"
+        },
+        {
+          "type": "narrative",
+          "text": "老妇的'渡'字最淡，像是快被写没了。少年的最深，墨迹新，说明刚被写进来。断指人的字不淡不深，可刮墙的动作带着一股狠劲——他在和墙较劲，不是和灰。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "灰不过膝，灯不灭，你就能多活一个时辰。无面卒巡夜，碰上就补进阵里。"
+        },
+        {
+          "type": "narrative",
+          "text": "你把视线沉得更深。忽然，墙上的空格在你眼里无声地亮起来——某乙后面空着，某丙后面空着，少年那行也空着。不是用眼睛看见的，是某种更底的东西，像校对时一眼扫出段落里缺了半个标点。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "五处空格，在这一面墙上，静静亮着。",
+          "effect": "flicker"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_001_work",
@@ -153,7 +247,12 @@
             "show": false,
             "flags": [
               "bu_ge_self"
-            ]
+            ],
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "bu_ge_self"
           }
         },
         {
@@ -163,10 +262,39 @@
           "changes": {
             "tong_hua": 5,
             "hun_li": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你接过汉子抛来的铜刀。沉，刃口卷了。低头看自己的手——手指细长，指节有老茧，是常年翻稿子磨出来的。可虎口处多了一道不该有的疤，弯弯的，像谁用毛笔在皮上补了一笔。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你一刀揭开墙上的灰层。灰下是小篆，每一行末尾都钉着一个死法。你的那一行排在最底下：'渡客某甲，今夜，殁于——'"
+        },
+        {
+          "type": "narrative",
+          "text": "空格还在。你想起审了十年稿子练出的本能：没写完，就说明还能写。"
+        },
+        {
+          "type": "narrative",
+          "text": "你把卷刃的铜刀往那空格里一按，指尖的血混着铜灰，在空白处拖出一道歪斜的竖。墙上的墨迹像被烫到一样缩了缩。",
+          "effect": "flicker"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_001_scar",
@@ -183,7 +311,12 @@
             "tong_hua": 8,
             "saved_count": 1,
             "hun_li": -5,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "save_boy"
           }
         },
         {
@@ -193,10 +326,45 @@
           "changes": {
             "ji_yi": -3,
             "hun_li": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你摸向虎口那道疤。从小就有，来历不明。可此刻它隐隐发热，像在对这地方的什么产生回应。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你想起生前审稿的习惯——常在稿子边缘批注，写'此处节奏拖''此处人设崩'。那些批注比正文还毒。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "你脸色不对。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "没事。你把袖子拉下，盖住疤。只是认出这地方的笔路了——墙上那些字，起笔狠，行笔飘，收笔犹豫。和你这道疤，是同一种力道。"
+        },
+        {
+          "type": "narrative",
+          "text": "远处传来一声闷响。地面裂开一道缝，灰雾凝成一只无指的手，朝最近的一个渡客抓去。是那个断指的人。他连叫都没叫出，人被拖进缝里，墙上'某丙'后面瞬间补完：'殁于无面阵。'",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_001_buge",
@@ -213,7 +381,12 @@
             "tong_hua": 5,
             "saved_count": 1,
             "hun_li": -5,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "save_boy"
           }
         },
         {
@@ -222,10 +395,60 @@
           "next": "node_001_save",
           "changes": {
             "ji_yi": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "血痕在空格上凝成一道疤。无指的手顿在半空。雾里传来一声极轻的'咦'，像是执笔的人发现稿子出了自己没写的东西。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "手缩回缝里。灰雾退了。",
+          "effect": "flicker"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "你……补了格？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "补了。你喘着，声音在抖，作者没写完，我替他填了一笔。"
+        },
+        {
+          "type": "narrative",
+          "text": "你低头看左手无名指。方才按刀的地方，皮肤底下浮起一层极淡的青灰，像铜锈沁进了肉里。凉的。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "铜化。你补那格，血进了稿，铜就认你做自己人——它要你慢慢变成墙上的字。"
+        },
+        {
+          "type": "narrative",
+          "text": "你盯着那层青灰。铜化，就是他被写成'路人甲'的过程。"
+        },
+        {
+          "type": "narrative",
+          "text": "远处，少年的'渡'字忽然亮了。灰雾的手转向了他。",
+          "effect": "flicker"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_001_save",
@@ -239,8 +462,13 @@
           "next": "node_001_talk",
           "changes": {
             "shi_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_go_gate",
@@ -249,10 +477,61 @@
           "changes": {
             "ling_shi": 2,
             "hun_li": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "to_hulao"
+          },
+          "weight": 2
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你冲到墙边，刀尖点在少年那行空的末尾，用血痕堵住空格。少年的'渡'字暗了。灰雾的手抓空，缩回缝里。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "某戊是个埋头刮墙的汉子，听见动静抬头，已经晚了。他被拖进缝，墙上补完：'殁于灯焚。'",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你喘着退开。墙上的空格还有三处亮着。你数得清——作者的笔，今晚够勾三个人。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "你救不了所有人。空格亮着的，迟早被勾。你补一格，它就去勾下一格。"
+        },
+        {
+          "type": "narrative",
+          "text": "你低头看左手。无名指的青灰淡了些，可虎口那道旧疤却隐隐发热——像在回应墙上的血痕。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "少年",
+          "text": "你堵住了？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "堵住了。但只是今晚。"
+        },
+        {
+          "type": "narrative",
+          "text": "风更凉。你把左手收进袖子里，望向墙的尽头——那里还有更多渡客，更多亮着的空格。",
+          "effect": "whispers"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_001_talk",
@@ -266,10 +545,56 @@
           "next": "node_002_gate",
           "changes": {
             "shi_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "to_hulao"
+          },
+          "weight": 2
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "能进虎牢副本的渡客，百不存一。你补了格，阵记下了你。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "虎牢？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "中阶。浅阶清灰，中阶破阵。你看得见漏写，这关本该是你克星——可阵首没脸，你连它叫什么都不知道，残影视界就照不出它的缝。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "这地方叫什么？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "铜雀台。渡客死了，身子化灰；记性好、又碰了稿的，化铜。铜回炉，浇成新的墙，新的字，新的渡客。"
+        },
+        {
+          "type": "narrative",
+          "text": "你想起他说的另一句话：'写的人躲在稿子后头，你看得见他漏写的缝，就看得到他。'"
+        },
+        {
+          "type": "narrative",
+          "text": "你摸了摸虎口的疤。如果写你的人和你同笔锋——是不是说明，写他的人，和他用的是同一只手？",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台·浅阶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_002_gate",
@@ -290,8 +615,14 @@
             "ling_shi": 5,
             "shi_shi": 5,
             "bi_bing_count": 1,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "find_cracks"
+          },
+          "weight": 2
         },
         {
           "id": "ch_push_gate",
@@ -299,8 +630,13 @@
           "next": "node_002_boss",
           "changes": {
             "hun_li": -10,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_patch_slow",
@@ -310,10 +646,59 @@
             "tong_hua": 10,
             "hun_li": -5,
             "ling_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "黑沙掺着碎骨，踩上去咯吱响。头顶是一片灰蒙蒙的天，天底下立着一道石门，门上刻满了字。"
+        },
+        {
+          "type": "narrative",
+          "text": "字在动。不是风吹，是笔画自己游移，像有人握着看不见的笔，在门上反复描同一段话。",
+          "effect": "flicker"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "石门铭文",
+          "text": "虎牢·无面阵首。"
+        },
+        {
+          "type": "narrative",
+          "text": "你撑起身。左手无名指一阵刺痒——昨夜那层青灰已经爬成了淡青的斑。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你凝神，视线里那些反复描写的笔画渐渐分层：表层是'虎牢·无面阵首'六个字，底下压着更早的刻痕。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "盖不掉。底下的名字从笔画缝里探出半截。",
+          "effect": "flicker"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "阵法写了两遍。先写了一个，又覆盖。覆盖得急，手抖了。"
+        },
+        {
+          "type": "narrative",
+          "text": "你顺着门往两边看。整道门上，这样的'手抖'处不止一道。你眯眼数，第一遍数出五道，凝神再看，门楣阴影里还藏着两道更浅的——一共七处。"
+        }
+      ],
+      "scene": {
+        "name": "虎牢石门",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_002_cracks",
@@ -330,7 +715,12 @@
             "tong_hua": 20,
             "hun_li": -15,
             "ling_shi": 5,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "patch_all_cracks"
           }
         },
         {
@@ -340,10 +730,49 @@
           "changes": {
             "tong_hua": 10,
             "hun_li": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "残影视界拉到最细。七道裂缝一一浮现——"
+        },
+        {
+          "type": "narrative",
+          "text": "第一将笔力最足，到第三将开始飘，第五将潦草，第七将直接废。不是写崩了，是写着写着失了兴味。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "虎牢本该是七将守关。作者写七将，每写一个，笔法就飘一次。他越写越不耐烦，最后一将干脆没写脸——就成了无面阵首。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "你连这都看得出？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "看稿看多了。阵靠这些缝连气。作者手抖的地方，就是阵的薄弱处。我补上，阵就断一口气。"
+        },
+        {
+          "type": "narrative",
+          "text": "你从怀里摸出昨夜那页残灰。纸贴上石门的瞬间，门上的字骤然一顿。游移的笔画卡在半空。你感觉到指尖的铜斑一烫——补缝的代价，铜往你肉里又沁了一分。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "虎牢石门",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_002_boss",
@@ -365,7 +794,12 @@
             "hun_li": -10,
             "shi_shi": 5,
             "bi_bing_count": 1,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "defeat_boss"
           }
         },
         {
@@ -374,10 +808,58 @@
           "next": "node_002_defeat",
           "changes": {
             "hun_li": -25,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "补完第七道缝，石门轰然中分。冷风涌出，风里先伸出一只脚——铁铸的，靴尖朝上弯。然后是腿、腰、胸，一节节拼成人形。拼到脖子以上，没了。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "没有头。头是一团模糊的雾，雾里偶尔浮出五官的轮廓，又散掉。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "无面阵首。"
+        },
+        {
+          "type": "narrative",
+          "text": "它站在门缝里，铁身子比你高两个头，胸口刻着'虎牢'二字，字底下压着那个被覆盖的名字，探出更多了。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "它没脸，作者忘写脸了。"
+        },
+        {
+          "type": "narrative",
+          "text": "阵首动了。铁脚踩碎黑沙，朝你走来。每走一步，胸口'虎牢'二字就亮一下。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你没退。你绕着它走，刀尖点地，看它身上的字。胸口'虎虎'是覆盖层，底下名字被压着；手臂上刻着阵法的走势，走势里也有裂缝——和石门上那些'手抖'处一一对应。"
+        },
+        {
+          "type": "narrative",
+          "text": "脚踝上刻着一行小字：'第八将属，未列正传。'"
+        }
+      ],
+      "scene": {
+        "name": "虎牢石门",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_002_defeat",
@@ -395,7 +877,12 @@
             "has_hui_feng": 1,
             "shi_shi": 5,
             "ji_yi": 3,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "name_hui_feng"
           }
         },
         {
@@ -404,10 +891,65 @@
           "next": "node_003_ask",
           "changes": {
             "shi_shi": 2,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "残灰按在阵首腰侧那道极细的颤笔上。铁身子一僵。雾脸里的眼缩成两个点。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你扑上去，残灰按在臂后的裂缝上。阵首的动作慢了。胸口'虎牢'二字突然暴亮，底下的名字挣出来，半个字浮在铁皮上——",
+          "effect": "flicker"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "阵首铭文",
+          "text": "第……"
+        },
+        {
+          "type": "narrative",
+          "text": "阵首的雾脸里，忽然浮出另一张脸的残影。眉眼只勾了三笔，嘴是空的。那张残脸贴在阵首的无脸上，两张脸叠在一起。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "第八人。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "第八人残影",
+          "text": "我也是被忘的。"
+        },
+        {
+          "type": "narrative",
+          "text": "阵首轰然倒下。胸口碎成两半，底下那个名字终于露出全貌，可你只来得及看清头一个字：'第。'"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "独眼汉子",
+          "text": "第八人，副本里从没有第八人的说法。"
+        },
+        {
+          "type": "narrative",
+          "text": "你接过铁皮。铁是温的。翻过来，背面有一道浅刻，弯弯的——和你虎口那道旧疤，同一个笔锋。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "虎牢石门",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_003_name",
@@ -421,8 +963,13 @@
           "next": "node_003_ask",
           "changes": {
             "shi_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_go_chibi",
@@ -430,10 +977,59 @@
           "next": "node_004_gate",
           "changes": {
             "ling_shi": 2,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "to_chibi"
+          },
+          "weight": 2
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你把残灰按在铁皮的'八'字上，血痕浸透，再拿铜刀尖蘸着，在沙坑的'未名'二字上，一笔笔改。"
+        },
+        {
+          "type": "narrative",
+          "text": "先抹掉'未名'。再写'回风落雁'四字。"
+        },
+        {
+          "type": "narrative",
+          "text": "刀尖落下的瞬间，你左手无名指的铜斑一窜，从指根爬到了掌缘。凉意像水，顺着筋脉往腕子去。补名的代价，比补缝重十倍——你在往一个'不存在的人'身上，硬写名字。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "'回'字写完，雾团开始凝实。'风'字写完，脸的鼻梁以下补全。'落'字写完，雾团缩成个人形，约莫七尺，铁灰色的身子。'雁'字最后一笔落下。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "坑底那团东西，终于有了完整的脸。眉眼周正，唇线平直，是个沉默的中年人模样。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "回风落雁",
+          "text": "回风落雁。这是我的名？"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "暂定的。作者没给你名，我拿自己废稿里删掉的四个字填了。"
+        },
+        {
+          "type": "narrative",
+          "text": "回风落雁抬手，按在自己胸口的空处——那块作者没写衣服的地方，露出底下更深的字：'虎牢·第八。'",
+          "effect": "whispers"
+        }
+      ],
+      "scene": {
+        "name": "虎牢沙径",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_003_ask",
@@ -447,10 +1043,50 @@
           "next": "node_004_gate",
           "changes": {
             "shi_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            },
+            "addFlag": "to_chibi"
+          },
+          "weight": 2
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "dialogue",
+          "speaker": "回风落雁",
+          "text": "焚江，官渡，长坂。一关比一关改得狠。执笔的越上头，笔越飘。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "陆渊",
+          "text": "飘得好。笔越飘，缝越多，我补得越顺。"
+        },
+        {
+          "type": "narrative",
+          "text": "你低头看左手。无名指的斑已经连成了掌缘一片云。你不知道前面几关有多险，也不知道那个同笔锋的人什么时候现身。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "回风落雁跟在你身后，铁灰色的身子在黑沙里留下一串浅印。"
+        },
+        {
+          "type": "narrative",
+          "text": "风卷黑沙。你握紧刀，往深处去。铜斑在掌缘凝成一片青灰的云，凉而稳。"
+        },
+        {
+          "type": "narrative",
+          "text": "远处，蓝焰的味道越来越重。",
+          "effect": "flicker"
+        }
+      ],
+      "scene": {
+        "name": "赤壁江岸",
+        "background": "../assets/images/scenes/horror-default.svg"
+      }
     },
     {
       "id": "node_004_gate",
@@ -471,7 +1107,11 @@
           "changes": {
             "shi_shi": 8,
             "bi_bing_count": 4,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
           }
         },
         {
@@ -487,7 +1127,11 @@
           "changes": {
             "shi_shi": 5,
             "bi_bing_count": 3,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
           }
         },
         {
@@ -497,10 +1141,50 @@
           "changes": {
             "tong_hua": 15,
             "hun_li": -20,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "蓝焰贴着江面扑过来，不是烫，是冷。江面辽阔得没有边，墨色的水上烧着一层幽蓝的光，光往下沉，不往上卷。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你踩上江岸的残船。船是虚的，脚底发飘。你低头，看见船板上浮着极淡的字：此舟无名。"
+        },
+        {
+          "type": "narrative",
+          "text": "你把残影视界往江面底下探。蓝焰的冷光散开，露出更深处一层橙红的火——那是焚江原本的底色，被蓝焰盖在下面，烧了千年没灭。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你忽然明白执笔的人为什么改：原本的焚江太惨，惨到作者自己下不去手，才拿冷蓝盖上去，假装这场仗美。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "往江心望，远处浮着几截断桅，桅上挂着残破的旗，旗面空着。周瑜的残影立在不远处，半透明，脚不沾船，悬在蓝焰上头。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "他身后本该立着个人，叫阿蒙，可那格是空的。"
+        }
+      ],
+      "scene": {
+        "name": "赤壁江岸",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "赤壁江岸"
     },
     {
       "id": "node_004_bibing",
@@ -517,7 +1201,11 @@
             "tong_hua": 10,
             "hun_li": -5,
             "shi_shi": 5,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
           }
         },
         {
@@ -527,10 +1215,59 @@
           "changes": {
             "tong_hua": 5,
             "hun_li": -10,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "四条笔病，你一条一条摸过来——"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "漏写",
+          "text": "阿蒙那格空的。作者写到此处笔尖顿了一下，想起该写个人，又懒得写，直接空过。"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "手抖",
+          "text": "东风的方向和船帆的受风面拧着。'东'字收笔处抖了一下，墨色洇开，风向就歪了。",
+          "effect": "whispers"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "贪功",
+          "text": "江岸石壁刻着'东风乃吾借与周郎'。'吾'字写得重，墨色新，压在原本'天时'的刻痕上。你拉到最细，墨色底下压着更早的一个字——'渊'。",
+          "effect": "whispers"
+        },
+        {
+          "type": "dialogue",
+          "speaker": "抄稿",
+          "text": "蓝焰的纹路里，阵的起笔、收笔、转折，和虎牢的阵纹分毫不差。执笔者懒得为赤壁另起炉灶，直接抄过来改了颜色。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "四条，全中。一场烧了千年的大战，底子是抄的，风是抢的，人是漏的，阵是抖的。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "你忽然笑了一声，很短——因为你自己，也是这页稿子上的人。",
+          "effect": "whispers"
+        }
+      ],
+      "scene": {
+        "name": "赤壁焚江",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "赤壁焚江"
     },
     {
       "id": "node_004_note",
@@ -545,8 +1282,13 @@
           "changes": {
             "ji_yi": 5,
             "shi_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_fix_wind",
@@ -561,10 +1303,62 @@
             "tong_hua": 15,
             "hun_li": -15,
             "shi_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你指尖虚虚点在蓝焰上，写下：赤壁原稿，焚江为底，四病覆之。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你故意用回风落雁的起势，笔锋挑着走，和执笔者那种横拖的写法不一样——你要在稿纸上留自己的痕，不是盖对方的，是并排。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "蓝焰在你指下顿了一顿，像被点名的病人。赤壁这页稿子，头回被人这么改——不是涂抹，是并排写。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你脖子上的铁凉深了一分，淡青的痕从耳根漫到了颈侧中段。'认'比'补'更费己——补是替别人填格，认是把自己也写进稿里。"
+        },
+        {
+          "type": "narrative",
+          "text": "周瑜的残影忽然动了。半透明的脸对着你，嘴张了张，没声。你看见他胸口刻着一行小字：公瑾。",
+          "effect": "whispers"
+        },
+        {
+          "type": "dialogue",
+          "text": "'公瑾。'你试着叫。"
+        },
+        {
+          "type": "narrative",
+          "text": "残影周瑜的眼珠转了转，落定在你脸上。没有敌意，只有一种被钉了太久的困。"
+        },
+        {
+          "type": "dialogue",
+          "text": "'你……看得见我？'"
+        },
+        {
+          "type": "dialogue",
+          "text": "'看得见。'你说，'也看得见你身后那格空的。'"
+        }
+      ],
+      "scene": {
+        "name": "赤壁残舟",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "赤壁残舟"
     },
     {
       "id": "node_004_zhouyu",
@@ -578,8 +1372,13 @@
           "next": "node_004_lamp",
           "changes": {
             "ling_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_to_guandu",
@@ -587,10 +1386,49 @@
           "next": "node_005_guandu",
           "changes": {
             "hun_li": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "残影周瑜的墨点散了又聚，很久，才极细地吐出半句：'恨……写不完。'"
+        },
+        {
+          "type": "narrative",
+          "text": "你懂了——周瑜恨的不是被写，是写到一半就丢下，连东风都写歪，连同伴都写漏。和某己一样，和那个半字'渊'一样，都是被写到一半的人。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "这副本里所有的怨，根源都是一个字：懒。"
+        },
+        {
+          "type": "narrative",
+          "text": "你伸手，虚虚按在江面。蓝焰在你掌心分了分，露出底下一点橙红。你没改，只是按着，让那点火亮了一息。周瑜的残影看见那点橙红，半透明的身子里浮起一丝暖，胸口的'公瑾'亮了一瞬。",
+          "effect": "flicker"
+        },
+        {
+          "type": "dialogue",
+          "text": "'原来你也被改过。'你说。残影周瑜没答，可那丝暖，是答了。"
+        },
+        {
+          "type": "narrative",
+          "text": "江岸远处的雾里，有一点灯。不是蓝焰，是暖黄，像谁提着灯在岸上走。提灯的手腕上缠着一圈淡铜——和守夜人的记号一个样。司灯人在看这页稿子。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "赤壁江心",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "赤壁江心"
     },
     {
       "id": "node_004_lamp",
@@ -605,10 +1443,57 @@
           "changes": {
             "hun_li": 15,
             "shi_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "司灯人没有脸，只有一盏提灯，灯芯是铜丝扭的，烧着极淡的青焰。他看你走近，灯晃了晃，像在打量。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "text": "'补格的人。'灯后传来声音，不是问，是认。'你身上铜味重，补了不少。'",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "text": "'你是守夜人？'"
+        },
+        {
+          "type": "dialogue",
+          "text": "'司灯。'他说，'守夜人记名，司灯人看稿。你改稿，我照路，各不相干。'"
+        },
+        {
+          "type": "narrative",
+          "text": "他递来一截灯芯。铜丝扭的，触手冰凉。'拿着。前面官渡的骨舟，没有灯照不见路。'",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你接过。灯芯入手，魂力像被轻轻托了一把，稳了些。"
+        },
+        {
+          "type": "dialogue",
+          "text": "'执笔者知道你在看稿。'司灯人说，'他在江底批了一句：谁人在此窥吾笔。你看得见他的笔名，他也看得见你的刀。'"
+        },
+        {
+          "type": "narrative",
+          "text": "你攥紧灯芯。那不是威胁，是宣战。"
+        }
+      ],
+      "scene": {
+        "name": "赤壁雾岸",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "赤壁雾岸"
     },
     {
       "id": "node_005_guandu",
@@ -623,8 +1508,13 @@
           "changes": {
             "shi_shi": 5,
             "hun_li": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_go_deep",
@@ -632,10 +1522,44 @@
           "next": "node_006_deep",
           "changes": {
             "ling_shi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "官渡没有江，只有一条骨河。河床上铺的不是水，是碎骨，骨缝里渗出黑浆，浆上漂着舟——舟是用人骨拼的，每根骨头上面都刻着半个名字。"
+        },
+        {
+          "type": "narrative",
+          "text": "你踩上骨舟。舟身一沉，骨头互相摩擦，发出极细的呜咽。不是鬼叫，是字在风里散。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "你蹲下来，指尖碰了一根腿骨。残影视界里浮出半个'许'字——是许攸，被写了一半搁下了。再往前，肋骨上刻着'粮'字的后半截，肩胛骨上只有一撇，像是'淳'字的开头。"
+        },
+        {
+          "type": "narrative",
+          "text": "执笔者连官渡的配角都懒得写完。"
+        },
+        {
+          "type": "narrative",
+          "text": "你想起赤壁的周瑜，想起虎牢的回风落雁。每一个副本，都有一群被写到一半就丢下的人。他们不是死了，是悬着，永远差一笔。",
+          "effect": "whispers"
+        }
+      ],
+      "scene": {
+        "name": "官渡骨河",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "官渡骨河"
     },
     {
       "id": "node_005_ash",
@@ -650,10 +1574,50 @@
           "changes": {
             "shi_shi": 8,
             "tong_hua": 10,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你把残灰收进铜盘。灰里有半句没写完的谏言，是许攸生前最后一段话，写到'主公若听'就断了。你摸着那半句，像摸着一封永远发不出去的退稿信。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "拼魂开始痛。"
+        },
+        {
+          "type": "narrative",
+          "text": "残灰里有别人的记忆往你脑子里钻。许攸在官渡帐前等曹操回头，等到骨化；等不到，就漂进了骨河。你把这些碎片往一块拼，每拼一片，左手指根的铜就凉一分。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "text": "'你拼得动吗。'灰底忽然传出极细的声。'拼得动也别拼太全，全了，你就成了他写的下一个格。'",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "你收了手。许攸拼到有了半张脸，够了。剩下的，留给写它的人去补——或者，留着空，才好问。"
+        },
+        {
+          "type": "narrative",
+          "text": "铜盘里的残灰拼成了一个模糊的人形。许攸望着你，眼神里没有怨恨，只有一种等了很久的安静。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "官渡骨舟",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "官渡骨舟"
     },
     {
       "id": "node_006_deep",
@@ -670,7 +1634,11 @@
             "tong_hua": 25,
             "hun_li": -20,
             "ling_shi": 10,
-            "show": false
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
           }
         },
         {
@@ -680,8 +1648,13 @@
           "changes": {
             "shi_shi": 8,
             "ling_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_leave_pen",
@@ -689,10 +1662,57 @@
           "next": "node_006_leave",
           "changes": {
             "ji_yi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "石阶往下，没有光。只有司灯人给你的那截灯芯，在掌心发着极淡的青焰，照见脚下三尺。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你走了很久。石阶尽头是一扇半开的门，门缝里涌出来的不是风，是墨味。浓得化不开的墨色从门后漫出，像执笔者写到这泼了半砚，没顾上收。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "你推门。"
+        },
+        {
+          "type": "narrative",
+          "text": "屋内只有一张石案。案上放着一支笔。"
+        },
+        {
+          "type": "narrative",
+          "text": "笔杆是铜的，笔头不是毛，是丝——人头发拧的丝，还泛着极淡的青。笔杆上刻着一行小字，字被铜锈盖了一半，可你一眼认出那个偏旁：三点水。",
+          "effect": "shudder"
+        },
+        {
+          "type": "dialogue",
+          "text": "'渊'。"
+        },
+        {
+          "type": "narrative",
+          "text": "你的'渊'。"
+        },
+        {
+          "type": "narrative",
+          "text": "你站在案前，忽然不敢碰。这支笔是写你的笔，还是你用来改稿的笔？如果是前者，你碰了，就等于认了自己是稿上的人。如果是后者——执笔者会把改稿的笔留给被写的人吗？"
+        }
+      ],
+      "scene": {
+        "name": "深阶之外",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "深阶之外"
     },
     {
       "id": "node_006_touch",
@@ -708,8 +1728,13 @@
             "tong_hua": 10,
             "hun_li": -10,
             "shi_shi": 5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         },
         {
           "id": "ch_put_down",
@@ -717,10 +1742,57 @@
           "next": "node_007_end",
           "changes": {
             "ji_yi": 3,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你握住了笔。"
+        },
+        {
+          "type": "narrative",
+          "text": "铜凉从掌心炸开，不是普通的凉，是上千个被写漏的人同时往你骨头里灌记忆。你看见虎牢的第七将在哭，看见赤壁的阿蒙在空格里漂，看见官渡的许攸在骨河里等——所有被执笔者丢下的格，都在这支笔里。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "笔杆上的'渊'字烫了一下。不是热，是认主。"
+        },
+        {
+          "type": "narrative",
+          "text": "你低头看自己的左手。铜斑从掌缘爬过了腕骨，像一朵青灰色的云，正往小臂走。可你同时感觉到一股从来没有过的力量——你能改稿了。不是用血痕去堵空格，是真的写，拿这支笔，在稿纸上写自己的字。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "你提笔，在案上虚虚一划。石案表面浮现出一行新字，压在最旧的刻痕上面："
+        },
+        {
+          "type": "dialogue",
+          "text": "'陆渊，改稿于此。'"
+        },
+        {
+          "type": "narrative",
+          "text": "五个字。你的名，你的笔迹，你的位置。"
+        },
+        {
+          "type": "narrative",
+          "text": "可你也知道，这笔是双刃剑。每写一笔，铜就认一次主。你改稿改得越多，就越像执笔者——而执笔者，不也是被这稿子吃进去的人吗？",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "深阶案笔",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "深阶案笔"
     },
     {
       "id": "node_006_watch",
@@ -735,10 +1807,49 @@
           "changes": {
             "shi_shi": 10,
             "ji_yi": -5,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你没有碰笔。你把残影视界拉到最细，照见石案的每一寸纹路。"
+        },
+        {
+          "type": "narrative",
+          "text": "案面不是平的，是层层叠叠的稿纸压成的。最底下一层，墨色最旧，是原本的焚江——橙红的火，烧得正烈。往上盖了一层赤壁的蓝焰，再往上是官渡的黑浆，每层都压着前一层的边角，像一个人改了三次开头，每次都不满意，最后把稿子改成了谁也不认识的模样。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你看见最底下那层焚江的边角，有一行小字：'陆渊，初稿。'",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "你的名。在最底。"
+        },
+        {
+          "type": "narrative",
+          "text": "也就是说，执笔者写你，不是从穿越开始写的。他先写了'陆渊'这个人，再把你写进虎牢、赤壁、官渡——你是底层设定，副本是上层剧情。你的死、你的穿越、你补格改稿的本能，全是这行'初稿'里埋好的。"
+        },
+        {
+          "type": "narrative",
+          "text": "你后退半步。这个发现比铜化更冷——你不是意外掉进副本的，你是副本的地基。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "深阶案笔",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "深阶案笔"
     },
     {
       "id": "node_006_leave",
@@ -753,10 +1864,44 @@
           "changes": {
             "ji_yi": 8,
             "hun_li": 10,
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
-      ]
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你退出门外。"
+        },
+        {
+          "type": "narrative",
+          "text": "不碰笔，不认主，不改稿——这是你的底线。可你也知道，底线守得了一时，守不了一世。执笔者把笔放在这，就是赌你会拿。你不拿，他就继续写；你拿了，你就成了他的共犯。"
+        },
+        {
+          "type": "narrative",
+          "text": "门在身后缓缓合上。你听见门缝里传来极细的一声响，像笔尖在干纸上顿了一下——执笔者知道你来了，又走了。他在稿边批了一句：'某甲不取笔。'",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "你不取，他就继续写你'不取'。无论你取不取，你都在他的稿子里。"
+        },
+        {
+          "type": "narrative",
+          "text": "你握紧铜刀，往回路走。左手腕骨的铜凉还在，可你脑子清醒。有些局，不能急着破，得先看清它是怎么布的。",
+          "effect": "shudder"
+        }
+      ],
+      "scene": {
+        "name": "深阶之外",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "深阶之外"
     },
     {
       "id": "node_007_end",
@@ -769,10 +1914,176 @@
           "text": "【卷一完结，准备进入卷二】",
           "next": "node_007_end",
           "changes": {
-            "show": false
-          }
+            "show": false,
+            "feedback": {
+              "style": "toast",
+              "duration": 2500
+            }
+          },
+          "weight": 1
         }
+      ],
+      "segments": [
+        {
+          "type": "narrative",
+          "text": "你站在铜雀台的石阶上，回望来路。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "虎牢破了。你补了七道门缝，收了第八人回风落雁，看穿了阵首是'未列正传'的废稿。",
+          "effect": "whispers"
+        },
+        {
+          "type": "narrative",
+          "text": "赤壁认了。你验出四种笔病，与周瑜对了话，在蓝焰底下认出了焚江的底色。",
+          "effect": "flicker"
+        },
+        {
+          "type": "narrative",
+          "text": "官渡拼了。你在骨舟上收起许攸的半句谏言，没拼太全——全了，你就成了他写的下一个格。"
+        },
+        {
+          "type": "narrative",
+          "text": "深阶见了。案上那支笔，你碰了，或者没碰。无论哪种，你都知道了自己的位置：你是初稿，是地基，是执笔者最早写下、却埋得最深的那一行。"
+        },
+        {
+          "type": "narrative",
+          "text": "左手小臂上，青灰的斑已经连成一片云。铜在爬，往肩上走。你知道它不会停。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "可你也知道，执笔者不是神。他会手抖，会漏写，会贪功，会抄稿。他越飘，缝越多。你补得越顺。"
+        },
+        {
+          "type": "narrative",
+          "text": "风从台顶吹下来，带着墨腥和铜锈。你握紧刀——或者笔——往石阶上走去。",
+          "effect": "shudder"
+        },
+        {
+          "type": "narrative",
+          "text": "卷一完。执笔者还在后头，笔还热着。"
+        }
+      ],
+      "scene": {
+        "name": "铜雀台顶",
+        "background": "../assets/images/scenes/horror-default.svg"
+      },
+      "title": "铜雀台顶",
+      "candidateEndings": [
+        "end_copper",
+        "end_writer",
+        "end_watcher"
       ]
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first_blood",
+      "name": "初醒",
+      "description": "在铜雀台浅阶中第一次睁开眼睛，意识到自己已死第二次。"
+    },
+    {
+      "id": "savior",
+      "name": "补格者",
+      "description": "用血痕补完墙上空格，救下被笔病悬置的渡客。"
+    },
+    {
+      "id": "crack_sealer",
+      "name": "缝补匠",
+      "description": "在虎牢石门上发现并补完七道裂缝，破开无面阵首。"
+    },
+    {
+      "id": "namer",
+      "name": "赋名者",
+      "description": "以废稿中删掉的四字为无名之雾赋予真名——回风落雁。"
+    },
+    {
+      "id": "bibing_master",
+      "name": "笔病猎人",
+      "description": "在赤壁焚江中验出漏写、手抖、贪功、抄稿四种笔病。"
+    },
+    {
+      "id": "pen_taker",
+      "name": "执笔者",
+      "description": "在深阶案前握住铜笔，认主改稿，成为能与原作者并肩书写的人。"
+    }
+  ],
+  "endings": [
+    {
+      "id": "end_copper",
+      "name": "铜化之终",
+      "tone": "dark",
+      "description": "铜斑爬满全身，你最终化为铜雀台墙上的一行新字，成为稿子的一部分。"
+    },
+    {
+      "id": "end_writer",
+      "name": "共笔者",
+      "tone": "true",
+      "description": "你握住铜笔，与执笔者并肩改稿，不再是被写的人，而是共同书写命运的人。"
+    },
+    {
+      "id": "end_watcher",
+      "name": "旁观者",
+      "tone": "neutral",
+      "description": "你放下笔，退出台阶，既不被写完，也不写完别人，在稿纸之外静静旁观。"
+    }
+  ],
+  "npcRelations": [
+    {
+      "id": "lu_yuan",
+      "name": "陆渊",
+      "role": "主角 / 编辑渡客",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "熬夜审稿而亡的编辑，死后坠入铜雀台，以残影视界补格改稿。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "du_yan",
+      "name": "独眼汉子",
+      "role": "守夜人",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "铜雀台浅阶的守夜人，蜡眼对灯，知晓渡客规则与虎牢副本的入口。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "hui_feng",
+      "name": "回风落雁",
+      "role": "虎牢第八人",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "虎牢副本中未列正传的第八将残影，被陆渊赋名后凝成实体，跟随前行。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "zhou_yu",
+      "name": "周瑜",
+      "role": "赤壁残影",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "赤壁焚江中的半透明残影，胸口刻着'公瑾'，恨的不是被写，而是写不完。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "xu_you",
+      "name": "许攸",
+      "role": "官渡骨河渡客",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "官渡骨舟上被写了一半的谋士，谏言断在'主公若听'，在骨河中悬了千年。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "si_deng",
+      "name": "司灯人",
+      "role": "看稿人",
+      "affinity": 0,
+      "maxAffinity": 100,
+      "description": "铜雀台的司灯人，无脸提灯，照路不改稿，与守夜人各司其职。",
+      "initialAffinity": 0
     }
   ]
 }

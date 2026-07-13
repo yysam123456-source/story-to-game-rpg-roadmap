@@ -14,6 +14,7 @@ window.GameState = class GameState {
     this.chapters = ['第一章', '第二章', '第三章', '第四章', '第五章'];
     this.maxUnlockedChapter = 0;  // 玩家只能切换到 <= 此值的章节
     this._listeners = [];
+    this._storyStatLabels = {};   // v2.0: story-specific stat label overrides
   }
 
   /* ── Stat Accessors ──────────────────── */
@@ -93,6 +94,10 @@ window.GameState = class GameState {
 
   /* ── Stat Label Lookup ──────────────── */
   getStatLabel(key) {
+    // v2.0: Check story-specific labels first
+    if (this._storyStatLabels && this._storyStatLabels[key]) {
+      return this._storyStatLabels[key];
+    }
     const config = window.GENRE_CONFIGS[this.genre];
     if (!config) return key;
     const stat = config.stats.find(s => s.key === key);

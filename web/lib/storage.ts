@@ -81,7 +81,7 @@ async function localDeleteWork(id: string): Promise<void> {
 async function blobSaveWork(id: string, meta: WorkMeta, script: StoryScript): Promise<void> {
   // 延迟导入，仅在需要时加载
   // @ts-ignore
-  const { put } = await import('@vercel/blob');
+  const { put, get } = await import('@vercel/blob');
   await put(`works/${id}.meta.json`, JSON.stringify(meta), {
     access: 'public',
     contentType: 'application/json',
@@ -90,6 +90,24 @@ async function blobSaveWork(id: string, meta: WorkMeta, script: StoryScript): Pr
     access: 'public',
     contentType: 'application/json',
   });
+
+  // 刷新索引：将新 id 写入 works/index.json，确保后续 listWorks 能读取到
+  let indexIds: string[] = [];
+  try {
+    const indexBlob = await get('works/index.json');
+    if (indexBlob) {
+      const res = await fetch(indexBlob.url);
+      if (res.ok) indexIds = await res.json();
+    }
+  } catch { /* index 不存在，忽略 */ }
+
+  if (!indexIds.includes(id)) {
+    indexIds.push(id);
+    await put('works/index.json', JSON.stringify(indexIds), {
+      access: 'public',
+      contentType: 'application/json',
+    });
+  }
 }
 
 async function blobGetWorkMeta(id: string): Promise<WorkMeta | null> {

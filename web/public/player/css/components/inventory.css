@@ -22,6 +22,7 @@
   color: var(--c-text-secondary);
   transition: all var(--duration-normal) var(--ease-out-expo);
   box-shadow: var(--shadow-md);
+  pointer-events: auto;
 }
 
 #inventory-toggle:hover {
@@ -108,6 +109,10 @@
   border-radius: var(--radius-md);
   color: var(--c-text-muted);
   transition: all var(--duration-fast);
+  pointer-events: auto;
+  cursor: pointer;
+  background: transparent;
+  border: none;
 }
 
 .inventory-close:hover {

@@ -1,0 +1,445 @@
+{
+  "meta": {
+    "title": "铜雀台·渡客初醒",
+    "author": "v2.0 Demo",
+    "version": "2.0.0",
+    "description": "Schema v2.0 示范脚本",
+    "genre": "horror",
+    "theme": "paper",
+    "ambient": "static",
+    "schemaVersion": "2.0",
+    "rpg": {
+      "enabled": true,
+      "conditionDisplay": "disabled",
+      "checkStyle": "dice_2d6",
+      "showCheckAnimation": true,
+      "primaryStats": [
+        { "key": "ling_shi", "label": "灵视", "type": "bar", "max": 100, "tone": "positive" },
+        { "key": "tong_hua", "label": "铜化", "type": "bar", "max": 100, "tone": "danger" },
+        { "key": "shi_shi", "label": "史识", "type": "bar", "max": 100, "tone": "neutral" },
+        { "key": "hun_li", "label": "魂力", "type": "bar", "max": 100, "tone": "positive" },
+        { "key": "ji_yi", "label": "记性", "type": "bar", "max": 100, "tone": "positive" }
+      ],
+      "hiddenStats": ["secret_knowledge"]
+    }
+  },
+  "startNodeId": "v2_narrative_1",
+  "initialState": {
+    "ling_shi": 5,
+    "tong_hua": 0,
+    "shi_shi": 3,
+    "hun_li": 80,
+    "ji_yi": 60
+  },
+  "flags": [],
+  "achievements": [
+    {
+      "id": "first_insight",
+      "title": "初次洞察",
+      "description": "通过灵视检定发现穹顶灯阵的隐藏规律。",
+      "category": "milestone",
+      "rarity": "common",
+      "autoUnlock": {
+        "condition": { "flag": "discovered_lamp_pattern" },
+        "check": "onFlagAdd"
+      }
+    },
+    {
+      "id": "duyan_trust",
+      "title": "杜雁的信任",
+      "description": "与杜雁建立信任关系。",
+      "category": "milestone",
+      "rarity": "rare",
+      "autoUnlock": {
+        "condition": { "affinity": { "npcId": "du_yan", "operator": ">=", "value": 15 } },
+        "check": "onNodeEnter"
+      }
+    }
+  ],
+  "items": {
+    "copper_rust_sample": {
+      "id": "copper_rust_sample",
+      "name": "铜灰样本",
+      "desc": "从地面砖缝刮取的铜锈，混着某种腥甜物质。",
+      "category": "key_items",
+      "qty": 1,
+      "usable": true,
+      "usableIn": ["v2_dialogue_1"],
+      "onUse": {
+        "text": "你把铜灰样本递给杜雁。她接过去，铜雾中的那双半眼凝视了片刻，随即发出一声低沉的笑。",
+        "changes": { "du_yan": 5 },
+        "consume": true
+      }
+    },
+    "lamp_fragment": {
+      "id": "lamp_fragment",
+      "name": "隐藏灯芯碎片",
+      "desc": "从穹顶灯阵的第八格中取出的灯芯碎片，散发着微弱的幽蓝光芒。",
+      "category": "key_items",
+      "qty": 1,
+      "usable": false,
+      "icon": "💡"
+    }
+  },
+  "endings": [
+    {
+      "id": "end_accept",
+      "title": "接受渡客身份",
+      "description": "你选择接受渡客的命运，开始清理铜灰的旅途。",
+      "type": "neutral",
+      "tone": "bittersweet",
+      "condition": { "flag": "chose_accept" }
+    },
+    {
+      "id": "end_resist",
+      "title": "反抗铜雀台",
+      "description": "你凭借过人的灵视，发现了阵法的致命漏洞，成功反抗铜雀台的规则。",
+      "type": "good",
+      "tone": "epic",
+      "condition": { "flag": "chose_resist" }
+    }
+  ],
+  "npcRelations": [
+    {
+      "id": "lu_yuan",
+      "name": "陆渊",
+      "title": "渡客",
+      "description": "穿越者，铜雀台浅阶渡客。",
+      "initialAffinity": 0
+    },
+    {
+      "id": "du_yan",
+      "name": "杜雁",
+      "title": "无面阵首",
+      "description": "铜雀台无面阵首，引路人。",
+      "initialAffinity": 5,
+      "color": "#6b9bd1"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "v2_narrative_1",
+      "type": "narrative",
+      "title": "苏醒",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·穹顶渡场",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "你睁开眼时，腐臭的铜锈味先一步钻进鼻腔。不是普通的锈，是混了骨粉和湿墨的腥甜。你躺在冰凉的地面上，后脑勺硌着一块凸起的石砖。" },
+        { "type": "narrative", "text": "头顶是极高极暗的穹顶，无数盏幽蓝的灯悬在那里，灯影晃得厉害，像有人在上面摇着一整片海。" },
+        { "type": "dialogue", "speaker": "???", "text": "编号八百六十七，渡客。", "effect": "shudder" },
+        { "type": "narrative", "text": "冰冷的声音贴着你后颈滑过去。你侧头，看见三个穿玄色铁甲的人形从阴影里走出来——它们没有脸，甲胄的颈口以上是一团蠕动的铜雾。" }
+      ],
+      "conditionalSegments": [
+        {
+          "condition": { "skill": "ji_yi", "min": 30 },
+          "segments": [
+            { "type": "inner_monologue", "text": "你的记忆在闪回——十年编辑生涯教会你第一件事：陌生的稿子，先看规矩。你本能地开始观察周围的结构。" }
+          ]
+        },
+        {
+          "condition": { "skill": "ling_shi", "min": 10 },
+          "segments": [
+            { "type": "narrative", "text": "你的灵视隐隐作痛——穹顶灯的排列不是随机的，灯与灯之间的暗影连起来，像一张巨大的网。" }
+          ]
+        }
+      ],
+      "next": "v2_exploration_1"
+    },
+    {
+      "id": "v2_exploration_1",
+      "type": "exploration",
+      "title": "渡场",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·渡场边缘",
+        "background": "dark_blue_hall",
+        "explorable": true
+      },
+      "segments": [
+        { "type": "narrative", "text": "三个无面阵卒在你身后停住，像三把钝刀架在脖子上。地面上那些被光割开的格子似乎在等你填入什么。" }
+      ],
+      "explorables": [
+        {
+          "id": "exp_lamp_pattern",
+          "label": "穹顶灯阵",
+          "description": "幽蓝的灯影在穹顶下晃动，似乎有某种规律。",
+          "check": {
+            "skill": "ling_shi",
+            "dc": 12,
+            "passive": false,
+            "label": "观察灯阵规律",
+            "onSuccess": {
+              "text": "你凝神细看，灯与灯之间的暗影连起来，像一张巨大的网。第八格的灯比其他的暗了一拍——那里是网眼中最薄弱的一点。",
+              "changes": { "ling_shi": 3, "shi_shi": 2 },
+              "grantItems": ["lamp_fragment"],
+              "unlock": "discovered_lamp_pattern",
+              "flag": "knows_lamp_weakness"
+            },
+            "onFailure": {
+              "text": "灯影晃得你眼花，你努力辨别规律，但那些光线太密了，看得你头疼。无面阵卒的甲胄声近了一步——你该抓紧时间。",
+              "changes": { "tong_hua": 2 },
+              "flag": "lamp_headache"
+            }
+          }
+        },
+        {
+          "id": "exp_floor_gap",
+          "label": "地面砖缝",
+          "description": "砖缝里嵌着暗红色的垢，散发出铜锈的腥甜味。",
+          "result": {
+            "text": "你用指甲刮了一点垢，凑到鼻尖——是铜锈，混着某种更腥甜的东西，像干涸的血被墨泡过。",
+            "changes": { "shi_shi": 1 },
+            "grantItems": ["copper_rust_sample"]
+          }
+        },
+        {
+          "id": "exp_self_hand",
+          "label": "虎口旧疤",
+          "description": "你低头看自己的手，虎口处有一道旧疤，形状像半把弯刀。",
+          "result": {
+            "text": "旧疤在幽蓝灯影下泛着淡淡的青色。你摸了摸——没有痛感，但疤下有某种东西在微微跳动，像铜锈在血管里流。",
+            "changes": { "ji_yi": 2 }
+          },
+          "condition": { "skill": "ji_yi", "min": 5 }
+        }
+      ],
+      "next": "v2_dialogue_1"
+    },
+    {
+      "id": "v2_dialogue_1",
+      "type": "dialogue",
+      "title": "无面阵首",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·渡场边缘",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "无面阵卒退去了。一个比它们更高大的人形从穹顶下的阴影里走出来，铜雾中的眼睛比阵卒多了两只——不是两只，是无数只，密密麻麻地浮在铜雾里。" },
+        { "type": "dialogue", "speaker": "杜雁", "text": "八百六十七号。你没有立刻清灰，也没有立刻逃跑。倒是比上一批安静。" }
+      ],
+      "dialogue": {
+        "npc": "du_yan",
+        "greeting": "杜雁站在你面前，铜雾中的无数只眼睛都在打量你。你不知道它在看什么，但你能感觉到——你在被评估。",
+        "topics": [
+          {
+            "id": "ask_rules",
+            "text": "铜雀台的规则是什么？",
+            "response": "杜雁的声音从铜雾里传出，像金属在石头上刮：「格不补，人不吃。地面每一格都是空——是被写漏的地方。渡客的任务就是补这些格。不清灰，格就空着；格空了，阵卒就吃人来填。」",
+            "changes": { "shi_shi": 2 }
+          },
+          {
+            "id": "ask_identity",
+            "text": "你是谁？",
+            "response": "铜雾凝了一下，那些眼睛同时转向你。「我是杜雁。无面阵首。规则就是我的脸。你不需要记住我的脸，你只需要记住我的规则。」",
+            "affinityChanges": [{ "npcId": "du_yan", "delta": 1 }]
+          },
+          {
+            "id": "ask_escape",
+            "text": "有没有离开这里的方法？",
+            "condition": { "flag": "knows_lamp_weakness" },
+            "response": "杜雁的铜雾猛地收缩了一下——那些眼睛全部定住了。「你看到了什么？」声音变得危险，「没有人应该看到第八格。」",
+            "affinityChanges": [{ "npcId": "du_yan", "delta": -3 }],
+            "flag": "duyan_suspicious"
+          },
+          {
+            "id": "give_item",
+            "text": "（递出铜灰样本）给你看看这个。",
+            "condition": { "item": "copper_rust_sample", "count": 1 },
+            "canUseItem": false,
+            "response": "",
+            "changes": { "du_yan": 5 },
+            "hint": "杜雁可能会对铜灰感兴趣"
+          }
+        ],
+        "farewell": "杜雁转身走向阴影深处：「清灰吧，渡客。你没有太多时间。」"
+      },
+      "next": "v2_check_1"
+    },
+    {
+      "id": "v2_check_1",
+      "type": "check",
+      "title": "第一格",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·渡场",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "你蹲在最近的空格前。砖缝里的铜灰暗红色，像干涸的血。你需要把灰填进格子的中央——但你知道，这不只是简单的填补。铜灰有自己的意志。" },
+        { "type": "narrative", "text": "你的手指触到铜灰的瞬间，一阵刺骨的寒意从指尖窜上来。这需要集中精神。" }
+      ],
+      "check": {
+        "skill": "ling_shi",
+        "dc": 10,
+        "cost": { "hun_li": 5 },
+        "label": "清灰检定",
+        "onSuccess": {
+          "text": "你的灵视捕捉到铜灰的流动方向，手指跟着它的纹路走，灰一缕一缕地落进格子中央。穹顶上对应的灯稳了一分，从惨白变回幽蓝。你听到了一声极轻的叹息——不是你的。",
+          "changes": { "ling_shi": 2, "hun_li": -5 }
+        },
+        "onFailure": {
+          "text": "你的手指刚碰到铜灰，它就像活了一样咬住了你的指尖。一阵剧痛，你猛地缩回手——指尖泛着铜绿色的光泽。穹顶的灯闪了一下，无面阵卒的甲胄声近了。",
+          "changes": { "tong_hua": 3, "hun_li": -5 },
+          "flag": "failed_first_clear"
+        }
+      },
+      "next": "v2_choice_1"
+    },
+    {
+      "id": "v2_choice_1",
+      "type": "choice",
+      "title": "抉择",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·渡场",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "第一格的清灰——无论结果如何——已经改变了什么。穹顶灯阵似乎比之前暗了一点，暗影更浓了。杜雁的声音从远处飘来：「格补了，但路还远。」" },
+        { "type": "narrative", "text": "你面前出现了两条路。左边，通往更深处的灯阵——那里有更多需要填补的格子。右边，一条你之前没注意到的窄道，似乎通向穹顶之外。" }
+      ],
+      "choices": [
+        {
+          "id": "c_accept",
+          "text": "接受渡客身份，继续清灰",
+          "targetNodeId": "v2_ending_accept",
+          "changes": { "shi_shi": 3, "hun_li": 5 },
+          "weight": "major",
+          "hint": "遵守规则，成为铜雀台的一部分",
+          "delayedChanges": [
+            {
+              "triggerAt": "v2_ending_accept",
+              "changes": { "flag": "chose_accept" },
+              "reminderText": "你选择了遵守规则……但铜雀台的规则，真的值得遵守吗？"
+            }
+          ]
+        },
+        {
+          "id": "c_resist",
+          "text": "走向窄道，寻找逃离的方法",
+          "targetNodeId": "v2_ending_resist",
+          "condition": { "flag": "knows_lamp_weakness" },
+          "changes": { "tong_hua": 5, "ling_shi": 3 },
+          "weight": "critical",
+          "hint": "你知道第八格的弱点——这是你唯一的机会",
+          "delayedChanges": [
+            {
+              "triggerAt": "v2_ending_resist",
+              "changes": { "flag": "chose_resist" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v2_ending_accept",
+      "type": "ending",
+      "title": "接受",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·深处",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "你走向更深处的灯阵。每一步都更沉重，你的关节里有东西在变——铜的质感。身后，杜雁的铜雾中传来一声几乎听不见的叹息。" },
+        { "type": "narrative", "text": "渡客的旅途，开始了。" }
+      ],
+      "next": "v2_ch2_narrative_1",
+      "candidateEndings": ["end_accept"]
+    },
+    {
+      "id": "v2_ending_resist",
+      "type": "ending",
+      "title": "反抗",
+      "chapter": "第一章 · 渡客初醒",
+      "scene": {
+        "name": "铜雀台·穹顶之外",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "你冲向那条窄道。身后的灯阵疯狂闪烁，无面阵卒的甲胄声像暴雨一样追来。但你的灵视引导着你——第八格的灯在闪烁，你冲向那个薄弱点。" },
+        { "type": "narrative", "text": "铜雾在你面前裂开了一条缝。你看到了缝隙之外的——光。不是穹顶的幽蓝，而是真正的、来自外面的光。" },
+        { "type": "narrative", "text": "你跃入光中。身后，铜雀台发出一声低沉的轰鸣——像一座巨大的钟被敲响了。" }
+      ],
+      "next": "v2_ch2_narrative_1",
+      "candidateEndings": ["end_resist"]
+    },
+    {
+      "id": "v2_ch2_narrative_1",
+      "type": "narrative",
+      "title": "灰中行者",
+      "chapter": "第二章 · 灰中行者",
+      "scene": {
+        "name": "铜雀台·第二渡场",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "第二章开始了。铜雀台的规则比你想象的更深。" },
+        { "type": "narrative", "text": "第二渡场的穹顶比第一渡场低得多，灯阵也更密。你能感觉到——这里死去的渡客比活着的多。" }
+      ],
+      "conditionalSegments": [
+        {
+          "condition": { "flag": "chose_accept" },
+          "segments": [
+            { "type": "narrative", "text": "你选择了接受渡客的身份。杜雁的声音从铜雾中传来：「格补了，但路还远。」" }
+          ]
+        },
+        {
+          "condition": { "flag": "chose_resist" },
+          "segments": [
+            { "type": "narrative", "text": "你反抗了铜雀台的规则。但光的那一头，似乎还有另一座铜雀台在等着你。" }
+          ]
+        }
+      ],
+      "next": "v2_ch2_choice_1"
+    },
+    {
+      "id": "v2_ch2_choice_1",
+      "type": "choice",
+      "title": "第二抉择",
+      "chapter": "第二章 · 灰中行者",
+      "scene": {
+        "name": "铜雀台·第二渡场",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "第二渡场的地面上有更多空格。铜灰比第一渡场的更浓、更腥甜。你蹲下来，手指触到灰的瞬间——灰里有东西在动。" }
+      ],
+      "choices": [
+        {
+          "id": "c2_clear",
+          "text": "继续清灰",
+          "targetNodeId": "v2_ch2_ending_1",
+          "changes": { "shi_shi": 2, "hun_li": -3 },
+          "weight": "major"
+        },
+        {
+          "id": "c2_refuse",
+          "text": "拒绝清灰，寻找其他出路",
+          "targetNodeId": "v2_ch2_ending_1",
+          "changes": { "tong_hua": 3 },
+          "weight": "major"
+        }
+      ]
+    },
+    {
+      "id": "v2_ch2_ending_1",
+      "type": "ending",
+      "title": "第二章终",
+      "chapter": "第二章 · 灰中行者",
+      "scene": {
+        "name": "铜雀台·第二渡场尽头",
+        "background": "dark_blue_hall"
+      },
+      "segments": [
+        { "type": "narrative", "text": "第二章的故事暂告一段落。铜雀台的秘密，还远未揭开。" }
+      ],
+      "next": null,
+      "candidateEndings": []
+    }
+  ]
+}

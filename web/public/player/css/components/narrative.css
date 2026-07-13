@@ -365,17 +365,30 @@
   white-space: nowrap;
 }
 
-/* Selected state */
+/* Selected state — enhanced with pulse and glow */
 .choice-btn.choice-selected {
   border-color: var(--c-brand);
   background: var(--c-brand-glow);
   transform: scale(1.02);
-  box-shadow: var(--shadow-glow-strong);
+  box-shadow: var(--shadow-glow-strong), 0 0 24px rgba(217, 119, 80, 0.25);
+  animation: choicePulse 0.6s ease-out;
 }
 
 .choice-btn.choice-selected::before {
   opacity: 1;
   width: 4px;
+  background: var(--c-brand);
+}
+
+@keyframes choicePulse {
+  0% { box-shadow: 0 0 0 0 rgba(217, 119, 80, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(217, 119, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 119, 80, 0); }
+}
+
+/* Non-selected choices fade out smoothly */
+.choice-btn:not(.choice-selected) {
+  transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
 }
 
 /* No choices placeholder */

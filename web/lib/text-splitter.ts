@@ -103,15 +103,16 @@ export class TextSplitter {
     const paragraphs = text.split(/\n{2,}/);
     const chunks: Array<{ index: number; title: string; content: string }> = [];
     let current = '';
-    let idx = 0;
+    let idx = 1;
 
     for (const para of paragraphs) {
       if (current.length + para.length > targetChunkSize && current.length > 1000) {
         chunks.push({
-          index: idx++,
+          index: idx - 1,
           title: `第${idx}部分`,
           content: current.trim(),
         });
+        idx++;
         // 保留重叠
         const overlapText = current.slice(-overlap);
         current = overlapText + '\n\n' + para;
@@ -122,8 +123,8 @@ export class TextSplitter {
 
     if (current.length > 0) {
       chunks.push({
-        index: idx,
-        title: `第${idx + 1}部分`,
+        index: idx - 1,
+        title: `第${idx}部分`,
         content: current.trim(),
       });
     }
